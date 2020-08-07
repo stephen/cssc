@@ -16,6 +16,7 @@ are here */
 	width: yes;
 }
 `)
+
 	for l.Current != EOF {
 		l.Next()
 		log.Printf("current token: %s (%s)", l.Current, l.CurrentLiteral)
@@ -79,8 +80,15 @@ func (l *Lexer) Next() {
 			l.step()
 
 		case '@':
-			l.Current = At
 			l.step()
+			if startsIdentifier(l.peek(0), l.peek(1), l.peek(2)) {
+				l.Current = AtKeyword
+				l.CurrentLiteral = l.nextName()
+				return
+			}
+
+			l.Current = Delim
+			l.CurrentLiteral = string(l.ch)
 
 		case '{':
 			l.Current = LCurly
@@ -155,21 +163,53 @@ func (l *Lexer) Next() {
 				// there's nothing interesting for the caller yet. We don't emit
 				// whitespace-token.
 				continue
-			} else if isNameStartCodePoint(l.ch) {
-				// TODO: ident-token
-				l.Current = Ident
-				start := l.lastPos
-				for isNameCodePoint(l.ch) {
-					l.step()
-				}
+			}
 
-				l.CurrentLiteral = l.source[start:l.lastPos]
+			// consume a name
+			if isNameStartCodePoint(l.ch) {
+				l.Current = Ident
+				l.CurrentLiteral = l.nextName()
 			}
 
 		}
 
 		return
 	}
+}
+
+// startsIdentifier implements https://www.w3.org/TR/css-syntax-3/#would-start-an-identifier.
+func startsIdentifier(p0, p1, p2 rune) bool {
+	switch p0 {
+	case '-':
+		return p1 == '-' || isEscape(p1, p2)
+	case '\n':
+		return false
+	default:
+		return isNameCodePoint(p1)
+	}
+}
+
+// isEscape implements https://www.w3.org/TR/css-syntax-3/#starts-with-a-valid-escape
+func isEscape(p0, p1 rune) bool {
+	if p0 != '\\' {
+		return false
+	}
+
+	if p1 == '\n' {
+		return false
+	}
+
+	return true
+}
+
+// nextName consumes and returns the a name, stepping the lexer forward.
+func (l *Lexer) nextName() string {
+	start := l.lastPos
+	for isNameCodePoint(l.ch) {
+		l.step()
+	}
+
+	return l.source[start:l.lastPos]
 }
 
 // isWhitespace implements https://www.w3.org/TR/css-syntax-3/#whitespace.
@@ -205,8 +245,9 @@ func (l *Lexer) step() {
 	l.pos += size
 }
 
-// peek returns the next unconsumed rune but does not consume it.
-func (l *Lexer) peek() rune {
+// peek returns the next ith unconsumed rune but does not consume it.
+// i is 0-indexed (0 is one ahead, 1 is two ahead, etc.)
+func (l *Lexer) peek(i int) rune {
 	cp, size := utf8.DecodeRuneInString(l.source[l.pos:])
 	if size == 0 {
 		return -1
@@ -233,7 +274,7 @@ const (
 	Period     // .
 	Colon      // :
 	Semicolon  // ;
-	At         // @
+	AtKeyword  // @
 
 	Backslash // \
 
@@ -279,7 +320,7 @@ var tokens = [...]string{
 	Period:     ".",
 	Colon:      ":",
 	Semicolon:  ";",
-	At:         "@",
+	AtKeyword:  "@",
 
 	Backslash: `\`,
 
