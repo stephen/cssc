@@ -12,17 +12,13 @@ func main() {
 	l := NewLexer(`@import "test.css";
 /* some notes about the next line
 are here */
+.n {
+	width: yes;
+}
 `)
 	for l.Current != EOF {
 		l.Next()
-		extra := ""
-		switch l.Current {
-		case Ident:
-			extra = l.CurrentName
-		case String, Comment:
-			extra = l.CurrentString
-		}
-		log.Printf("current token: %s (%s)", l.Current, extra)
+		log.Printf("current token: %s (%s)", l.Current, l.CurrentLiteral)
 	}
 }
 
@@ -46,8 +42,9 @@ type Lexer struct {
 	// Current is the last token lexed by Next().
 	Current Token
 
-	CurrentName   string // Ident
-	CurrentString string // Literal
+	// CurrentLiteral is the last literal lexed by Next(). It
+	// is not cleared between valid literals.
+	CurrentLiteral string // Literal
 
 	Errors []error
 }
@@ -76,9 +73,29 @@ func (l *Lexer) Next() {
 			l.Current = Semicolon
 			l.step()
 
+		case ':':
+			log.Println("colon")
+			l.Current = Colon
+			l.step()
+
 		case '@':
 			l.Current = At
 			l.step()
+
+		case '{':
+			l.Current = LCurly
+			l.step()
+
+		case '}':
+			l.Current = RCurly
+			l.step()
+
+		case '.':
+			// XXX: support number parsing here too.
+			start := l.lastPos
+			l.step()
+			l.Current = Delim
+			l.CurrentLiteral = l.source[start:l.lastPos]
 
 		case '/':
 			l.step()
@@ -105,7 +122,7 @@ func (l *Lexer) Next() {
 				}
 			}
 			l.Current = Comment
-			l.CurrentString = l.source[start:end]
+			l.CurrentLiteral = l.source[start:end]
 
 		case '"', '\'':
 			mark := l.ch
@@ -129,7 +146,7 @@ func (l *Lexer) Next() {
 
 			// TODO: full string-token parsing
 			l.Current = String
-			l.CurrentString = l.source[start:end]
+			l.CurrentLiteral = l.source[start:end]
 
 		default:
 			if isWhitespace(l.ch) {
@@ -138,9 +155,7 @@ func (l *Lexer) Next() {
 				// there's nothing interesting for the caller yet. We don't emit
 				// whitespace-token.
 				continue
-			}
-
-			if isNameStartCodePoint(l.ch) {
+			} else if isNameStartCodePoint(l.ch) {
 				// TODO: ident-token
 				l.Current = Ident
 				start := l.lastPos
@@ -148,9 +163,9 @@ func (l *Lexer) Next() {
 					l.step()
 				}
 
-				l.CurrentName = l.source[start:l.lastPos]
-				l.step()
+				l.CurrentLiteral = l.source[start:l.lastPos]
 			}
+
 		}
 
 		return
@@ -237,6 +252,7 @@ const (
 	Digit  // Number literal
 	String // String literal
 	Ident  // Identifier
+	Delim  // Delimiter (used for preserving tokens for subprocessors)
 )
 
 func (t Token) String() string {
@@ -249,6 +265,7 @@ var tokens = [...]string{
 	EOF: "EOF",
 
 	Comment: "COMMENT",
+	Delim:   "DELIMITER",
 
 	Digit:  "DIGIT",
 	String: "STRING",
