@@ -124,6 +124,18 @@ func (l *Lexer) Next() {
 
 			l.nextDelimToken()
 
+		case ',':
+			l.Current = Comma
+			l.step()
+
+		case '(':
+			l.Current = LParen
+			l.step()
+
+		case ')':
+			l.Current = RParen
+			l.step()
+
 		case '[':
 			l.Current = LBracket
 			l.step()
@@ -145,8 +157,6 @@ func (l *Lexer) Next() {
 				l.nextNumericToken()
 				return
 			}
-
-			// XXX: support number parsing here too.
 
 			l.nextDelimToken()
 
