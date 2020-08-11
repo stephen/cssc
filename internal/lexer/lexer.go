@@ -327,14 +327,17 @@ func (l *Lexer) nextNumericToken() {
 }
 
 // nextIdentLikeToken implements https://www.w3.org/TR/css-syntax-3/#consume-an-ident-like-token.
+// The spec tells us to return a bad-url-token, but we
+// are uninterested in best-effort interpretation for compilation.
 func (l *Lexer) nextIdentLikeToken() {
 	start := l.lastPos
 	l.nextName()
 	l.CurrentString = l.source[start:l.lastPos]
 
 	// Here, we need to special case the url function because it supports unquoted string content.
-	if strings.ToLower(l.CurrentString) == "url" && l.peek(0) == '(' {
-		for i := l.lastPos; i < len(l.source) && isWhitespace(l.peek(0)); i++ {
+	if strings.ToLower(l.CurrentString) == "url" && l.ch == '(' {
+		l.step()
+		for i := l.lastPos; i < len(l.source) && isWhitespace(l.ch); i++ {
 			l.step()
 		}
 
@@ -343,9 +346,38 @@ func (l *Lexer) nextIdentLikeToken() {
 			return
 		}
 
-		// XXX: url token
+		l.Current = URL
+		urlStart := l.lastPos
+		for {
+			switch l.ch {
+			case ')':
+				l.CurrentString = l.source[urlStart:l.lastPos]
+				l.step()
+				return
+			case -1:
+				l.errorf("unexpected EOF")
+			case '"', '\'', '(':
+				l.errorf("unexpected token: %c", l.ch)
+			case '\\':
+				if startsEscape(l.ch, l.peek(0)) {
+					l.nextEscaped()
+					continue
+				}
 
-		return
+				l.errorf("unexpected token: %c", l.ch)
+			default:
+				if isWhitespace(l.ch) {
+					l.step()
+					continue
+				}
+
+				if isNonPrintable(l.ch) {
+					l.errorf("unexpected token: %c", l.ch)
+				}
+
+				l.step()
+			}
+		}
 	}
 
 	// Otherwise, it's probably a normal function.
@@ -435,7 +467,12 @@ func isWhitespace(r rune) bool {
 
 // isNameStartCodePoint implements https://www.w3.org/TR/css-syntax-3/#name-start-code-point.
 func isNameStartCodePoint(r rune) bool {
-	return unicode.IsLetter(r) || int32(r) >= 0x80 || r == '_'
+	return unicode.IsLetter(r) || r >= 0x80 || r == '_'
+}
+
+// isNonPrintable implements https://www.w3.org/TR/css-syntax-3/#non-printable-code-point.
+func isNonPrintable(r rune) bool {
+	return (r >= 0 && r <= 0x008) || (r == 0x0b) || (r >= 0x0e && r <= 0x1f) || r == 0x7f
 }
 
 // isNameCodePoint implements https://www.w3.org/TR/css-syntax-3/#name-code-point.
@@ -492,6 +529,7 @@ const (
 	Semicolon     // ;
 	AtKeyword     // @
 	FunctionStart // something(
+	URL           // url(...)
 
 	Backslash // \
 
@@ -537,6 +575,7 @@ var tokens = [...]string{
 	Dimension:  "DIMENSION",
 	String:     "STRING",
 	Ident:      "IDENT",
+	URL:        "URL",
 
 	NumberSign:    "#",
 	Apostrophe:    "'",

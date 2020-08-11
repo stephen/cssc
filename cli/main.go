@@ -20,6 +20,7 @@ are here */
 
 #test {
 	uhoh: hello;
+	img: url(test.com)
 }
 `
 
