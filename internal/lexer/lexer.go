@@ -20,6 +20,10 @@ type Lexer struct {
 	// pos is the current byte (not codepoint) offset within source.
 	pos int
 
+	// start is the position at the beginning of a Next() call. It's
+	// only used for providing locations, not for processing.
+	start int
+
 	// lastPos is the last byte (not codepoint) offset within source.
 	lastPos int
 
@@ -72,12 +76,27 @@ func (l *Lexer) peek(i int) rune {
 	return cp
 }
 
+// Location is the start offset of the current token in the source, i.e.
+// the value of l.pos when Next() was called.
+func (l *Lexer) Location() int {
+	return l.start
+}
+
+// Range is the start to end offset of the current token in the source. The returned
+// start should be the same as Location() and the end is the last position stepped through,
+// i.e. l.lastPos.
+func (l *Lexer) Range() (int, int) {
+	return l.start, l.lastPos
+}
+
 // Next consumes the most recent r.
 func (l *Lexer) Next() {
 	// Run in a for-loop so that some types (e.g. whitespace) can use continue to
 	// move on to the next token. Other codepaths will end in a return statement
 	// at the end of a single iteration.
 	for {
+		// Mark the start after all whitespace has been skipped.
+		l.start = l.lastPos
 		switch l.ch {
 		case -1:
 			l.Current = EOF
