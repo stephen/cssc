@@ -2,25 +2,77 @@ package main
 
 import (
 	"log"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/samsarahq/go/oops"
 )
 
 func main() {
-	l := NewLexer(`@import "test.css";
+	source := `@import "test.css";
 /* some notes about the next line
 are here */
 .n {
 	width: yes;
+	height: 2.3px;
+	border: -2em;
+	content: "test\u005ctest";
 }
-`)
+`
+
+	log.Println(spew.Sdump(Parse(source)))
+
+}
+
+func Parse(source string) *Stylesheet {
+	l := NewLexer(source)
+
+	ss := &Stylesheet{}
 
 	for l.Current != EOF {
 		l.Next()
-		log.Printf("current token: %s (%s)", l.Current, l.CurrentLiteral)
+		switch l.Current {
+		case AtKeyword:
+			rule := &AtRule{
+				Name: l.CurrentString,
+			}
+
+		atKeyword:
+			for {
+				l.Next()
+				switch l.Current {
+				case Semicolon:
+					break atKeyword
+				case EOF:
+					panic("uh oh")
+				// case {
+				default:
+					rule.Prelude += l.CurrentString
+				}
+			}
+
+			ss.Children = append(ss.Children, rule)
+
+		}
+		log.Printf("current token: %s (%s%s)", l.Current, l.CurrentNumeral, l.CurrentString)
+		l.CurrentNumeral, l.CurrentString = "", ""
 	}
+	return ss
+}
+
+type Stylesheet struct {
+	Children []interface{}
+}
+
+type AtRule struct {
+	Name string
+
+	// XXX: Prelude ("test.css" or media query)
+	Prelude string
+
+	// XXX: Block (contents of {})
 }
 
 // Lexer lexes the input source. Callers push the lexer
@@ -43,9 +95,13 @@ type Lexer struct {
 	// Current is the last token lexed by Next().
 	Current Token
 
-	// CurrentLiteral is the last literal lexed by Next(). It
+	// CurrentString is the last literal string lexed by Next(). It
 	// is not cleared between valid literals.
-	CurrentLiteral string // Literal
+	CurrentString string
+
+	// CurrentNumeral is the last literal numeral lexed by Next(). It
+	// is not cleared between valid literals.
+	CurrentNumeral string
 
 	Errors []error
 }
@@ -75,20 +131,49 @@ func (l *Lexer) Next() {
 			l.step()
 
 		case ':':
-			log.Println("colon")
 			l.Current = Colon
 			l.step()
 
-		case '@':
-			l.step()
-			if startsIdentifier(l.peek(0), l.peek(1), l.peek(2)) {
-				l.Current = AtKeyword
-				l.CurrentLiteral = l.nextName()
+		case '+':
+			if startsNumber(l.ch, l.peek(0), l.peek(1)) {
+				l.nextNumericToken()
 				return
 			}
 
+			// Otherwise save it as a delimiter.
+			start := l.lastPos
+			l.step()
 			l.Current = Delim
-			l.CurrentLiteral = string(l.ch)
+			l.CurrentString = l.source[start:l.lastPos]
+
+		case '-':
+			if startsNumber(l.ch, l.peek(0), l.peek(1)) {
+				l.nextNumericToken()
+				return
+			}
+
+			// XXX: CDC token
+			// XXX: identifier
+
+			// Otherwise save it as a delimiter.
+			start := l.lastPos
+			l.step()
+			l.Current = Delim
+			l.CurrentString = l.source[start:l.lastPos]
+
+		case '@':
+			l.step()
+			if startsIdentifier(l.ch, l.peek(0), l.peek(1)) {
+				l.Current = AtKeyword
+				start := l.lastPos
+				l.nextName()
+				l.CurrentString = l.source[start:l.lastPos]
+				return
+			}
+
+			// Otherwise save it as a delimiter.
+			l.Current = Delim
+			l.CurrentString = string(l.ch)
 
 		case '{':
 			l.Current = LCurly
@@ -99,11 +184,16 @@ func (l *Lexer) Next() {
 			l.step()
 
 		case '.':
+			if unicode.IsDigit(l.peek(0)) {
+				l.nextNumericToken()
+				return
+			}
+
 			// XXX: support number parsing here too.
 			start := l.lastPos
 			l.step()
 			l.Current = Delim
-			l.CurrentLiteral = l.source[start:l.lastPos]
+			l.CurrentString = l.source[start:l.lastPos]
 
 		case '/':
 			l.step()
@@ -130,7 +220,7 @@ func (l *Lexer) Next() {
 				}
 			}
 			l.Current = Comment
-			l.CurrentLiteral = l.source[start:end]
+			l.CurrentString = l.source[start:end]
 
 		case '"', '\'':
 			mark := l.ch
@@ -145,6 +235,21 @@ func (l *Lexer) Next() {
 					end = l.lastPos
 					l.step()
 					break stringToken
+				case '\n':
+					l.errorf("unexpected newline")
+				case '\\':
+					l.step()
+
+					switch l.ch {
+					case '\n':
+						l.step()
+					case -1:
+						l.errorf("unexpected EOF")
+					default:
+						if startsEscape(l.ch, l.peek(0)) {
+							l.nextEscaped()
+						}
+					}
 				case -1:
 					l.errorf("unexpected EOF")
 				default:
@@ -154,7 +259,7 @@ func (l *Lexer) Next() {
 
 			// TODO: full string-token parsing
 			l.Current = String
-			l.CurrentLiteral = l.source[start:end]
+			l.CurrentString = l.source[start:end]
 
 		default:
 			if isWhitespace(l.ch) {
@@ -165,10 +270,39 @@ func (l *Lexer) Next() {
 				continue
 			}
 
-			// consume a name
+			if unicode.IsDigit(l.ch) {
+				l.nextNumericToken()
+			}
+
+			// https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
 			if isNameStartCodePoint(l.ch) {
+				start := l.lastPos
+				l.nextName()
+				l.CurrentString = l.source[start:l.lastPos]
+
+				// Here, we need to special case the url function because it supports unquoted string content.
+				if strings.ToLower(l.CurrentString) == "url" && l.peek(0) == '(' {
+					for i := l.lastPos; i < len(l.source) && isWhitespace(l.peek(0)); i++ {
+						l.step()
+					}
+
+					if p0 := l.peek(0); p0 == '\'' || p0 == '"' {
+						l.Current = FunctionStart
+						break
+					}
+
+					// XXX: url token
+
+					break
+				}
+
+				// Otherwise, it's probably a normal function.
+				if l.peek(0) == '(' {
+					l.Current = FunctionStart
+					break
+				}
+
 				l.Current = Ident
-				l.CurrentLiteral = l.nextName()
 			}
 
 		}
@@ -181,7 +315,7 @@ func (l *Lexer) Next() {
 func startsIdentifier(p0, p1, p2 rune) bool {
 	switch p0 {
 	case '-':
-		return p1 == '-' || isEscape(p1, p2)
+		return p1 == '-' || startsEscape(p1, p2)
 	case '\n':
 		return false
 	default:
@@ -189,8 +323,8 @@ func startsIdentifier(p0, p1, p2 rune) bool {
 	}
 }
 
-// isEscape implements https://www.w3.org/TR/css-syntax-3/#starts-with-a-valid-escape
-func isEscape(p0, p1 rune) bool {
+// startsEscape implements https://www.w3.org/TR/css-syntax-3/#starts-with-a-valid-escape
+func startsEscape(p0, p1 rune) bool {
 	if p0 != '\\' {
 		return false
 	}
@@ -202,14 +336,101 @@ func isEscape(p0, p1 rune) bool {
 	return true
 }
 
-// nextName consumes and returns the a name, stepping the lexer forward.
-func (l *Lexer) nextName() string {
+// startsNumber implements https://www.w3.org/TR/css-syntax-3/#starts-with-a-number.
+func startsNumber(p0, p1, p2 rune) bool {
+	if p0 == '+' || p0 == '-' {
+		if unicode.IsDigit(p1) {
+			return true
+		}
+
+		if p1 == '.' && unicode.IsDigit(p2) {
+			return true
+		}
+
+		return false
+	}
+
+	if p0 == '.' && unicode.IsDigit(p1) {
+		return true
+	}
+
+	return unicode.IsDigit(p0)
+}
+
+// nextNumericToken implements https://www.w3.org/TR/css-syntax-3/#consume-a-numeric-token
+// and sets the lexer state.
+func (l *Lexer) nextNumericToken() {
 	start := l.lastPos
-	for isNameCodePoint(l.ch) {
+	l.nextNumber()
+	l.CurrentNumeral = l.source[start:l.lastPos]
+
+	log.Println(string([]byte{byte(l.ch), byte(l.peek(0))}))
+	if startsIdentifier(l.ch, l.peek(0), l.peek(1)) {
+		dimenStart := l.lastPos
+		l.nextName()
+		l.CurrentString = l.source[dimenStart:l.lastPos]
+		l.Current = Dimension
+	} else if l.ch == '%' {
+		l.Current = Percentage
+	} else {
+		l.Current = Number
+	}
+}
+
+// nextNumber implements https://www.w3.org/TR/css-syntax-3/#consume-a-number
+// and consumes a number. We don't distinguish between number and integer because
+// it doesn't matter for us.
+func (l *Lexer) nextNumber() {
+	if l.ch == '+' || l.ch == '-' {
 		l.step()
 	}
 
-	return l.source[start:l.lastPos]
+	for unicode.IsDigit(l.ch) {
+		l.step()
+	}
+
+	if l.ch == '.' && unicode.IsDigit(l.peek(0)) {
+		l.step()
+		l.step()
+	}
+
+	if p0, p1 := l.peek(0), l.peek(1); (l.ch == 'e' || l.ch == 'E') && (unicode.IsDigit(p0) ||
+		((p0 == '+' || p0 == '-') && unicode.IsDigit(p1))) {
+		l.step()
+		if l.ch == '+' || l.ch == '-' {
+			l.step()
+		}
+
+		for unicode.IsDigit(l.ch) {
+			l.step()
+		}
+	}
+}
+
+// nextName consumes and returns a name, stepping the lexer forward.
+func (l *Lexer) nextName() {
+	for isNameCodePoint(l.ch) {
+		l.step()
+	}
+}
+
+// nextEscaped consumes and returns an escaped codepoint, stepping the lexer forward.
+// It implements https://www.w3.org/TR/css-syntax-3/#consume-escaped-code-point.
+//
+// Note that we do not need to interpret the codepoint for our purposes - we can record
+// the byte offsets as-is for transformation purposes.
+func (l *Lexer) nextEscaped() {
+	l.step()
+	for i := 0; i < 5 && isHexDigit(l.ch); i++ {
+		l.step()
+		if isWhitespace(l.ch) {
+			l.step()
+		}
+	}
+}
+
+func isHexDigit(r rune) bool {
+	return unicode.IsDigit(r) || (r >= 'A' && r <= 'F') || (r >= 'a' && r <= 'f')
 }
 
 // isWhitespace implements https://www.w3.org/TR/css-syntax-3/#whitespace.
@@ -266,15 +487,16 @@ const (
 
 	Comment
 
-	NumberSign // #
-	Apostrophe // '
-	Plus       // +
-	Comma      // ,
-	Hyphen     // -
-	Period     // .
-	Colon      // :
-	Semicolon  // ;
-	AtKeyword  // @
+	NumberSign    // #
+	Apostrophe    // '
+	Plus          // +
+	Comma         // ,
+	Hyphen        // -
+	Period        // .
+	Colon         // :
+	Semicolon     // ;
+	AtKeyword     // @
+	FunctionStart // something(
 
 	Backslash // \
 
@@ -290,10 +512,12 @@ const (
 	LCurly // {
 	RCurly // }
 
-	Digit  // Number literal
-	String // String literal
-	Ident  // Identifier
-	Delim  // Delimiter (used for preserving tokens for subprocessors)
+	Number     // Number literal
+	Percentage // Percentage literal
+	Dimension  // Dimension literal
+	String     // String literal
+	Ident      // Identifier
+	Delim      // Delimiter (used for preserving tokens for subprocessors)
 )
 
 func (t Token) String() string {
@@ -308,19 +532,22 @@ var tokens = [...]string{
 	Comment: "COMMENT",
 	Delim:   "DELIMITER",
 
-	Digit:  "DIGIT",
-	String: "STRING",
-	Ident:  "IDENT",
+	Number:     "NUMBER",
+	Percentage: "PERCENTAGE",
+	Dimension:  "DIMENSION",
+	String:     "STRING",
+	Ident:      "IDENT",
 
-	NumberSign: "#",
-	Apostrophe: "'",
-	Plus:       "+",
-	Comma:      ",",
-	Hyphen:     "-",
-	Period:     ".",
-	Colon:      ":",
-	Semicolon:  ";",
-	AtKeyword:  "@",
+	NumberSign:    "#",
+	Apostrophe:    "'",
+	Plus:          "+",
+	Comma:         ",",
+	Hyphen:        "-",
+	Period:        ".",
+	Colon:         ":",
+	Semicolon:     ";",
+	AtKeyword:     "@",
+	FunctionStart: "FUNCTION",
 
 	Backslash: `\`,
 
