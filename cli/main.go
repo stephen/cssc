@@ -17,6 +17,10 @@ are here */
 	border: -2em;
 	content: "test\u005ctest";
 }
+
+#test {
+	uhoh: hello;
+}
 `
 
 	log.Println(spew.Sdump(Parse(source)))

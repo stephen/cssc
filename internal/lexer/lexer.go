@@ -111,6 +111,19 @@ func (l *Lexer) Next() {
 
 			l.nextDelimToken()
 
+		case '#':
+			if isNameCodePoint(l.peek(0)) || startsEscape(l.peek(0), l.peek(1)) {
+				l.Current = Hash
+
+				l.step()
+				start := l.lastPos
+				l.nextName()
+				l.CurrentString = l.source[start:l.lastPos]
+				return
+			}
+
+			l.nextDelimToken()
+
 		case '{':
 			l.Current = LCurly
 			l.step()
@@ -455,6 +468,7 @@ const (
 	LCurly // {
 	RCurly // }
 
+	Hash       // Hash literal
 	Number     // Number literal
 	Percentage // Percentage literal
 	Dimension  // Dimension literal
@@ -475,6 +489,7 @@ var tokens = [...]string{
 	Comment: "COMMENT",
 	Delim:   "DELIMITER",
 
+	Hash:       "HASH",
 	Number:     "NUMBER",
 	Percentage: "PERCENTAGE",
 	Dimension:  "DIMENSION",
