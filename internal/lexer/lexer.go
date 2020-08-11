@@ -196,19 +196,21 @@ func (l *Lexer) Next() {
 
 		case '/':
 			l.step()
-			if l.ch != '*' {
+			if l.peek(0) != '*' {
 				l.errorf("expected * but got %c", l.ch)
 			}
+			l.step()
 			start, end := l.lastPos, -1
 
 		commentToken:
 			for {
 				switch l.ch {
 				case '*':
+					maybeEnd := l.lastPos
 					l.step()
 					if l.ch == '/' {
-						end = l.lastPos
 						l.step()
+						end = maybeEnd
 						break commentToken
 					}
 					l.step()
@@ -429,6 +431,10 @@ func (l *Lexer) nextNumber() {
 	if l.ch == '.' && unicode.IsDigit(l.peek(0)) {
 		l.step()
 		l.step()
+
+		for unicode.IsDigit(l.ch) {
+			l.step()
+		}
 	}
 
 	if p0, p1 := l.peek(0), l.peek(1); (l.ch == 'e' || l.ch == 'E') && (unicode.IsDigit(p0) ||
