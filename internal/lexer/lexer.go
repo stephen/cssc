@@ -72,11 +72,7 @@ func (l *Lexer) Next() {
 				return
 			}
 
-			// Otherwise save it as a delimiter.
-			start := l.lastPos
-			l.step()
-			l.Current = Delim
-			l.CurrentString = l.source[start:l.lastPos]
+			l.nextDelimToken()
 
 		case '-':
 			if startsNumber(l.ch, l.peek(0), l.peek(1)) {
@@ -88,24 +84,20 @@ func (l *Lexer) Next() {
 			// XXX: identifier
 
 			// Otherwise save it as a delimiter.
-			start := l.lastPos
-			l.step()
-			l.Current = Delim
-			l.CurrentString = l.source[start:l.lastPos]
+			l.nextDelimToken()
 
 		case '@':
-			l.step()
-			if startsIdentifier(l.ch, l.peek(0), l.peek(1)) {
+			if startsIdentifier(l.peek(0), l.peek(1), l.peek(2)) {
+				l.step() // Consume @.
 				l.Current = AtKeyword
+
 				start := l.lastPos
 				l.nextName()
 				l.CurrentString = l.source[start:l.lastPos]
 				return
 			}
 
-			// Otherwise save it as a delimiter.
-			l.Current = Delim
-			l.CurrentString = string(l.ch)
+			l.nextDelimToken()
 
 		case '{':
 			l.Current = LCurly
@@ -122,10 +114,8 @@ func (l *Lexer) Next() {
 			}
 
 			// XXX: support number parsing here too.
-			start := l.lastPos
-			l.step()
-			l.Current = Delim
-			l.CurrentString = l.source[start:l.lastPos]
+
+			l.nextDelimToken()
 
 		case '/':
 			l.step()
@@ -335,6 +325,14 @@ func (l *Lexer) nextNumber() {
 			l.step()
 		}
 	}
+}
+
+// nextDelim consumes a codepoint and saves it as a delimiter token.
+func (l *Lexer) nextDelimToken() {
+	start := l.lastPos
+	l.step()
+	l.Current = Delim
+	l.CurrentString = l.source[start:l.lastPos]
 }
 
 // nextName consumes and returns a name, stepping the lexer forward.
