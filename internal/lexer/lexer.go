@@ -226,6 +226,7 @@ func (l *Lexer) Next() {
 
 			if unicode.IsDigit(l.ch) {
 				l.nextNumericToken()
+				return
 			}
 
 			// https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
@@ -257,8 +258,10 @@ func (l *Lexer) Next() {
 				}
 
 				l.Current = Ident
+				return
 			}
 
+			l.nextDelimToken()
 		}
 
 		return
