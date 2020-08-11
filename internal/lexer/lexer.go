@@ -153,7 +153,8 @@ func (l *Lexer) Next() {
 			l.step()
 
 		case '.':
-			if unicode.IsDigit(l.peek(0)) {
+
+			if startsNumber(l.peek(0), l.peek(1), l.peek(2)) {
 				l.nextNumericToken()
 				return
 			}
