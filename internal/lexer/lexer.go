@@ -80,8 +80,20 @@ func (l *Lexer) Next() {
 				return
 			}
 
-			// XXX: CDC token
+			if p0, p1 := l.peek(0), l.peek(1); p0 == '-' && p1 == '>' {
+				l.Current = CDC
+				return
+			}
+
 			// XXX: identifier
+
+			l.nextDelimToken()
+
+		case '<':
+			if p0, p1, p2 := l.peek(0), l.peek(1), l.peek(2); p0 == '!' && p1 == '-' && p2 == '-' {
+				l.Current = CDO
+				return
+			}
 
 			// Otherwise save it as a delimiter.
 			l.nextDelimToken()
@@ -434,6 +446,9 @@ const (
 	LParen // (
 	RParen // )
 
+	CDO // <!--
+	CDC // -->
+
 	LBracket // [
 	RBracket // ]
 
@@ -481,6 +496,9 @@ var tokens = [...]string{
 
 	LessThan:    "<",
 	GreaterThan: ">",
+
+	CDO: "<!--",
+	CDC: "-->",
 
 	LParen: "(",
 	RParen: ")",
