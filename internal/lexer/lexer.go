@@ -341,7 +341,7 @@ func (l *Lexer) nextIdentLikeToken() {
 			l.step()
 		}
 
-		if p0 := l.peek(0); p0 == '\'' || p0 == '"' {
+		if l.ch == '\'' || l.ch == '"' {
 			l.Current = FunctionStart
 			return
 		}
