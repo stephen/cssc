@@ -124,6 +124,14 @@ func (l *Lexer) Next() {
 
 			l.nextDelimToken()
 
+		case '[':
+			l.Current = LBracket
+			l.step()
+
+		case ']':
+			l.Current = RBracket
+			l.step()
+
 		case '{':
 			l.Current = LCurly
 			l.step()
