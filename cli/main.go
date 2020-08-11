@@ -35,7 +35,6 @@ func Parse(source string) *Stylesheet {
 	ss := &Stylesheet{}
 
 	for l.Current != lexer.EOF {
-		l.Next()
 		switch l.Current {
 		case lexer.AtKeyword:
 			rule := &AtRule{
@@ -61,6 +60,7 @@ func Parse(source string) *Stylesheet {
 		}
 		log.Printf("current token: %s (%s%s)", l.Current, l.CurrentNumeral, l.CurrentString)
 		l.CurrentNumeral, l.CurrentString = "", ""
+		l.Next()
 	}
 	return ss
 }

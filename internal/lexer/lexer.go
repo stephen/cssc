@@ -44,6 +44,7 @@ func NewLexer(source string) *Lexer {
 		source: source,
 	}
 	l.step()
+	l.Next()
 	return l
 }
 
