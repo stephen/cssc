@@ -85,7 +85,9 @@ func (l *Lexer) Next() {
 				return
 			}
 
-			// XXX: identifier
+			if startsIdentifier(l.ch, l.peek(0), l.peek(1)) {
+				l.nextIdentLikeToken()
+			}
 
 			l.nextDelimToken()
 
@@ -153,13 +155,19 @@ func (l *Lexer) Next() {
 			l.step()
 
 		case '.':
-
 			if startsNumber(l.peek(0), l.peek(1), l.peek(2)) {
 				l.nextNumericToken()
 				return
 			}
 
 			l.nextDelimToken()
+
+		case '\\':
+			if !startsEscape(l.ch, l.peek(0)) {
+				l.errorf("parse error")
+			}
+
+			l.nextIdentLikeToken()
 
 		case '/':
 			l.step()
@@ -242,33 +250,7 @@ func (l *Lexer) Next() {
 
 			// https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
 			if isNameStartCodePoint(l.ch) {
-				start := l.lastPos
-				l.nextName()
-				l.CurrentString = l.source[start:l.lastPos]
-
-				// Here, we need to special case the url function because it supports unquoted string content.
-				if strings.ToLower(l.CurrentString) == "url" && l.peek(0) == '(' {
-					for i := l.lastPos; i < len(l.source) && isWhitespace(l.peek(0)); i++ {
-						l.step()
-					}
-
-					if p0 := l.peek(0); p0 == '\'' || p0 == '"' {
-						l.Current = FunctionStart
-						break
-					}
-
-					// XXX: url token
-
-					break
-				}
-
-				// Otherwise, it's probably a normal function.
-				if l.peek(0) == '(' {
-					l.Current = FunctionStart
-					break
-				}
-
-				l.Current = Ident
+				l.nextIdentLikeToken()
 				return
 			}
 
@@ -344,6 +326,37 @@ func (l *Lexer) nextNumericToken() {
 	}
 }
 
+// nextIdentLikeToken implements https://www.w3.org/TR/css-syntax-3/#consume-an-ident-like-token.
+func (l *Lexer) nextIdentLikeToken() {
+	start := l.lastPos
+	l.nextName()
+	l.CurrentString = l.source[start:l.lastPos]
+
+	// Here, we need to special case the url function because it supports unquoted string content.
+	if strings.ToLower(l.CurrentString) == "url" && l.peek(0) == '(' {
+		for i := l.lastPos; i < len(l.source) && isWhitespace(l.peek(0)); i++ {
+			l.step()
+		}
+
+		if p0 := l.peek(0); p0 == '\'' || p0 == '"' {
+			l.Current = FunctionStart
+			return
+		}
+
+		// XXX: url token
+
+		return
+	}
+
+	// Otherwise, it's probably a normal function.
+	if l.peek(0) == '(' {
+		l.Current = FunctionStart
+		return
+	}
+
+	l.Current = Ident
+}
+
 // nextNumber implements https://www.w3.org/TR/css-syntax-3/#consume-a-number
 // and consumes a number. We don't distinguish between number and integer because
 // it doesn't matter for us.
@@ -382,10 +395,17 @@ func (l *Lexer) nextDelimToken() {
 	l.CurrentString = l.source[start:l.lastPos]
 }
 
-// nextName consumes and returns a name, stepping the lexer forward.
+// nextName implements https://www.w3.org/TR/css-syntax-3/#consume-a-name.
+// It consumes and returns a name, stepping the lexer forward.
 func (l *Lexer) nextName() {
-	for isNameCodePoint(l.ch) {
-		l.step()
+	for {
+		if isNameCodePoint(l.ch) {
+			l.step()
+		} else if startsEscape(l.ch, l.peek(0)) {
+			l.nextEscaped()
+		} else {
+			return
+		}
 	}
 }
 
