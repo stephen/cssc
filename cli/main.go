@@ -11,9 +11,10 @@ import (
 func main() {
 	source := `@import "test.css";
 @import url("./testing.css");
-	@import url(tester.css);`
-	// /* some notes about the next line
-	// are here */
+	@import url(tester.css);
+	/* some notes about the next line
+	are here */
+	`
 	// .n {
 	// 	width: yes;
 	// 	height: 2.3px;
@@ -54,6 +55,14 @@ func (p *parser) parse() {
 		switch p.lexer.Current {
 		case lexer.AtKeyword:
 			p.parseAtRule()
+
+		case lexer.Comment:
+			p.ss.Nodes = append(p.ss.Nodes, &ast.Comment{
+				Loc:  &ast.Loc{Position: p.lexer.Location()},
+				Text: p.lexer.CurrentString,
+			})
+			p.lexer.Next()
+
 		default:
 			log.Printf("current token: %s (%s%s)", p.lexer.Current, p.lexer.CurrentNumeral, p.lexer.CurrentString)
 			p.lexer.CurrentNumeral, p.lexer.CurrentString = "", ""
@@ -107,5 +116,5 @@ func (p *parser) parseImportAtRule() {
 
 	// XXX: support conditional @import
 
-	p.ss.Rules = append(p.ss.Rules, imp)
+	p.ss.Nodes = append(p.ss.Nodes, imp)
 }

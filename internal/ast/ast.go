@@ -3,6 +3,7 @@ package ast
 // Node is any AST node.
 type Node interface {
 	Location() int
+	node()
 }
 
 // Loc is a location in the source.
@@ -15,13 +16,7 @@ func (l Loc) Location() int { return l.Position }
 
 // Stylesheet is a CSS stylesheet.
 type Stylesheet struct {
-	Rules []Rule
-}
-
-// Rule is a top-level rule in the stylesheet.
-type Rule interface {
-	Node
-	rule()
+	Nodes []Node
 }
 
 // ImportAtRule represents an import statement.
@@ -32,7 +27,15 @@ type ImportAtRule struct {
 	URL string
 }
 
-var _ Rule = ImportAtRule{}
+// Comment represents a comment.
+type Comment struct {
+	*Loc
 
-// rule implements Rule.
-func (r ImportAtRule) rule() {}
+	Text string
+}
+
+var _ Node = ImportAtRule{}
+var _ Node = Comment{}
+
+func (r ImportAtRule) node() {}
+func (r Comment) node()      {}

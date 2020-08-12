@@ -224,7 +224,7 @@ func (l *Lexer) Next() {
 
 		case '/':
 			l.step()
-			if l.peek(0) != '*' {
+			if l.ch != '*' {
 				l.errorf("expected * but got %c", l.ch)
 			}
 			l.step()
