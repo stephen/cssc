@@ -56,6 +56,11 @@ func (p *parser) parse() {
 		case lexer.AtKeyword:
 			p.parseAtRule()
 
+		case lexer.CDO, lexer.CDC:
+			// From https://www.w3.org/TR/css-syntax-3/#parser-entry-points,
+			// we'll always assume we're parsing from the top-level, so we can discard CDO/CDC.
+			p.lexer.Next()
+
 		case lexer.Comment:
 			p.ss.Nodes = append(p.ss.Nodes, &ast.Comment{
 				Loc:  &ast.Loc{Position: p.lexer.Location()},
