@@ -29,3 +29,9 @@ func (h *Harness) ExpectAndNext(token lexer.Token, stringLiteral, numericLiteral
 
 	h.Next()
 }
+
+func (h *Harness) RunUntil(token lexer.Token) {
+	for h.Current != token {
+		h.Next()
+	}
+}

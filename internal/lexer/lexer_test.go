@@ -74,3 +74,13 @@ func TestLexer_SimpleBlocks(t *testing.T) {
 	h.ExpectAndNext(lexer.Semicolon, "", "")
 	h.ExpectAndNext(lexer.RCurly, "", "")
 }
+
+func TestLexer_String(t *testing.T) {
+	assert.Panics(t, func() {
+		NewHarness(t, lexer.NewLexer(`
+.class {
+	someting: "ok"
+	bad: "no good
+}`)).RunUntil(lexer.EOF)
+	})
+}

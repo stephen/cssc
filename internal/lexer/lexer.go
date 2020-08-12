@@ -256,7 +256,7 @@ func (l *Lexer) Next() {
 					l.step()
 					break stringToken
 				case '\n':
-					l.errorf("unexpected newline")
+					l.locationErrorf(l.source, l.start, l.lastPos, "unclosed string: unexpected newline")
 				case '\\':
 					l.step()
 
@@ -504,6 +504,45 @@ func (l *Lexer) nextEscaped() {
 			l.step()
 		}
 	}
+}
+
+type LocationError struct {
+	Message string
+
+	source string
+	start  int
+	length int
+}
+
+// Error implements error. It's relatively slow because it needs to
+// rescan the source to figure out line and column numbers.
+func (l *LocationError) Error() string {
+	lineNumber, lineStart := 1, 0
+	for i, ch := range l.source[:l.start] {
+		if ch == '\n' {
+			lineNumber++
+			lineStart = i
+		}
+	}
+
+	lineEnd := len(l.source)
+	for i, ch := range l.source[l.start:] {
+		if ch == '\n' {
+			lineEnd = i + l.start
+			break
+		}
+	}
+
+	line := l.source[lineStart:lineEnd]
+	col := l.start - lineStart
+	len := lineEnd - l.start
+
+	return fmt.Sprintf("%s: %s\n%d:%d through %d", l.Message, line, lineNumber, col, len)
+}
+
+// errorf sends up a lexer panic.
+func (l *Lexer) locationErrorf(source string, start, end int, f string, args ...interface{}) {
+	panic((&LocationError{fmt.Sprintf(f, args...), source, start, end - start}).Error())
 }
 
 // errorf sends up a lexer panic.
