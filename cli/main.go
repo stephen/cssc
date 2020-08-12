@@ -63,7 +63,7 @@ func (p *parser) parse() {
 
 		case lexer.Comment:
 			p.ss.Nodes = append(p.ss.Nodes, &ast.Comment{
-				Loc:  &ast.Loc{Position: p.lexer.Location()},
+				Loc:  p.lexer.Location(),
 				Text: p.lexer.CurrentString,
 			})
 			p.lexer.Next()
@@ -91,7 +91,7 @@ func (p *parser) parseAtRule() {
 // https://www.w3.org/TR/css-cascade-4/#at-import.
 func (p *parser) parseImportAtRule() {
 	imp := &ast.ImportAtRule{
-		Loc: &ast.Loc{Position: p.lexer.Location()},
+		Loc: p.lexer.Location(),
 	}
 
 	switch p.lexer.Current {
