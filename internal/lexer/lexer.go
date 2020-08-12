@@ -89,6 +89,15 @@ func (l *Lexer) Range() (int, int) {
 	return l.start, l.lastPos
 }
 
+// Expect is like Next, except it asserts the current token before moving on. Callers should
+// pull CurrentLiteral / CurrentNumeral before calling this function.
+func (l *Lexer) Expect(token Token) {
+	if l.Current != token {
+		l.locationErrorf(l.source, l.start, l.lastPos, "expected %s, but got %s instead", token, l.Current)
+	}
+	l.Next()
+}
+
 // Next consumes the most recent r.
 func (l *Lexer) Next() {
 	// Run in a for-loop so that some types (e.g. whitespace) can use continue to
