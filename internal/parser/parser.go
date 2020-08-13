@@ -63,7 +63,7 @@ func (p *parser) parseQualifiedRule() {
 		case lexer.EOF:
 			p.lexer.Errorf("unexpected EOF")
 		case lexer.LCurly:
-			// Consume a simple block
+			// XXX: Consume a simple block
 			p.lexer.Next()
 			for p.lexer.Current != lexer.RCurly {
 				p.lexer.Next()

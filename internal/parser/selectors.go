@@ -134,6 +134,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			s.Selectors = append(s.Selectors, pc)
 
 		case lexer.LBracket:
+			// XXX: Attribute selectors.
 			p.lexer.Next()
 			for p.lexer.Current != lexer.RBracket {
 				p.lexer.Next()
