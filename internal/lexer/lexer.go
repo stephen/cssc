@@ -95,7 +95,7 @@ func (l *Lexer) Range() (int, int) {
 // pull CurrentLiteral / CurrentNumeral before calling this function.
 func (l *Lexer) Expect(token Token) {
 	if l.Current != token {
-		l.locationErrorf(l.source, l.start, l.lastPos, "expected %s, but got %s instead", token, l.Current)
+		l.errorf("expected %s, but got %s instead", token, l.Current)
 	}
 	l.Next()
 }
@@ -219,7 +219,7 @@ func (l *Lexer) Next() {
 
 		case '\\':
 			if !startsEscape(l.ch, l.peek(0)) {
-				l.locationErrorf(l.start, l.lastPos, "invalid escape")
+				l.errorf("parse error")
 			}
 
 			l.nextIdentLikeToken()
@@ -227,7 +227,7 @@ func (l *Lexer) Next() {
 		case '/':
 			l.step()
 			if l.ch != '*' {
-				l.locationErrorf(l.start, l.lastPos, "expected *, but got unexpected %c", l.ch)
+				l.errorf("expected * but got %c", l.ch)
 			}
 			l.step()
 			start, end := l.lastPos, -1
@@ -245,7 +245,7 @@ func (l *Lexer) Next() {
 					}
 					l.step()
 				case -1:
-					l.locationErrorf(l.start, l.lastPos, "unexpected EOF")
+					l.errorf("unexpected EOF")
 				default:
 					l.step()
 				}
@@ -267,7 +267,7 @@ func (l *Lexer) Next() {
 					l.step()
 					break stringToken
 				case '\n':
-					l.locationErrorf(l.start, l.lastPos, "unclosed string: unexpected newline")
+					l.errorf("unclosed string: unexepected newline")
 				case '\\':
 					l.step()
 
@@ -275,14 +275,14 @@ func (l *Lexer) Next() {
 					case '\n':
 						l.step()
 					case -1:
-						l.locationErrorf(l.start, l.lastPos, "unexpected EOF")
+						l.errorf("unexpected EOF")
 					default:
 						if startsEscape(l.ch, l.peek(0)) {
 							l.nextEscaped()
 						}
 					}
 				case -1:
-					l.locationErrorf(l.start, l.lastPos, "unexpected EOF")
+					l.errorf("unexpected EOF")
 				default:
 					l.step()
 				}
@@ -412,16 +412,16 @@ func (l *Lexer) nextIdentLikeToken() {
 				l.step()
 				return
 			case -1:
-				l.locationErrorf(l.start, l.lastPos, "unexpected EOF")
+				l.errorf("unexpected EOF")
 			case '"', '\'', '(':
-				l.locationErrorf(l.start, l.lastPos, "unexpected token: %c", l.ch)
+				l.errorf("unexpected token: %c", l.ch)
 			case '\\':
 				if startsEscape(l.ch, l.peek(0)) {
 					l.nextEscaped()
 					continue
 				}
 
-				l.locationErrorf(l.start, l.lastPos, "unexpected token: %c", l.ch)
+				l.errorf("unexpected token: %c", l.ch)
 			default:
 				if isWhitespace(l.ch) {
 					l.step()
@@ -429,7 +429,7 @@ func (l *Lexer) nextIdentLikeToken() {
 				}
 
 				if isNonPrintable(l.ch) {
-					l.locationErrorf(l.start, l.lastPos, "unexpected token: %c", l.ch)
+					l.errorf("unexpected token: %c", l.ch)
 				}
 
 				l.step()
@@ -517,6 +517,8 @@ func (l *Lexer) nextEscaped() {
 	}
 }
 
+// LocationError is an error that happened at a specific location
+// in the source.
 type LocationError struct {
 	Message string
 
@@ -551,7 +553,12 @@ func (l *LocationError) Error() string {
 	return fmt.Sprintf("%s: %s\n%d:%d through %d", l.Message, line, lineNumber, col, len)
 }
 
-// locationErrorf sends up a lexer panic.
+// locationErrof sends up a lexer panic with a custom location.
 func (l *Lexer) locationErrorf(start, end int, f string, args ...interface{}) {
 	panic((&LocationError{fmt.Sprintf(f, args...), l.source, start, end - start}).Error())
+}
+
+// errorf sends up a lexer panic at the range from start to lastPos.
+func (l *Lexer) errorf(f string, args ...interface{}) {
+	l.locationErrorf(l.start, l.lastPos, f, args...)
 }
