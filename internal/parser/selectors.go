@@ -80,8 +80,15 @@ func (p *parser) parseSelector() *ast.Selector {
 				})
 				p.lexer.Next()
 
+			case "*":
+				s.Selectors = append(s.Selectors, &ast.TypeSelector{
+					Loc:  p.lexer.Location(),
+					Name: p.lexer.CurrentString,
+				})
+				p.lexer.Next()
+
 			default:
-				panic("unknown delimiter")
+				panic("unknown delimiter" + p.lexer.Current.String() + p.lexer.CurrentString)
 			}
 
 		case lexer.LessThan:
@@ -127,7 +134,12 @@ func (p *parser) parseSelector() *ast.Selector {
 			s.Selectors = append(s.Selectors, pc)
 
 		case lexer.LBracket:
-			// attribute selector
+			p.lexer.Next()
+			for p.lexer.Current != lexer.RBracket {
+				p.lexer.Next()
+			}
+			p.lexer.Next()
+
 		default:
 			panic("unknown " + p.lexer.Current.String())
 		}

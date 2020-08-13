@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"log"
+
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/lexer"
 )
@@ -30,6 +32,7 @@ type parser struct {
 
 func (p *parser) parse() {
 	for p.lexer.Current != lexer.EOF {
+		log.Println(p.lexer.Location().Position)
 		switch p.lexer.Current {
 		case lexer.AtKeyword:
 			p.parseAtRule()
