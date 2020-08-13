@@ -236,9 +236,9 @@ func (l *Lexer) Next() {
 			l.nextIdentLikeToken()
 
 		case '/':
-			l.step()
-			if l.ch != '*' {
-				l.Errorf("expected * but got %c", l.ch)
+			if l.peek(0) != '*' {
+				l.nextDelimToken()
+				return
 			}
 			l.step()
 			start, end := l.lastPos, -1
