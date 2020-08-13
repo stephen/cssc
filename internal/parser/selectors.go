@@ -9,7 +9,7 @@ func (p *parser) parseSelectorList() *ast.SelectorList {
 	l := &ast.SelectorList{Loc: p.lexer.Location()}
 	for {
 		if p.lexer.Current == lexer.EOF {
-			panic("unexpected EOF")
+			p.lexer.Errorf("unexpected EOF")
 		}
 
 		l.Selectors = append(l.Selectors, p.parseSelector())
@@ -32,20 +32,20 @@ func (p *parser) parseSelector() *ast.Selector {
 	for {
 		switch p.lexer.Current {
 		case lexer.EOF:
-			panic("unexpected EOF")
+			p.lexer.Errorf("unexpected EOF")
 
 		case lexer.Comma:
 			return s
 
 		case lexer.LCurly:
 			if p.innerSelectorList {
-				panic("unexpected {")
+				p.lexer.Errorf("unexpected {")
 			}
 			return s
 
 		case lexer.RParen:
 			if !p.innerSelectorList {
-				panic("unexpected )")
+				p.lexer.Errorf("unexpected )")
 			}
 			return s
 
@@ -88,7 +88,7 @@ func (p *parser) parseSelector() *ast.Selector {
 				p.lexer.Next()
 
 			default:
-				panic("unknown delimiter" + p.lexer.Current.String() + p.lexer.CurrentString)
+				p.lexer.Errorf("unexpected delimeter: %s", p.lexer.CurrentString)
 			}
 
 		case lexer.LessThan:
@@ -141,7 +141,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Next()
 
 		default:
-			panic("unknown " + p.lexer.Current.String())
+			p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
 		}
 	}
 }

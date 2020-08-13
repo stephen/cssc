@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"log"
-
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/lexer"
 )
@@ -32,7 +30,6 @@ type parser struct {
 
 func (p *parser) parse() {
 	for p.lexer.Current != lexer.EOF {
-		log.Println(p.lexer.Location().Position)
 		switch p.lexer.Current {
 		case lexer.AtKeyword:
 			p.parseAtRule()
@@ -64,7 +61,7 @@ func (p *parser) parseQualifiedRule() {
 	for {
 		switch p.lexer.Current {
 		case lexer.EOF:
-			panic("unexpected EOF")
+			p.lexer.Errorf("unexpected EOF")
 		case lexer.LCurly:
 			// Consume a simple block
 			p.lexer.Next()
@@ -87,7 +84,7 @@ func (p *parser) parseAtRule() {
 		p.lexer.Next()
 		p.parseImportAtRule()
 	default:
-		panic("unsuppported at rule")
+		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
 	}
 }
 
@@ -105,7 +102,7 @@ func (p *parser) parseImportAtRule() {
 
 	case lexer.FunctionStart:
 		if p.lexer.CurrentString != "url" {
-			panic("@import target must be a url or string")
+			p.lexer.Errorf("@import target must be a url or string")
 		}
 		p.lexer.Next()
 
@@ -118,7 +115,7 @@ func (p *parser) parseImportAtRule() {
 		p.lexer.Expect(lexer.String)
 
 	default:
-		panic("unexpected import specifier")
+		p.lexer.Errorf("unexpected import specifier")
 	}
 
 	p.lexer.Expect(lexer.Semicolon)
