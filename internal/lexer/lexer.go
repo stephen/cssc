@@ -452,6 +452,7 @@ func (l *Lexer) nextIdentLikeToken() {
 		return
 	}
 
+	// Otherwise, it's an identifier.
 	l.Current = Ident
 }
 

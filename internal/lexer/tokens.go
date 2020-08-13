@@ -118,5 +118,5 @@ func isNonPrintable(r rune) bool {
 
 // isNameCodePoint implements https://www.w3.org/TR/css-syntax-3/#name-code-point.
 func isNameCodePoint(r rune) bool {
-	return isNameStartCodePoint(r) || unicode.IsNumber(r)
+	return isNameStartCodePoint(r) || unicode.IsNumber(r) || r == '-'
 }
