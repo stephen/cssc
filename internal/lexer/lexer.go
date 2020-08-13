@@ -69,6 +69,7 @@ func (l *Lexer) step() {
 
 	if size == 0 {
 		l.ch = -1
+		l.lastPos = l.pos
 		return
 	}
 
@@ -80,7 +81,7 @@ func (l *Lexer) step() {
 // peek returns the next ith unconsumed rune but does not consume it.
 // i is 0-indexed (0 is one ahead, 1 is two ahead, etc.)
 func (l *Lexer) peek(i int) rune {
-	cp, size := utf8.DecodeRuneInString(l.source.Content[l.pos:])
+	cp, size := utf8.DecodeRuneInString(l.source.Content[l.pos+i:])
 	if size == 0 {
 		return -1
 	}
@@ -149,8 +150,9 @@ func (l *Lexer) Next() {
 				return
 			}
 
-			if startsIdentifier(l.ch, l.peek(0), l.peek(1)) {
+			if startsIdentifier(l.peek(0), l.peek(1), l.peek(2)) {
 				l.nextIdentLikeToken()
+				return
 			}
 
 			l.nextDelimToken()
