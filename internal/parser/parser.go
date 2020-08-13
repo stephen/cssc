@@ -83,12 +83,15 @@ func (p *parser) parseAtRule() {
 	case "import":
 		p.lexer.Next()
 		p.parseImportAtRule()
+	case "media":
+		p.lexer.Next()
+		p.parseMediaAtRule()
 	default:
 		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
 	}
 }
 
-// parseImportAtRule parses an at rule. It roughly implements
+// parseImportAtRule parses an import at rule. It roughly implements
 // https://www.w3.org/TR/css-cascade-4/#at-import.
 func (p *parser) parseImportAtRule() {
 	imp := &ast.ImportAtRule{
@@ -121,6 +124,31 @@ func (p *parser) parseImportAtRule() {
 	p.lexer.Expect(lexer.Semicolon)
 
 	// XXX: support conditional @import
+
+	p.ss.Nodes = append(p.ss.Nodes, imp)
+}
+
+// parseMediaAtRule parses a media at rule. It roughly implements
+// https://www.w3.org/TR/mediaqueries-4/#media.
+func (p *parser) parseMediaAtRule() {
+	imp := &ast.ImportAtRule{
+		Loc: p.lexer.Location(),
+	}
+
+	p.lexer.Next()
+	for p.lexer.Current != lexer.Semicolon && p.lexer.Current != lexer.LCurly {
+		p.lexer.Next()
+	}
+
+	// XXX: actually parse media query and inner block.
+	if p.lexer.Current == lexer.LCurly {
+		p.lexer.Next()
+		for p.lexer.Current != lexer.RCurly {
+			p.lexer.Next()
+		}
+		p.lexer.Next()
+	}
+	p.lexer.Next()
 
 	p.ss.Nodes = append(p.ss.Nodes, imp)
 }

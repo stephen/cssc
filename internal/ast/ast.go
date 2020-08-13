@@ -27,6 +27,15 @@ type ImportAtRule struct {
 	URL string
 }
 
+// MediaAtRule represents a @media rule.
+type MediaAtRule struct {
+	*Loc
+
+	// Query
+	// XXX: model out the media query.
+	Query string
+}
+
 // Comment represents a comment.
 type Comment struct {
 	*Loc
