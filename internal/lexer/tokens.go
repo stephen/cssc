@@ -25,9 +25,6 @@ const (
 
 	Backslash // \
 
-	LessThan    // <
-	GreaterThan // >
-
 	LParen // (
 	RParen // )
 
@@ -79,9 +76,6 @@ var tokens = [...]string{
 	FunctionStart: "FUNCTION",
 
 	Backslash: `\`,
-
-	LessThan:    "<",
-	GreaterThan: ">",
 
 	CDO: "<!--",
 	CDC: "-->",

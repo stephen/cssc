@@ -73,7 +73,7 @@ func (p *parser) parseSelector() *ast.Selector {
 				})
 				p.lexer.Expect(lexer.Ident)
 
-			case "+", "<", "~", "|":
+			case "+", ">", "~", "|":
 				s.Selectors = append(s.Selectors, &ast.CombinatorSelector{
 					Loc:      p.lexer.Location(),
 					Operator: p.lexer.CurrentString,
@@ -90,13 +90,6 @@ func (p *parser) parseSelector() *ast.Selector {
 			default:
 				p.lexer.Errorf("unexpected delimeter: %s", p.lexer.CurrentString)
 			}
-
-		case lexer.LessThan:
-			s.Selectors = append(s.Selectors, &ast.CombinatorSelector{
-				Loc:      p.lexer.Location(),
-				Operator: "<",
-			})
-			p.lexer.Next()
 
 		case lexer.Colon:
 			p.lexer.Next()
