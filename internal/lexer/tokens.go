@@ -15,10 +15,8 @@ const (
 
 	NumberSign    // #
 	Apostrophe    // '
-	Plus          // +
 	Comma         // ,
 	Hyphen        // -
-	Period        // .
 	Colon         // :
 	Semicolon     // ;
 	AtKeyword     // @
@@ -73,10 +71,8 @@ var tokens = [...]string{
 
 	NumberSign:    "#",
 	Apostrophe:    "'",
-	Plus:          "+",
 	Comma:         ",",
 	Hyphen:        "-",
-	Period:        ".",
 	Colon:         ":",
 	Semicolon:     ";",
 	AtKeyword:     "@",
