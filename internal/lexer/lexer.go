@@ -4,12 +4,22 @@ package lexer
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/stephen/cssc/internal/ast"
 )
+
+// Source is a container for a file and its contents.
+type Source struct {
+	// Path is the path of the source file.
+	Path string
+
+	// Content is the content of the file.
+	Content string
+}
 
 // Lexer lexes the input source. Callers push the lexer
 // along with calls to Next(), which populate the current
@@ -30,7 +40,7 @@ type Lexer struct {
 	lastPos int
 
 	// source is the current source code being lexed.
-	source string
+	source *Source
 
 	// Current is the last token lexed by Next().
 	Current Token
@@ -45,7 +55,7 @@ type Lexer struct {
 }
 
 // NewLexer creates a new lexer for the source.
-func NewLexer(source string) *Lexer {
+func NewLexer(source *Source) *Lexer {
 	l := &Lexer{
 		source: source,
 	}
@@ -56,7 +66,7 @@ func NewLexer(source string) *Lexer {
 
 // step consumes the next unicode rune and stores it.
 func (l *Lexer) step() {
-	cp, size := utf8.DecodeRuneInString(l.source[l.pos:])
+	cp, size := utf8.DecodeRuneInString(l.source.Content[l.pos:])
 
 	if size == 0 {
 		l.ch = -1
@@ -71,7 +81,7 @@ func (l *Lexer) step() {
 // peek returns the next ith unconsumed rune but does not consume it.
 // i is 0-indexed (0 is one ahead, 1 is two ahead, etc.)
 func (l *Lexer) peek(i int) rune {
-	cp, size := utf8.DecodeRuneInString(l.source[l.pos:])
+	cp, size := utf8.DecodeRuneInString(l.source.Content[l.pos:])
 	if size == 0 {
 		return -1
 	}
@@ -162,7 +172,7 @@ func (l *Lexer) Next() {
 
 				start := l.lastPos
 				l.nextName()
-				l.CurrentString = l.source[start:l.lastPos]
+				l.CurrentString = l.source.Content[start:l.lastPos]
 				return
 			}
 
@@ -175,7 +185,7 @@ func (l *Lexer) Next() {
 				l.step()
 				start := l.lastPos
 				l.nextName()
-				l.CurrentString = l.source[start:l.lastPos]
+				l.CurrentString = l.source.Content[start:l.lastPos]
 				return
 			}
 
@@ -251,7 +261,7 @@ func (l *Lexer) Next() {
 				}
 			}
 			l.Current = Comment
-			l.CurrentString = l.source[start:end]
+			l.CurrentString = l.source.Content[start:end]
 
 		case '"', '\'':
 			mark := l.ch
@@ -289,7 +299,7 @@ func (l *Lexer) Next() {
 			}
 
 			l.Current = String
-			l.CurrentString = l.source[start:end]
+			l.CurrentString = l.source.Content[start:end]
 
 		default:
 			if isWhitespace(l.ch) {
@@ -369,12 +379,12 @@ func startsNumber(p0, p1, p2 rune) bool {
 func (l *Lexer) nextNumericToken() {
 	start := l.lastPos
 	l.nextNumber()
-	l.CurrentNumeral = l.source[start:l.lastPos]
+	l.CurrentNumeral = l.source.Content[start:l.lastPos]
 
 	if startsIdentifier(l.ch, l.peek(0), l.peek(1)) {
 		dimenStart := l.lastPos
 		l.nextName()
-		l.CurrentString = l.source[dimenStart:l.lastPos]
+		l.CurrentString = l.source.Content[dimenStart:l.lastPos]
 		l.Current = Dimension
 	} else if l.ch == '%' {
 		l.Current = Percentage
@@ -389,12 +399,12 @@ func (l *Lexer) nextNumericToken() {
 func (l *Lexer) nextIdentLikeToken() {
 	start := l.lastPos
 	l.nextName()
-	l.CurrentString = l.source[start:l.lastPos]
+	l.CurrentString = l.source.Content[start:l.lastPos]
 
 	// Here, we need to special case the url function because it supports unquoted string content.
 	if strings.ToLower(l.CurrentString) == "url" && l.ch == '(' {
 		l.step()
-		for i := l.lastPos; i < len(l.source) && isWhitespace(l.ch); i++ {
+		for i := l.lastPos; i < len(l.source.Content) && isWhitespace(l.ch); i++ {
 			l.step()
 		}
 
@@ -408,7 +418,7 @@ func (l *Lexer) nextIdentLikeToken() {
 		for {
 			switch l.ch {
 			case ')':
-				l.CurrentString = l.source[urlStart:l.lastPos]
+				l.CurrentString = l.source.Content[urlStart:l.lastPos]
 				l.step()
 				return
 			case -1:
@@ -485,7 +495,7 @@ func (l *Lexer) nextDelimToken() {
 	start := l.lastPos
 	l.step()
 	l.Current = Delim
-	l.CurrentString = l.source[start:l.lastPos]
+	l.CurrentString = l.source.Content[start:l.lastPos]
 }
 
 // nextName implements https://www.w3.org/TR/css-syntax-3/#consume-a-name.
@@ -522,35 +532,45 @@ func (l *Lexer) nextEscaped() {
 type LocationError struct {
 	Message string
 
-	source string
+	source *Source
 	start  int
 	length int
 }
 
 // Error implements error. It's relatively slow because it needs to
-// rescan the source to figure out line and column numbers.
+// rescan the source to figure out line and column numbers. The output
+// looks like:
+// file.css:1:1
+// there's a problem here:
+//   contents
+//   ~~~~~~~~
 func (l *LocationError) Error() string {
 	lineNumber, lineStart := 1, 0
-	for i, ch := range l.source[:l.start] {
+	for i, ch := range l.source.Content[:l.start] {
 		if ch == '\n' {
 			lineNumber++
-			lineStart = i
+			lineStart = i + 1
 		}
 	}
 
-	lineEnd := len(l.source)
-	for i, ch := range l.source[l.start:] {
+	lineEnd := len(l.source.Content)
+	for i, ch := range l.source.Content[l.start:] {
 		if ch == '\n' {
 			lineEnd = i + l.start
 			break
 		}
 	}
 
-	line := l.source[lineStart:lineEnd]
-	col := l.start - lineStart
+	line := l.source.Content[lineStart:lineEnd]
+	col := l.start - lineStart + 1
 	len := lineEnd - l.start
 
-	return fmt.Sprintf("%s: %s\n%d:%d through %d", l.Message, line, lineNumber, col, len)
+	log.Printf(`"%s"`, line)
+
+	indent := strings.Repeat(" ", col)
+	underline := strings.Repeat("~", len)
+
+	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.source.Path, lineNumber, col, l.Message, line, indent, underline)
 }
 
 // locationErrof sends up a lexer panic with a custom location.

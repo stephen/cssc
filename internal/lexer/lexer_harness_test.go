@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func NewHarness(t testing.TB, l *lexer.Lexer) *Harness {
-	return &Harness{t, l}
+func NewHarness(t testing.TB, content string) *Harness {
+	return &Harness{t, lexer.NewLexer(&lexer.Source{"main.css", content})}
 }
 
 // Harness is a simple test harness to expect on the lexer.

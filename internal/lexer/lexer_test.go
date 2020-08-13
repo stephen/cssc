@@ -8,22 +8,22 @@ import (
 )
 
 func TestLexer_URL(t *testing.T) {
-	h := NewHarness(t, lexer.NewLexer("url(http://test.com/image.jpg)"))
+	h := NewHarness(t, "url(http://test.com/image.jpg)")
 
 	h.ExpectAndNext(lexer.URL, "http://test.com/image.jpg", "")
 	h.ExpectAndNext(lexer.EOF, "", "")
 
 	assert.Panics(t, func() {
-		lexer.NewLexer("url(http://test.com/image.jpg").Next()
+		NewHarness(t, "url(http://test.com/image.jpg").Next()
 	})
 
 	assert.Panics(t, func() {
-		lexer.NewLexer("url(())").Next()
+		NewHarness(t, "url(())").Next()
 	})
 }
 
 func TestLexer_Function(t *testing.T) {
-	h := NewHarness(t, lexer.NewLexer(`url("http://test.com/image.jpg")`))
+	h := NewHarness(t, `url("http://test.com/image.jpg")`)
 
 	h.ExpectAndNext(lexer.FunctionStart, "url", "")
 	h.ExpectAndNext(lexer.String, "http://test.com/image.jpg", "")
@@ -32,7 +32,7 @@ func TestLexer_Function(t *testing.T) {
 }
 
 func TestLexer_AtRule(t *testing.T) {
-	h := NewHarness(t, lexer.NewLexer(`@import "test.css"`))
+	h := NewHarness(t, `@import "test.css"`)
 
 	h.ExpectAndNext(lexer.AtKeyword, "import", "")
 	h.ExpectAndNext(lexer.String, "test.css", "")
@@ -40,7 +40,7 @@ func TestLexer_AtRule(t *testing.T) {
 }
 
 func TestLexer_SimpleBlocks(t *testing.T) {
-	h := NewHarness(t, lexer.NewLexer(`.class {
+	h := NewHarness(t, `.class {
 	width: 5px;
 }
 
@@ -49,7 +49,7 @@ func TestLexer_SimpleBlocks(t *testing.T) {
 #id {
 	margin: -2.75rem;
 	content: "text";
-}`))
+}`)
 
 	h.ExpectAndNext(lexer.Delim, ".", "")
 	h.ExpectAndNext(lexer.Ident, "class", "")
@@ -76,11 +76,10 @@ func TestLexer_SimpleBlocks(t *testing.T) {
 }
 
 func TestLexer_String(t *testing.T) {
-	assert.Panics(t, func() {
-		NewHarness(t, lexer.NewLexer(`
-.class {
-	someting: "ok"
-	bad: "no good
-}`)).RunUntil(lexer.EOF)
+	assert.PanicsWithValue(t, "main.css:3:7\nunclosed string: unexepected newline:\n\t\tbad: \"no good\n\t       ~~~~~~~~", func() {
+		NewHarness(t, `.class {
+	something: "ok";
+	bad: "no good;
+}`).RunUntil(lexer.EOF)
 	})
 }

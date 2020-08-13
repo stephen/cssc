@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,9 +25,12 @@ func BenchmarkParser(b *testing.B) {
 	// .one, .two {}
 	// `
 
-	by, err := ioutil.ReadFile("./bootstrap.css")
+	by, err := ioutil.ReadFile("testdata/bootstrap.css")
 	require.NoError(b, err)
-	source := string(by)
+	source := &lexer.Source{
+		Path:    "bootstrap.css",
+		Content: string(by),
+	}
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {

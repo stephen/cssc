@@ -8,13 +8,13 @@ import (
 )
 
 // Parse parses an input stylesheet.
-func Parse(source string) *ast.Stylesheet {
+func Parse(source *lexer.Source) *ast.Stylesheet {
 	p := newParser(source)
 	p.parse()
 	return p.ss
 }
 
-func newParser(source string) *parser {
+func newParser(source *lexer.Source) *parser {
 	return &parser{
 		lexer: lexer.NewLexer(source),
 		ss:    &ast.Stylesheet{},
