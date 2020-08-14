@@ -143,10 +143,21 @@ func (p *parser) parseMediaAtRule() {
 	// XXX: actually parse media query and inner block.
 	if p.lexer.Current == lexer.LCurly {
 		p.lexer.Next()
-		for p.lexer.Current != lexer.RCurly {
+		inner := 0
+	skip:
+		for {
+			switch p.lexer.Current {
+			case lexer.LCurly:
+				inner++
+
+			case lexer.RCurly:
+				if inner == 0 {
+					break skip
+				}
+				inner--
+			}
 			p.lexer.Next()
 		}
-		p.lexer.Next()
 	}
 	p.lexer.Next()
 
