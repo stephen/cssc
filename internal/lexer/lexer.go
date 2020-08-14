@@ -333,7 +333,7 @@ func (l *Lexer) Next() {
 func startsIdentifier(p0, p1, p2 rune) bool {
 	switch p0 {
 	case '-':
-		return p1 == '-' || startsEscape(p1, p2)
+		return p1 == '-' || isNameCodePoint(p1) || startsEscape(p1, p2)
 	case '\n':
 		return false
 	default:
