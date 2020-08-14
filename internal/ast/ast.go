@@ -21,7 +21,7 @@ type Stylesheet struct {
 
 // ImportAtRule represents an import statement.
 type ImportAtRule struct {
-	*Loc
+	Loc
 
 	// Target is the URL or string location to import.
 	URL string
@@ -29,7 +29,7 @@ type ImportAtRule struct {
 
 // MediaAtRule represents a @media rule.
 type MediaAtRule struct {
-	*Loc
+	Loc
 
 	// Query
 	// XXX: model out the media query.
@@ -38,14 +38,14 @@ type MediaAtRule struct {
 
 // Comment represents a comment.
 type Comment struct {
-	*Loc
+	Loc
 
 	Text string
 }
 
 // QualifiedRule is a prelude (selectors) and set of declarations.
 type QualifiedRule struct {
-	*Loc
+	Loc
 
 	Selectors *SelectorList
 
@@ -54,14 +54,14 @@ type QualifiedRule struct {
 
 // Block is a set of declarations.
 type Block struct {
-	*Loc
+	Loc
 
 	Declarations []*Declaration
 }
 
 // Declaration is a property assignment.
 type Declaration struct {
-	*Loc
+	Loc
 
 	// Property is the property being assigned.
 	Property string
@@ -70,7 +70,7 @@ type Declaration struct {
 // SelectorList is a list of selectors, separated by commas, e.g.
 // .class, .another-class.
 type SelectorList struct {
-	*Loc
+	Loc
 
 	Selectors []*Selector
 }
@@ -80,35 +80,35 @@ type SelectorList struct {
 // compound-selector, type-selector, combinator, etc, since we mostly
 // just want tokens to work with.
 type Selector struct {
-	*Loc
+	Loc
 
 	Selectors []interface{}
 }
 
 // TypeSelector selects a single type, e.g. div, body, or html.
 type TypeSelector struct {
-	*Loc
+	Loc
 
 	Name string
 }
 
 // ClassSelector selects a single class, e.g. .test or .Thing.
 type ClassSelector struct {
-	*Loc
+	Loc
 
 	Name string
 }
 
 // IDSelector selects a single ID, e.g. #container.
 type IDSelector struct {
-	*Loc
+	Loc
 
 	Name string
 }
 
 // CombinatorSelector operates between two selectors.
 type CombinatorSelector struct {
-	*Loc
+	Loc
 
 	// The combinator operation, i.e. >, +, ~, or |.
 	Operator string
@@ -116,7 +116,7 @@ type CombinatorSelector struct {
 
 // PseudoClassSelector selects a pseudo class, e.g. :not() or :hover.
 type PseudoClassSelector struct {
-	*Loc
+	Loc
 
 	// Name is the name of the pseudo selector.
 	Name string
@@ -127,7 +127,7 @@ type PseudoClassSelector struct {
 
 // PseudoElementSelector selects a pseudo element, e.g. ::before or ::after.
 type PseudoElementSelector struct {
-	*Loc
+	Loc
 
 	Inner *PseudoClassSelector
 }

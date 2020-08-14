@@ -95,9 +95,11 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Next()
 
 			// Wrap it in a PseudoElementSelector if there are two colons.
-			var wrapper *ast.Loc
+			var wrapper bool
+			var wrapperLocation ast.Loc
 			if p.lexer.Current == lexer.Colon {
-				wrapper = p.lexer.Location()
+				wrapper = true
+				wrapperLocation = p.lexer.Location()
 				p.lexer.Next()
 			}
 
@@ -125,9 +127,9 @@ func (p *parser) parseSelector() *ast.Selector {
 				}
 			}
 
-			if wrapper != nil {
+			if wrapper {
 				s.Selectors = append(s.Selectors, &ast.PseudoElementSelector{
-					Loc:   wrapper,
+					Loc:   wrapperLocation,
 					Inner: pc,
 				})
 				break
