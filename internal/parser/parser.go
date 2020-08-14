@@ -86,6 +86,10 @@ func (p *parser) parseAtRule() {
 	case "media":
 		p.lexer.Next()
 		p.parseMediaAtRule()
+	case "keyframes", "-webkit-keyframes":
+		// XXX: maybe consolidate all at rule AST/parsing?
+		p.lexer.Next()
+		p.parseMediaAtRule()
 	default:
 		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
 	}
