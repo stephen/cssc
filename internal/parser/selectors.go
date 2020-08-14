@@ -110,10 +110,19 @@ func (p *parser) parseSelector() *ast.Selector {
 			if p.lexer.Current == lexer.LParen {
 				p.lexer.Next()
 
-				p.innerSelectorList = true
-				pc.Children = p.parseSelectorList()
-				p.innerSelectorList = false
-				p.lexer.Expect(lexer.RParen)
+				if pc.Name == "nth-child" || pc.Name == "nth-last-child" || pc.Name == "nth-of-type" || pc.Name == "nth-last-of-type" {
+					for p.lexer.Current != lexer.RParen {
+						p.lexer.Next()
+					}
+					p.lexer.Expect(lexer.RParen)
+					// XXX: actually parse an+b syntax.
+
+				} else {
+					p.innerSelectorList = true
+					pc.Children = p.parseSelectorList()
+					p.innerSelectorList = false
+					p.lexer.Expect(lexer.RParen)
+				}
 			}
 
 			if wrapper != nil {
