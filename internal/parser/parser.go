@@ -31,7 +31,7 @@ type parser struct {
 func (p *parser) parse() {
 	for p.lexer.Current != lexer.EOF {
 		switch p.lexer.Current {
-		case lexer.AtKeyword:
+		case lexer.At:
 			p.parseAtRule()
 
 		case lexer.CDO, lexer.CDC:

@@ -34,7 +34,7 @@ func TestLexer_Function(t *testing.T) {
 func TestLexer_AtRule(t *testing.T) {
 	h := NewHarness(t, `@import "test.css"`)
 
-	h.ExpectAndNext(lexer.AtKeyword, "import", "")
+	h.ExpectAndNext(lexer.At, "import", "")
 	h.ExpectAndNext(lexer.String, "test.css", "")
 	h.ExpectAndNext(lexer.EOF, "", "")
 }

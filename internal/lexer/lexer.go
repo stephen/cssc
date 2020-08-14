@@ -169,7 +169,7 @@ func (l *Lexer) Next() {
 		case '@':
 			if startsIdentifier(l.peek(0), l.peek(1), l.peek(2)) {
 				l.step() // Consume @.
-				l.Current = AtKeyword
+				l.Current = At
 
 				start := l.lastPos
 				l.nextName()

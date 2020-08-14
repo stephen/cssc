@@ -11,39 +11,29 @@ const (
 
 	EOF
 
-	Comment
+	Comma     // ,
+	Colon     // :
+	Semicolon // ;
+	LParen    // (
+	RParen    // )
+	CDO       // <!--
+	CDC       // -->
+	LBracket  // [
+	RBracket  // ]
+	LCurly    // {
+	RCurly    // }
 
-	NumberSign    // #
-	Apostrophe    // '
-	Comma         // ,
-	Hyphen        // -
-	Colon         // :
-	Semicolon     // ;
-	AtKeyword     // @
-	FunctionStart // something(
+	Comment       // /* comment */
 	URL           // url(...)
-
-	Backslash // \
-
-	LParen // (
-	RParen // )
-
-	CDO // <!--
-	CDC // -->
-
-	LBracket // [
-	RBracket // ]
-
-	LCurly // {
-	RCurly // }
-
-	Hash       // Hash literal
-	Number     // Number literal
-	Percentage // Percentage literal
-	Dimension  // Dimension literal
-	String     // String literal
-	Ident      // Identifier
-	Delim      // Delimiter (used for preserving tokens for subprocessors)
+	FunctionStart // something(
+	At            // @keyword
+	Hash          // #hash
+	Number        // Number literal
+	Percentage    // Percentage literal
+	Dimension     // Dimension literal
+	String        // String literal
+	Ident         // Identifier
+	Delim         // Delimiter (used for preserving tokens for subprocessors)
 )
 
 func (t Token) String() string {
@@ -66,16 +56,11 @@ var tokens = [...]string{
 	Ident:      "IDENT",
 	URL:        "URL",
 
-	NumberSign:    "#",
-	Apostrophe:    "'",
 	Comma:         ",",
-	Hyphen:        "-",
 	Colon:         ":",
 	Semicolon:     ";",
-	AtKeyword:     "@",
+	At:            "@",
 	FunctionStart: "FUNCTION",
-
-	Backslash: `\`,
 
 	CDO: "<!--",
 	CDC: "-->",
