@@ -98,13 +98,16 @@ func (p *parser) parseAtRule() {
 // parseImportAtRule parses an import at rule. It roughly implements
 // https://www.w3.org/TR/css-cascade-4/#at-import.
 func (p *parser) parseImportAtRule() {
-	imp := &ast.ImportAtRule{
-		Loc: p.lexer.Location(),
+	imp := &ast.AtRule{
+		Loc:  p.lexer.Location(),
+		Name: "import",
 	}
+
+	prelude := &ast.ImportPrelude{}
 
 	switch p.lexer.Current {
 	case lexer.URL:
-		imp.URL = p.lexer.CurrentString
+		prelude.URL = p.lexer.CurrentString
 		p.lexer.Next()
 
 	case lexer.FunctionStart:
@@ -113,12 +116,12 @@ func (p *parser) parseImportAtRule() {
 		}
 		p.lexer.Next()
 
-		imp.URL = p.lexer.CurrentString
+		prelude.URL = p.lexer.CurrentString
 		p.lexer.Expect(lexer.String)
 		p.lexer.Expect(lexer.RParen)
 
 	case lexer.String:
-		imp.URL = p.lexer.CurrentString
+		prelude.URL = p.lexer.CurrentString
 		p.lexer.Expect(lexer.String)
 
 	default:
@@ -135,8 +138,9 @@ func (p *parser) parseImportAtRule() {
 // parseMediaAtRule parses a media at rule. It roughly implements
 // https://www.w3.org/TR/mediaqueries-4/#media.
 func (p *parser) parseMediaAtRule() {
-	imp := &ast.ImportAtRule{
-		Loc: p.lexer.Location(),
+	imp := &ast.AtRule{
+		Loc:  p.lexer.Location(),
+		Name: "media",
 	}
 
 	p.lexer.Next()

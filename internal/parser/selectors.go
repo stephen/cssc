@@ -50,14 +50,14 @@ func (p *parser) parseSelector() *ast.Selector {
 			return s
 
 		case lexer.Ident:
-			s.Selectors = append(s.Selectors, &ast.TypeSelector{
+			s.Parts = append(s.Parts, &ast.TypeSelector{
 				Loc:  p.lexer.Location(),
 				Name: p.lexer.CurrentString,
 			})
 			p.lexer.Next()
 
 		case lexer.Hash:
-			s.Selectors = append(s.Selectors, &ast.IDSelector{
+			s.Parts = append(s.Parts, &ast.IDSelector{
 				Loc:  p.lexer.Location(),
 				Name: p.lexer.CurrentString,
 			})
@@ -67,21 +67,21 @@ func (p *parser) parseSelector() *ast.Selector {
 			switch p.lexer.CurrentString {
 			case ".":
 				p.lexer.Next()
-				s.Selectors = append(s.Selectors, &ast.ClassSelector{
+				s.Parts = append(s.Parts, &ast.ClassSelector{
 					Loc:  p.lexer.Location(),
 					Name: p.lexer.CurrentString,
 				})
 				p.lexer.Expect(lexer.Ident)
 
 			case "+", ">", "~", "|":
-				s.Selectors = append(s.Selectors, &ast.CombinatorSelector{
+				s.Parts = append(s.Parts, &ast.CombinatorSelector{
 					Loc:      p.lexer.Location(),
 					Operator: p.lexer.CurrentString,
 				})
 				p.lexer.Next()
 
 			case "*":
-				s.Selectors = append(s.Selectors, &ast.TypeSelector{
+				s.Parts = append(s.Parts, &ast.TypeSelector{
 					Loc:  p.lexer.Location(),
 					Name: p.lexer.CurrentString,
 				})
@@ -128,14 +128,14 @@ func (p *parser) parseSelector() *ast.Selector {
 			}
 
 			if wrapper {
-				s.Selectors = append(s.Selectors, &ast.PseudoElementSelector{
+				s.Parts = append(s.Parts, &ast.PseudoElementSelector{
 					Loc:   wrapperLocation,
 					Inner: pc,
 				})
 				break
 			}
 
-			s.Selectors = append(s.Selectors, pc)
+			s.Parts = append(s.Parts, pc)
 
 		case lexer.LBracket:
 			// XXX: Attribute selectors.

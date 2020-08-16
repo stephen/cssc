@@ -1,9 +1,11 @@
 package ast
 
-// Node is any AST node.
+// Node is any top-level stylesheet rule.
 type Node interface {
 	Location() int
-	node()
+
+	// isNode is only used for type discrimination.
+	isNode()
 }
 
 // Loc is a location in the source.
@@ -19,21 +21,32 @@ type Stylesheet struct {
 	Nodes []Node
 }
 
-// ImportAtRule represents an import statement.
-type ImportAtRule struct {
+// AtRule represents an import statement.
+type AtRule struct {
 	Loc
 
-	// Target is the URL or string location to import.
+	Name string
+
+	Prelude Prelude
+
+	Block interface{}
+}
+
+// ImportPrelude is the target for an import statement.
+type ImportPrelude struct {
+	Loc
+
 	URL string
 }
 
-// MediaAtRule represents a @media rule.
-type MediaAtRule struct {
-	Loc
+var _ Prelude = ImportPrelude{}
 
-	// Query
-	// XXX: model out the media query.
-	Query string
+func (ImportPrelude) isPrelude() {}
+
+// Prelude is the set of arguments for an at-rule.
+// The interface is only used for type discrimination.
+type Prelude interface {
+	isPrelude()
 }
 
 // Comment represents a comment.
@@ -82,7 +95,15 @@ type SelectorList struct {
 type Selector struct {
 	Loc
 
-	Selectors []interface{}
+	Parts []SelectorPart
+}
+
+// SelectorPart is a part of a complex selector. It maybe be e.g.
+// a class or id selector, or a + or < combinator, or a pseudoselector.
+//
+// The interface is only used for type discrimination.
+type SelectorPart interface {
+	isSelector()
 }
 
 // TypeSelector selects a single type, e.g. div, body, or html.
@@ -132,14 +153,28 @@ type PseudoElementSelector struct {
 	Inner *PseudoClassSelector
 }
 
-var _ Node = ImportAtRule{}
+var _ SelectorPart = TypeSelector{}
+var _ SelectorPart = ClassSelector{}
+var _ SelectorPart = IDSelector{}
+var _ SelectorPart = CombinatorSelector{}
+var _ SelectorPart = PseudoClassSelector{}
+var _ SelectorPart = PseudoElementSelector{}
+
+func (TypeSelector) isSelector()          {}
+func (ClassSelector) isSelector()         {}
+func (IDSelector) isSelector()            {}
+func (CombinatorSelector) isSelector()    {}
+func (PseudoClassSelector) isSelector()   {}
+func (PseudoElementSelector) isSelector() {}
+
+var _ Node = AtRule{}
 var _ Node = Comment{}
 var _ Node = Block{}
 var _ Node = Declaration{}
 var _ Node = QualifiedRule{}
 
-func (r ImportAtRule) node()  {}
-func (r Comment) node()       {}
-func (r Block) node()         {}
-func (r Declaration) node()   {}
-func (r QualifiedRule) node() {}
+func (r AtRule) isNode()        {}
+func (r Comment) isNode()       {}
+func (r Block) isNode()         {}
+func (r Declaration) isNode()   {}
+func (r QualifiedRule) isNode() {}
