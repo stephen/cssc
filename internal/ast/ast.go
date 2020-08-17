@@ -42,7 +42,11 @@ type Declaration struct {
 	// Property is the property being assigned.
 	Property string
 
+	// Values is the list of values assigned to the declaration.
 	Values []Value
+
+	// Important is whether or not the declaration was marked !important.
+	Important bool
 }
 
 var _ Node = Comment{}

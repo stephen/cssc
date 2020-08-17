@@ -87,6 +87,18 @@ func (p *parser) parseQualifiedRule() {
 						r.Block.Declarations = append(r.Block.Declarations, decl)
 
 						break values
+					case lexer.Delim:
+						if p.lexer.CurrentString != "!" {
+							p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
+						}
+						p.lexer.Next()
+
+						if p.lexer.CurrentString != "important" {
+							p.lexer.Errorf("expected !important, unexpected token: %s", p.lexer.CurrentString)
+						}
+						p.lexer.Next()
+						decl.Important = true
+
 					case lexer.Comma:
 						// XXX: skipping isn't quite right. for some rules, commas are required.
 						// see: https://www.w3.org/TR/css-fonts-3/#font-family-prop.
