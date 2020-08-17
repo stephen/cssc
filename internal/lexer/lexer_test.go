@@ -30,6 +30,12 @@ func TestLexer_Function(t *testing.T) {
 	h.ExpectAndNext(lexer.RParen, "", "")
 	h.ExpectAndNext(lexer.EOF, "", "")
 }
+func TestLexer_Number(t *testing.T) {
+	h := NewHarness(t, `20%`)
+
+	h.ExpectAndNext(lexer.Percentage, "", "20")
+	h.ExpectAndNext(lexer.EOF, "", "")
+}
 
 func TestLexer_AtRule(t *testing.T) {
 	h := NewHarness(t, `@import "test.css"`)

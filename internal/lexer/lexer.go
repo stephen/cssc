@@ -393,6 +393,7 @@ func (l *Lexer) nextNumericToken() {
 		l.Current = Dimension
 	} else if l.ch == '%' {
 		l.Current = Percentage
+		l.step()
 	} else {
 		l.Current = Number
 	}
