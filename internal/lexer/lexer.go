@@ -245,6 +245,7 @@ func (l *Lexer) Next() {
 				return
 			}
 			l.step()
+			l.step()
 			start, end := l.lastPos, -1
 
 		commentToken:
