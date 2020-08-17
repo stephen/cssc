@@ -52,7 +52,7 @@ type Image struct {
 
 // HexColor is a hex color (e.g. #aabbccdd) defined by https://www.w3.org/TR/css-color-3/.
 type HexColor struct {
-	Keyword string
+	Loc
 
 	// RGBA is the literal rgba value.
 	RGBA string
@@ -83,6 +83,7 @@ func (Number) isValue()       {}
 func (Function) isValue()     {}
 func (MathOperator) isValue() {}
 func (Identifier) isValue()   {}
+func (HexColor) isValue()     {}
 
 var _ Value = Dimension{}
 var _ Value = Percentage{}
@@ -90,3 +91,4 @@ var _ Value = Number{}
 var _ Value = Function{}
 var _ Value = MathOperator{}
 var _ Value = Identifier{}
+var _ Value = HexColor{}

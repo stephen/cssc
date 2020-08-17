@@ -143,6 +143,13 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 			Value: p.lexer.CurrentString,
 		}
 
+	case lexer.Hash:
+		defer p.lexer.Next()
+		return &ast.HexColor{
+			Loc:  p.lexer.Location(),
+			RGBA: p.lexer.CurrentString,
+		}
+
 	case lexer.Delim:
 		switch p.lexer.CurrentString {
 		case "*", "/", "+", "-":
@@ -185,7 +192,7 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 
 		return fn
 	default:
-		p.lexer.Errorf("unknowntoken: %s %s", p.lexer.Current, p.lexer.CurrentString)
+		p.lexer.Errorf("unknown token: %s|%s|%s", p.lexer.Current, p.lexer.CurrentString, p.lexer.CurrentNumeral)
 		return nil
 	}
 }
