@@ -107,9 +107,12 @@ func (p *parser) parseSelector() *ast.Selector {
 				Loc:  p.lexer.Location(),
 				Name: p.lexer.CurrentString,
 			}
-			p.lexer.Expect(lexer.Ident)
 
-			if p.lexer.Current == lexer.LParen {
+			switch p.lexer.Current {
+			case lexer.Ident:
+				p.lexer.Next()
+
+			case lexer.FunctionStart:
 				p.lexer.Next()
 
 				if pc.Name == "nth-child" || pc.Name == "nth-last-child" || pc.Name == "nth-of-type" || pc.Name == "nth-last-of-type" {
@@ -125,6 +128,9 @@ func (p *parser) parseSelector() *ast.Selector {
 					p.innerSelectorList = false
 					p.lexer.Expect(lexer.RParen)
 				}
+
+			default:
+				p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
 			}
 
 			if wrapper {
