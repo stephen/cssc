@@ -106,8 +106,8 @@ func TestLexer_BrowserPrefix(t *testing.T) {
 	h.ExpectAndNext(lexer.Ident, "-webkit-calendar-picker-indicator", "")
 }
 
-func TestLexer_String(t *testing.T) {
-	assert.PanicsWithValue(t, "main.css:3:7\nunclosed string: unexepected newline:\n\t\tbad: \"no good\n\t       ~~~~~~~~", func() {
+func TestLexer_Errorf(t *testing.T) {
+	assert.PanicsWithValue(t, "main.css:3:6\nunclosed string: unexepected newline:\n\t  bad: \"no good;\n\t       ~~~~~~~~~", func() {
 		NewHarness(t, `.class {
 	something: "ok";
 	bad: "no good;
