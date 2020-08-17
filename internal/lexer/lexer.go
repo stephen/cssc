@@ -454,7 +454,8 @@ func (l *Lexer) nextIdentLikeToken() {
 	}
 
 	// Otherwise, it's probably a normal function.
-	if l.peek(0) == '(' {
+	if l.ch == '(' {
+		l.step()
 		l.Current = FunctionStart
 		return
 	}

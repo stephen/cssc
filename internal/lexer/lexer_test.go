@@ -30,6 +30,20 @@ func TestLexer_Function(t *testing.T) {
 	h.ExpectAndNext(lexer.RParen, "", "")
 	h.ExpectAndNext(lexer.EOF, "", "")
 }
+
+func TestLexer_Function_RGB(t *testing.T) {
+	h := NewHarness(t, `rgb(255, 254, 253)`)
+
+	h.ExpectAndNext(lexer.FunctionStart, "rgb", "")
+	h.ExpectAndNext(lexer.Number, "", "255")
+	h.ExpectAndNext(lexer.Comma, "", "")
+	h.ExpectAndNext(lexer.Number, "", "254")
+	h.ExpectAndNext(lexer.Comma, "", "")
+	h.ExpectAndNext(lexer.Number, "", "253")
+	h.ExpectAndNext(lexer.RParen, "", "")
+	h.ExpectAndNext(lexer.EOF, "", "")
+}
+
 func TestLexer_Number(t *testing.T) {
 	h := NewHarness(t, `20%`)
 
