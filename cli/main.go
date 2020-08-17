@@ -21,6 +21,7 @@ func main() {
 		margin: 2em 1px;
 		height: 20%;
 		padding: 0;
+		color: rgb(255, 255, calc(2 + 2));
 	}
 	`,
 	}

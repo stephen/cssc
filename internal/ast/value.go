@@ -57,10 +57,33 @@ type HexColor struct {
 	RGBA string
 }
 
-func (Dimension) isValue()  {}
-func (Percentage) isValue() {}
-func (Number) isValue()     {}
+// Function is a css function.
+type Function struct {
+	Loc
+
+	// Name is the name of the function.
+	Name string
+
+	// Arguments is the set of values passed into the function.
+	Arguments []Value
+}
+
+// MathOperator is +, -, *, or /.
+type MathOperator struct {
+	Loc
+
+	// Operator +, -, *, or /.
+	Operator string
+}
+
+func (Dimension) isValue()    {}
+func (Percentage) isValue()   {}
+func (Number) isValue()       {}
+func (Function) isValue()     {}
+func (MathOperator) isValue() {}
 
 var _ Value = Dimension{}
 var _ Value = Percentage{}
 var _ Value = Number{}
+var _ Value = Function{}
+var _ Value = MathOperator{}

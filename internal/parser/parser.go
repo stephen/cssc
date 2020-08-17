@@ -88,7 +88,7 @@ func (p *parser) parseQualifiedRule() {
 
 						break values
 					default:
-						decl.Values = append(decl.Values, p.parseValue())
+						decl.Values = append(decl.Values, p.parseValue(false))
 					}
 				}
 			}
@@ -102,8 +102,17 @@ func (p *parser) parseQualifiedRule() {
 	}
 }
 
-// parseValue parses a possible ast value at the current position.
-func (p *parser) parseValue() ast.Value {
+var mathFunctions = map[string]struct{}{
+	"calc":  struct{}{},
+	"min":   struct{}{},
+	"max":   struct{}{},
+	"clamp": struct{}{},
+}
+
+// parseValue parses a possible ast value at the current position. Callers
+// can set allowMathOperators if the enclosing context allows math expressions.
+// See: https://www.w3.org/TR/css-values-4/#math-function.
+func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 	switch p.lexer.Current {
 	case lexer.Dimension:
 		defer p.lexer.Next()
@@ -113,17 +122,61 @@ func (p *parser) parseValue() ast.Value {
 			Unit:  p.lexer.CurrentString,
 			Value: p.lexer.CurrentNumeral,
 		}
+
 	case lexer.Percentage:
 		defer p.lexer.Next()
 		return &ast.Percentage{
 			Value: p.lexer.CurrentNumeral,
 		}
+
 	case lexer.Number:
 		defer p.lexer.Next()
 		// XXX: should we make sure this is 0?
 		return &ast.Number{
 			Value: p.lexer.CurrentNumeral,
 		}
+
+	case lexer.Delim:
+		switch p.lexer.CurrentString {
+		case "*", "/", "+", "-":
+			if !allowMathOperators {
+				p.lexer.Errorf("math operations are only allowed within: calc(), min(), max(), or clamp()")
+				return nil
+			}
+			p.lexer.Next()
+
+			return &ast.MathOperator{
+				Loc:      p.lexer.Location(),
+				Operator: p.lexer.CurrentString,
+			}
+
+		default:
+			p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
+			return nil
+		}
+
+	case lexer.FunctionStart:
+		fn := &ast.Function{
+			Loc:  p.lexer.Location(),
+			Name: p.lexer.CurrentString,
+		}
+		p.lexer.Next()
+
+	arguments:
+		for {
+			switch p.lexer.Current {
+			case lexer.RParen:
+				p.lexer.Next()
+				break arguments
+			case lexer.Comma:
+				p.lexer.Next()
+			default:
+				_, allowMath := mathFunctions[fn.Name]
+				fn.Arguments = append(fn.Arguments, p.parseValue(allowMath))
+			}
+		}
+
+		return fn
 	default:
 		p.lexer.Errorf("unknowntoken: %s %s", p.lexer.Current, p.lexer.CurrentString)
 		return nil
