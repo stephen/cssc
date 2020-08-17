@@ -87,6 +87,10 @@ func (p *parser) parseQualifiedRule() {
 						r.Block.Declarations = append(r.Block.Declarations, decl)
 
 						break values
+					case lexer.Comma:
+						// XXX: skipping isn't quite right. for some rules, commas are required.
+						// see: https://www.w3.org/TR/css-fonts-3/#font-family-prop.
+						p.lexer.Next()
 					default:
 						decl.Values = append(decl.Values, p.parseValue(false))
 					}
@@ -148,6 +152,13 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 		return &ast.HexColor{
 			Loc:  p.lexer.Location(),
 			RGBA: p.lexer.CurrentString,
+		}
+
+	case lexer.String:
+		defer p.lexer.Next()
+		return &ast.String{
+			Loc:   p.lexer.Location(),
+			Value: p.lexer.CurrentString,
 		}
 
 	case lexer.Delim:

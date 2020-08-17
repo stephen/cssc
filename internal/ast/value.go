@@ -6,6 +6,14 @@ type Value interface {
 	isValue()
 }
 
+// String is a string literal.
+type String struct {
+	Loc
+
+	// Value is the string.
+	Value string
+}
+
 // Dimension is a numeric value and a unit.
 type Dimension struct {
 	Loc
@@ -77,6 +85,7 @@ type MathOperator struct {
 	Operator string
 }
 
+func (String) isValue()       {}
 func (Dimension) isValue()    {}
 func (Percentage) isValue()   {}
 func (Number) isValue()       {}
@@ -85,6 +94,7 @@ func (MathOperator) isValue() {}
 func (Identifier) isValue()   {}
 func (HexColor) isValue()     {}
 
+var _ Value = String{}
 var _ Value = Dimension{}
 var _ Value = Percentage{}
 var _ Value = Number{}
