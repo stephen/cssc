@@ -136,6 +136,13 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 			Value: p.lexer.CurrentNumeral,
 		}
 
+	case lexer.Ident:
+		defer p.lexer.Next()
+		return &ast.Identifier{
+			Loc:   p.lexer.Location(),
+			Value: p.lexer.CurrentString,
+		}
+
 	case lexer.Delim:
 		switch p.lexer.CurrentString {
 		case "*", "/", "+", "-":

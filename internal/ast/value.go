@@ -30,10 +30,11 @@ type Number struct {
 	Value string
 }
 
-// Position is a 2D position, e.g. left, center, or bottom.
-// See: https://www.w3.org/TR/css-values-4/#position.
-type Position struct {
-	// Value is the position.
+// Identifier is any string identifier value, e.g. inherit or left.
+type Identifier struct {
+	Loc
+
+	// Value is the identifier.
 	Value string
 }
 
@@ -81,9 +82,11 @@ func (Percentage) isValue()   {}
 func (Number) isValue()       {}
 func (Function) isValue()     {}
 func (MathOperator) isValue() {}
+func (Identifier) isValue()   {}
 
 var _ Value = Dimension{}
 var _ Value = Percentage{}
 var _ Value = Number{}
 var _ Value = Function{}
 var _ Value = MathOperator{}
+var _ Value = Identifier{}
