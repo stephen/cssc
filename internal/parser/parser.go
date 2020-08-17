@@ -23,6 +23,10 @@ type parser struct {
 	lexer *lexer.Lexer
 	ss    *ast.Stylesheet
 
+	// Flags. These flags are only on the parser because they must
+	// travel across function boundaries. Other single-depth flags
+	// should be passed as arguments locally.
+
 	// innerSelectorList is true if we're currently parsing a nested
 	// selector list, e.g. :not(a, b, c).
 	innerSelectorList bool
