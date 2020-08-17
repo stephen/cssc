@@ -41,6 +41,8 @@ type Declaration struct {
 
 	// Property is the property being assigned.
 	Property string
+
+	Values []Value
 }
 
 var _ Node = Comment{}

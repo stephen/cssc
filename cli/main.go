@@ -16,13 +16,12 @@ func main() {
 	/* some notes about the next line
 	are here */
 
-	.class {}
-	#id {}
-	body#id {}
-	body::after {}
-	a:hover {}
-	:not(a, b, c) {}
-	.one, .two {}
+	.class {
+		width: 2rem;
+		margin: 2em 1px;
+		height: 20%;
+		padding: 0;
+	}
 	`,
 	}
 

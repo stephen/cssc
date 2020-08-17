@@ -64,9 +64,33 @@ func (p *parser) parseQualifiedRule() {
 			p.lexer.Errorf("unexpected EOF")
 		case lexer.LCurly:
 			// XXX: Consume a simple block
+			r.Block = &ast.Block{
+				Loc: p.lexer.Location(),
+			}
 			p.lexer.Next()
+
 			for p.lexer.Current != lexer.RCurly {
-				p.lexer.Next()
+				decl := &ast.Declaration{
+					Loc:      p.lexer.Location(),
+					Property: p.lexer.CurrentString,
+				}
+				p.lexer.Expect(lexer.Ident)
+				p.lexer.Expect(lexer.Colon)
+			values:
+				for {
+					switch p.lexer.Current {
+					case lexer.EOF:
+						p.lexer.Errorf("unexpected EOF")
+					case lexer.Semicolon:
+						// XXX: if no values, get upset.
+						p.lexer.Next()
+						r.Block.Declarations = append(r.Block.Declarations, decl)
+
+						break values
+					default:
+						decl.Values = append(decl.Values, p.parseValue())
+					}
+				}
 			}
 			p.lexer.Next()
 
@@ -75,6 +99,34 @@ func (p *parser) parseQualifiedRule() {
 		default:
 			r.Selectors = p.parseSelectorList()
 		}
+	}
+}
+
+// parseValue parses a possible ast value at the current position.
+func (p *parser) parseValue() ast.Value {
+	switch p.lexer.Current {
+	case lexer.Dimension:
+		defer p.lexer.Next()
+		return &ast.Dimension{
+			Loc: p.lexer.Location(),
+
+			Unit:  p.lexer.CurrentString,
+			Value: p.lexer.CurrentNumeral,
+		}
+	case lexer.Percentage:
+		defer p.lexer.Next()
+		return &ast.Percentage{
+			Value: p.lexer.CurrentNumeral,
+		}
+	case lexer.Number:
+		defer p.lexer.Next()
+		// XXX: should we make sure this is 0?
+		return &ast.Number{
+			Value: p.lexer.CurrentNumeral,
+		}
+	default:
+		p.lexer.Errorf("unknowntoken: %s %s", p.lexer.Current, p.lexer.CurrentString)
+		return nil
 	}
 }
 
