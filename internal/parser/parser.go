@@ -140,7 +140,7 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 		switch p.lexer.CurrentString {
 		case "*", "/", "+", "-":
 			if !allowMathOperators {
-				p.lexer.Errorf("math operations are only allowed within: calc(), min(), max(), or clamp()")
+				p.lexer.Errorf("math operations are only allowed within: calc, min, max, or clamp")
 				return nil
 			}
 			p.lexer.Next()

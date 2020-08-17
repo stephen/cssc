@@ -570,13 +570,15 @@ func (l *LocationError) Error() string {
 	}
 
 	line := l.source.Content[lineStart:lineEnd]
-	col := l.start - lineStart + 1
-	len := lineEnd - l.start
+	col := l.start - lineStart
 
-	indent := strings.Repeat(" ", col)
-	underline := strings.Repeat("~", len)
+	tabCount := strings.Count(line, "\t")
+	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
 
-	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.source.Path, lineNumber, col, l.Message, line, indent, underline)
+	indent := strings.Repeat(" ", col+tabCount)
+	underline := strings.Repeat("~", l.length)
+
+	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.source.Path, lineNumber, col, l.Message, withoutTabs, indent, underline)
 }
 
 // LocationErrorf sends up a lexer panic with a custom location.
