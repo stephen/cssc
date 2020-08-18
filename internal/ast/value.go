@@ -77,6 +77,20 @@ type Function struct {
 	Arguments []Value
 }
 
+// IsMath returns whether or not this function supports math expressions
+// as values.
+func (f Function) IsMath() bool {
+	_, ok := mathFunctions[f.Name]
+	return ok
+}
+
+var mathFunctions = map[string]struct{}{
+	"calc":  struct{}{},
+	"min":   struct{}{},
+	"max":   struct{}{},
+	"clamp": struct{}{},
+}
+
 // MathOperator is +, -, *, or /.
 type MathOperator struct {
 	Loc

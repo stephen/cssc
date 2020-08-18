@@ -122,13 +122,6 @@ func (p *parser) parseQualifiedRule() {
 	}
 }
 
-var mathFunctions = map[string]struct{}{
-	"calc":  struct{}{},
-	"min":   struct{}{},
-	"max":   struct{}{},
-	"clamp": struct{}{},
-}
-
 // parseValue parses a possible ast value at the current position. Callers
 // can set allowMathOperators if the enclosing context allows math expressions.
 // See: https://www.w3.org/TR/css-values-4/#math-function.
@@ -212,8 +205,7 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 			case lexer.Comma:
 				p.lexer.Next()
 			default:
-				_, allowMath := mathFunctions[fn.Name]
-				fn.Arguments = append(fn.Arguments, p.parseValue(allowMath))
+				fn.Arguments = append(fn.Arguments, p.parseValue(fn.IsMath()))
 			}
 		}
 
