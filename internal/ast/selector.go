@@ -1,13 +1,5 @@
 package ast
 
-// SelectorList is a list of selectors, separated by commas, e.g.
-// .class, .another-class.
-type SelectorList struct {
-	Loc
-
-	Selectors []*Selector
-}
-
 // Selector represents a single selector. From the selectors level 4
 // spec, a selector is a flat representation of complex-selector,
 // compound-selector, type-selector, combinator, etc, since we mostly
@@ -63,7 +55,7 @@ type PseudoClassSelector struct {
 	Name string
 
 	// Children holds any arguments to the selector, if specified.
-	Children *SelectorList
+	Children []*Selector
 }
 
 // PseudoElementSelector selects a pseudo element, e.g. ::before or ::after.

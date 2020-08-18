@@ -4,7 +4,7 @@ package ast
 type QualifiedRule struct {
 	Loc
 
-	Selectors *SelectorList
+	Selectors []*Selector
 
 	Block *Block
 }

@@ -5,14 +5,14 @@ import (
 	"github.com/stephen/cssc/internal/lexer"
 )
 
-func (p *parser) parseSelectorList() *ast.SelectorList {
-	l := &ast.SelectorList{Loc: p.lexer.Location()}
+func (p *parser) parseSelectorList() []*ast.Selector {
+	var l []*ast.Selector
 	for {
 		if p.lexer.Current == lexer.EOF {
 			p.lexer.Errorf("unexpected EOF")
 		}
 
-		l.Selectors = append(l.Selectors, p.parseSelector())
+		l = append(l, p.parseSelector())
 
 		if p.lexer.Current == lexer.Comma {
 			p.lexer.Next()
