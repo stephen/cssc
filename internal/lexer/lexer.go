@@ -288,7 +288,7 @@ func (l *Lexer) Next() {
 					l.step()
 					break stringToken
 				case '\n':
-					l.Errorf("unclosed string: unexepected newline")
+					l.Errorf("unclosed string: unexpected newline")
 				case '\\':
 					l.step()
 
