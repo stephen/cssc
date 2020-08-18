@@ -15,6 +15,8 @@ type Selector struct {
 //
 // The interface is only used for type discrimination.
 type SelectorPart interface {
+	Node
+
 	isSelector()
 }
 

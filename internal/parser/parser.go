@@ -139,6 +139,7 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 	case lexer.Percentage:
 		defer p.lexer.Next()
 		return &ast.Percentage{
+			Loc:   p.lexer.Location(),
 			Value: p.lexer.CurrentNumeral,
 		}
 
@@ -146,6 +147,7 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 		defer p.lexer.Next()
 		// XXX: should we make sure this is 0?
 		return &ast.Number{
+			Loc:   p.lexer.Location(),
 			Value: p.lexer.CurrentNumeral,
 		}
 

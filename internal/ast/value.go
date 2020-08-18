@@ -2,6 +2,8 @@ package ast
 
 // Value is a css value, e.g. dimension, percentage, or number.
 type Value interface {
+	Node
+
 	// isValue is only used for type discrimination.
 	isValue()
 }
@@ -27,6 +29,8 @@ type Dimension struct {
 
 // Percentage is a numeric percentage.
 type Percentage struct {
+	Loc
+
 	// Value is the string representation for the value.
 	Value string
 }
@@ -34,6 +38,8 @@ type Percentage struct {
 // Number is a number literal. It can be either an integer or
 // real number from https://www.w3.org/TR/css-values-4/.
 type Number struct {
+	Loc
+
 	// Value is the string representation for the value.
 	Value string
 }

@@ -8,7 +8,7 @@ type AtRule struct {
 
 	Prelude Prelude
 
-	Block interface{}
+	Block *Block
 }
 
 // ImportPrelude is the target for an import statement.
@@ -25,6 +25,8 @@ func (ImportPrelude) isPrelude() {}
 // Prelude is the set of arguments for an at-rule.
 // The interface is only used for type discrimination.
 type Prelude interface {
+	Node
+
 	isPrelude()
 }
 

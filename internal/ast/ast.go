@@ -3,9 +3,6 @@ package ast
 // Node is any top-level stylesheet rule.
 type Node interface {
 	Location() int
-
-	// isNode is only used for type discrimination.
-	isNode()
 }
 
 // Loc is a location in the source.
@@ -20,6 +17,9 @@ func (l Loc) Location() int { return l.Position }
 type Stylesheet struct {
 	Nodes []Node
 }
+
+// Location implements Node.
+func (l Stylesheet) Location() int { return 0 }
 
 // Comment represents a comment.
 type Comment struct {
@@ -48,11 +48,3 @@ type Declaration struct {
 	// Important is whether or not the declaration was marked !important.
 	Important bool
 }
-
-var _ Node = Comment{}
-var _ Node = Block{}
-var _ Node = Declaration{}
-
-func (r Comment) isNode()     {}
-func (r Block) isNode()       {}
-func (r Declaration) isNode() {}
