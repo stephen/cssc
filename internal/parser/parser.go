@@ -179,7 +179,7 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 				p.lexer.Errorf("math operations are only allowed within: calc, min, max, or clamp")
 				return nil
 			}
-			p.lexer.Next()
+			defer p.lexer.Next()
 
 			return &ast.MathOperator{
 				Loc:      p.lexer.Location(),
