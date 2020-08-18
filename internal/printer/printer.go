@@ -1,6 +1,8 @@
 package printer
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/stephen/cssc/internal/ast"
@@ -135,9 +137,16 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteRune('#')
 		p.s.WriteString(node.Name)
 
+	case *ast.CombinatorSelector:
+		p.s.WriteString(node.Operator)
+
 	case *ast.PseudoElementSelector:
 		p.s.WriteRune(':')
 		p.print(node.Inner)
+
+	case *ast.HexColor:
+		p.s.WriteRune('#')
+		p.s.WriteString(node.RGBA)
 
 	case *ast.PseudoClassSelector:
 		p.s.WriteRune(':')
@@ -149,6 +158,9 @@ func (p *printer) print(in ast.Node) {
 			}
 			p.s.WriteRune(')')
 		}
+
+	default:
+		panic(fmt.Sprintf("unknown ast node: %s", reflect.TypeOf(in)))
 	}
 
 }
