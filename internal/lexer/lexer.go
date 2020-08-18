@@ -51,6 +51,11 @@ type Lexer struct {
 	// CurrentNumeral is the last literal numeral lexed by Next(). It
 	// is not cleared between valid literals.
 	CurrentNumeral string
+
+	// RetainWhitespace is settable by the caller of the lexer. When set,
+	// it will keep whitespace tokens around. This is useful for parsing
+	// some CSS that must be space disambiguated.
+	RetainWhitespace bool
 }
 
 // NewLexer creates a new lexer for the source.
@@ -309,11 +314,20 @@ func (l *Lexer) Next() {
 
 		default:
 			if isWhitespace(l.ch) {
-				l.step()
-				// Don't return out because we only processed whitespace and
-				// there's nothing interesting for the caller yet. We don't emit
-				// whitespace-token.
-				continue
+				if !l.RetainWhitespace {
+					l.step()
+
+					// Don't return out because we only processed whitespace and
+					// there's nothing interesting for the caller yet. We don't emit
+					// whitespace-token.
+					continue
+				}
+
+				for isWhitespace(l.ch) {
+					l.step()
+				}
+				l.Current = Whitespace
+				return
 			}
 
 			if unicode.IsDigit(l.ch) {

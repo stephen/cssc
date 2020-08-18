@@ -121,6 +121,9 @@ func (p *printer) print(in ast.Node) {
 	case *ast.MathOperator:
 		p.s.WriteString(node.Operator)
 
+	case *ast.Whitespace:
+		p.s.WriteRune(' ')
+
 	case *ast.Selector:
 		for _, part := range node.Parts {
 			p.print(part)

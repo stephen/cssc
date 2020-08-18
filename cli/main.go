@@ -29,6 +29,12 @@ func main() {
 		margin: 1em; border: solid 1px;
 		width: calc(100%/3 - 2*1em - 2*1px);
 	}
+
+	/*
+		here we are:
+	*/
+	section .child {}
+	section.self {}
 	`,
 	}
 

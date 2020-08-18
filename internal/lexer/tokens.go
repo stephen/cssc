@@ -11,6 +11,8 @@ const (
 
 	EOF
 
+	Whitespace
+
 	Comma     // ,
 	Colon     // :
 	Semicolon // ;
@@ -44,6 +46,8 @@ var tokens = [...]string{
 	Illegal: "Illegal",
 
 	EOF: "EOF",
+
+	Whitespace: "WHITESPACE",
 
 	Comment: "COMMENT",
 	Delim:   "DELIMITER",

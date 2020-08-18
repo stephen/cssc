@@ -29,10 +29,19 @@ func (p *parser) parseSelector() *ast.Selector {
 		Loc: p.lexer.Location(),
 	}
 
+	p.lexer.RetainWhitespace = true
+	defer func() {
+		p.lexer.RetainWhitespace = false
+	}()
+
 	for {
 		switch p.lexer.Current {
 		case lexer.EOF:
 			p.lexer.Errorf("unexpected EOF")
+
+		case lexer.Whitespace:
+			s.Parts = append(s.Parts, &ast.Whitespace{Loc: p.lexer.Location()})
+			p.lexer.Next()
 
 		case lexer.Comma:
 			return s

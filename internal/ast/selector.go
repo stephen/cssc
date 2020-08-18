@@ -67,12 +67,20 @@ type PseudoElementSelector struct {
 	Inner *PseudoClassSelector
 }
 
+// Whitespace represents any whitespace sequence. Whitespace is
+// only kept in the AST when necessary for disambiguating syntax,
+// e.g. in selectors.
+type Whitespace struct {
+	Loc
+}
+
 var _ SelectorPart = TypeSelector{}
 var _ SelectorPart = ClassSelector{}
 var _ SelectorPart = IDSelector{}
 var _ SelectorPart = CombinatorSelector{}
 var _ SelectorPart = PseudoClassSelector{}
 var _ SelectorPart = PseudoElementSelector{}
+var _ SelectorPart = Whitespace{}
 
 func (TypeSelector) isSelector()          {}
 func (ClassSelector) isSelector()         {}
@@ -80,3 +88,4 @@ func (IDSelector) isSelector()            {}
 func (CombinatorSelector) isSelector()    {}
 func (PseudoClassSelector) isSelector()   {}
 func (PseudoElementSelector) isSelector() {}
+func (Whitespace) isSelector()            {}
