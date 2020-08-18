@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
+	"github.com/stephen/cssc/internal/printer"
 )
 
 func main() {
@@ -32,5 +32,6 @@ func main() {
 	`,
 	}
 
-	log.Println(spew.Sdump(parser.Parse(source)))
+	sheet := parser.Parse(source)
+	log.Println(printer.Print(sheet))
 }
