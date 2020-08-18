@@ -1,24 +1,22 @@
-package main
+package cssc
 
 import (
-	"fmt"
 	"io/ioutil"
+	"testing"
 
 	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
+	"github.com/stretchr/testify/require"
 )
 
-func main() {
-	by, err := ioutil.ReadFile("internal/testdata/bootstrap.css")
-	if err != nil {
-		panic(err)
-	}
-
+func TestBootstrap(t *testing.T) {
+	by, err := ioutil.ReadFile("testdata/bootstrap.css")
+	require.NoError(t, err)
 	source := &lexer.Source{
 		Path:    "bootstrap.css",
 		Content: string(by),
 	}
 
-	fmt.Println(printer.Print(parser.Parse(source)))
+	printer.Print(parser.Parse(source))
 }
