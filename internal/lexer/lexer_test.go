@@ -51,6 +51,18 @@ func TestLexer_Number(t *testing.T) {
 	h.ExpectAndNext(lexer.EOF, "", "")
 }
 
+func TestLexer_Dimension(t *testing.T) {
+	h := NewHarness(t, `0.15s`)
+
+	h.ExpectAndNext(lexer.Dimension, "s", "0.15")
+	h.ExpectAndNext(lexer.EOF, "", "")
+
+	h = NewHarness(t, `2rem`)
+
+	h.ExpectAndNext(lexer.Dimension, "rem", "2")
+	h.ExpectAndNext(lexer.EOF, "", "")
+}
+
 func TestLexer_AtRule(t *testing.T) {
 	h := NewHarness(t, `@import "test.css"`)
 

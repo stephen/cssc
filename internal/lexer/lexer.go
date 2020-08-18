@@ -356,7 +356,7 @@ func startsIdentifier(p0, p1, p2 rune) bool {
 	case '\n':
 		return false
 	default:
-		return isNameCodePoint(p1)
+		return isNameCodePoint(p0)
 	}
 }
 
