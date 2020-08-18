@@ -238,12 +238,15 @@ func (p *parser) parseAtRule() {
 // parseImportAtRule parses an import at rule. It roughly implements
 // https://www.w3.org/TR/css-cascade-4/#at-import.
 func (p *parser) parseImportAtRule() {
-	imp := &ast.AtRule{
-		Loc:  p.lexer.Location(),
-		Name: "import",
+	prelude := &ast.ImportPrelude{
+		Loc: p.lexer.Location(),
 	}
 
-	prelude := &ast.ImportPrelude{}
+	imp := &ast.AtRule{
+		Loc:     p.lexer.Location(),
+		Name:    "import",
+		Prelude: prelude,
+	}
 
 	switch p.lexer.Current {
 	case lexer.URL:
