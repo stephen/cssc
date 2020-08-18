@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
@@ -35,9 +36,16 @@ func main() {
 	*/
 	section .child {}
 	section.self {}
+
+	[test="hello"] {}
+	[test=hello] {}
+	[test*=hello] {}
+	[test^=2.5] {}
+	[test] {}
 	`,
 	}
 
 	sheet := parser.Parse(source)
+	log.Println(spew.Sdump(sheet))
 	log.Println(printer.Print(sheet))
 }

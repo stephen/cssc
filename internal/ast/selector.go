@@ -74,6 +74,22 @@ type Whitespace struct {
 	Loc
 }
 
+// AttributeSelector selects elements with the specified attributes matching.
+// Note that the = token is implied if Value is non-zero.
+type AttributeSelector struct {
+	Loc
+
+	// Property is the attribute to check.
+	Property string
+
+	// PreOperator can be ~, ^, $, *.
+	// See: https://www.w3.org/TR/selectors-4/#attribute-representation.
+	PreOperator string
+
+	// Value is the value to match against.
+	Value Value
+}
+
 var _ SelectorPart = TypeSelector{}
 var _ SelectorPart = ClassSelector{}
 var _ SelectorPart = IDSelector{}
@@ -81,6 +97,7 @@ var _ SelectorPart = CombinatorSelector{}
 var _ SelectorPart = PseudoClassSelector{}
 var _ SelectorPart = PseudoElementSelector{}
 var _ SelectorPart = Whitespace{}
+var _ SelectorPart = AttributeSelector{}
 
 func (TypeSelector) isSelector()          {}
 func (ClassSelector) isSelector()         {}
@@ -89,3 +106,4 @@ func (CombinatorSelector) isSelector()    {}
 func (PseudoClassSelector) isSelector()   {}
 func (PseudoElementSelector) isSelector() {}
 func (Whitespace) isSelector()            {}
+func (AttributeSelector) isSelector()     {}

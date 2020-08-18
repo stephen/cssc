@@ -129,6 +129,15 @@ func (p *printer) print(in ast.Node) {
 			p.print(part)
 		}
 
+	case *ast.AttributeSelector:
+		p.s.WriteRune('[')
+		p.s.WriteString(node.Property)
+		if node.Value != nil {
+			p.s.WriteRune('=')
+			p.print(node.Value)
+		}
+		p.s.WriteRune(']')
+
 	case *ast.TypeSelector:
 		p.s.WriteString(node.Name)
 
@@ -163,7 +172,7 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	default:
-		panic(fmt.Sprintf("unknown ast node: %s", reflect.TypeOf(in)))
+		panic(fmt.Sprintf("unknown ast node: %s", reflect.TypeOf(in).String()))
 	}
 
 }

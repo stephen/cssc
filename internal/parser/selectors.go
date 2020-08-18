@@ -153,12 +153,38 @@ func (p *parser) parseSelector() *ast.Selector {
 			s.Parts = append(s.Parts, pc)
 
 		case lexer.LBracket:
-			// XXX: Attribute selectors.
 			p.lexer.Next()
-			for p.lexer.Current != lexer.RBracket {
-				p.lexer.Next()
+
+			attr := &ast.AttributeSelector{
+				Loc:      p.lexer.Location(),
+				Property: p.lexer.CurrentString,
 			}
-			p.lexer.Next()
+			p.lexer.Expect(lexer.Ident)
+			if p.lexer.Current == lexer.RBracket {
+				s.Parts = append(s.Parts, attr)
+				p.lexer.Next()
+				break
+			}
+
+			if p.lexer.Current == lexer.Delim {
+				switch p.lexer.CurrentString {
+				case "^", "~", "$", "*":
+					attr.PreOperator = p.lexer.CurrentString
+					p.lexer.Next()
+
+					if p.lexer.CurrentString != "=" {
+						p.lexer.Errorf("expected =, got %s: ", p.lexer.CurrentString)
+					}
+					p.lexer.Expect(lexer.Delim)
+				case "=":
+					p.lexer.Expect(lexer.Delim)
+				}
+
+				attr.Value = p.parseValue(false)
+				s.Parts = append(s.Parts, attr)
+			}
+
+			p.lexer.Expect(lexer.RBracket)
 
 		default:
 			p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
