@@ -63,16 +63,12 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteRune('}')
 
 	case *ast.Declaration:
-		printCommas := node.Property == "font-family"
 		p.s.WriteString(node.Property)
 		p.s.WriteRune(':')
 		for i, val := range node.Values {
 			p.print(val)
 
 			if i+1 < len(node.Values) {
-				if printCommas {
-					p.s.WriteRune(',')
-				}
 				p.s.WriteRune(' ')
 			}
 		}
@@ -82,6 +78,9 @@ func (p *printer) print(in ast.Node) {
 		}
 
 		p.s.WriteRune(';')
+
+	case *ast.Comma:
+		p.s.WriteRune(',')
 
 	case *ast.Dimension:
 		p.s.WriteString(node.Value)

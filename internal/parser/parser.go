@@ -104,9 +104,9 @@ func (p *parser) parseQualifiedRule() {
 						decl.Important = true
 
 					case lexer.Comma:
-						// XXX: skipping isn't quite right. for some rules, commas are required.
-						// see: https://www.w3.org/TR/css-fonts-3/#font-family-prop.
+						decl.Values = append(decl.Values, &ast.Comma{Loc: p.lexer.Location()})
 						p.lexer.Next()
+
 					default:
 						decl.Values = append(decl.Values, p.parseValue(false))
 					}

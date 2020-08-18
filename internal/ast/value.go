@@ -105,12 +105,19 @@ type MathOperator struct {
 	Operator string
 }
 
+// Comma is a single comma. Some declarations require commas,
+// e.g. font-family fallbacks or transitions.
+type Comma struct {
+	Loc
+}
+
 func (String) isValue()       {}
 func (Dimension) isValue()    {}
 func (Percentage) isValue()   {}
 func (Number) isValue()       {}
 func (Function) isValue()     {}
 func (MathOperator) isValue() {}
+func (Comma) isValue()        {}
 func (Identifier) isValue()   {}
 func (HexColor) isValue()     {}
 
@@ -120,5 +127,6 @@ var _ Value = Percentage{}
 var _ Value = Number{}
 var _ Value = Function{}
 var _ Value = MathOperator{}
+var _ Value = Comma{}
 var _ Value = Identifier{}
 var _ Value = HexColor{}
