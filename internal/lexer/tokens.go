@@ -91,7 +91,7 @@ func isWhitespace(r rune) bool {
 
 // isNameStartCodePoint implements https://www.w3.org/TR/css-syntax-3/#name-start-code-point.
 func isNameStartCodePoint(r rune) bool {
-	return unicode.IsLetter(r) || r >= 0x80 || r == '_'
+	return (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r >= 0x80 || r == '_'
 }
 
 // isNonPrintable implements https://www.w3.org/TR/css-syntax-3/#non-printable-code-point.
@@ -101,5 +101,5 @@ func isNonPrintable(r rune) bool {
 
 // isNameCodePoint implements https://www.w3.org/TR/css-syntax-3/#name-code-point.
 func isNameCodePoint(r rune) bool {
-	return isNameStartCodePoint(r) || unicode.IsNumber(r) || r == '-'
+	return isNameStartCodePoint(r) || (r <= '9' && r >= '0') || r == '-'
 }
