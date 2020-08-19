@@ -6,28 +6,21 @@ type AtRule struct {
 
 	Name string
 
-	Prelude Prelude
+	Prelude AtPrelude
 
 	Block *Block
 }
 
-// ImportPrelude is the target for an import statement.
-type ImportPrelude struct {
-	Loc
+func (String) isAtPrelude() {}
 
-	URL string
-}
+var _ AtPrelude = String{}
 
-var _ Prelude = ImportPrelude{}
-
-func (ImportPrelude) isPrelude() {}
-
-// Prelude is the set of arguments for an at-rule.
+// AtPrelude is the set of arguments for an at-rule.
 // The interface is only used for type discrimination.
-type Prelude interface {
+type AtPrelude interface {
 	Node
 
-	isPrelude()
+	isAtPrelude()
 }
 
 var _ Node = AtRule{}

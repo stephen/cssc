@@ -46,11 +46,6 @@ func (p *printer) print(in ast.Node) {
 			p.s.WriteRune(';')
 		}
 
-	case *ast.ImportPrelude:
-		p.s.WriteRune('"')
-		p.s.WriteString(node.URL)
-		p.s.WriteRune('"')
-
 	case *ast.QualifiedRule:
 		for _, s := range node.Selectors {
 			p.print(s)
