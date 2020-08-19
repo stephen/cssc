@@ -414,6 +414,11 @@ func (l *Lexer) nextNumericToken() {
 	}
 }
 
+// isURLString is a case-insensitive comparison to see if a string is url.
+func isURLString(in string) bool {
+	return len(in) == 3 && (in[0] == 'u' || in[0] == 'U') && (in[1] == 'r' || in[1] == 'R') && (in[2] == 'l' || in[2] == 'L')
+}
+
 // nextIdentLikeToken implements https://www.w3.org/TR/css-syntax-3/#consume-an-ident-like-token.
 // The spec tells us to return a bad-url-token, but we
 // are uninterested in best-effort interpretation for compilation.
@@ -423,7 +428,7 @@ func (l *Lexer) nextIdentLikeToken() {
 	l.CurrentString = l.source.Content[start:l.lastPos]
 
 	// Here, we need to special case the url function because it supports unquoted string content.
-	if strings.ToLower(l.CurrentString) == "url" && l.ch == '(' {
+	if isURLString(l.CurrentString) && l.ch == '(' {
 		l.step()
 		for i := l.lastPos; i < len(l.source.Content) && isWhitespace(l.ch); i++ {
 			l.step()

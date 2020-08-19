@@ -57,6 +57,19 @@ func (p *parser) parse() {
 	}
 }
 
+func isImportantString(in string) bool {
+	return len(in) == 9 &&
+		(in[0] == 'i' || in[0] == 'I') &&
+		(in[1] == 'm' || in[1] == 'M') &&
+		(in[2] == 'p' || in[2] == 'P') &&
+		(in[3] == 'o' || in[3] == 'O') &&
+		(in[4] == 'r' || in[4] == 'R') &&
+		(in[5] == 't' || in[5] == 'T') &&
+		(in[6] == 'a' || in[6] == 'A') &&
+		(in[7] == 'n' || in[7] == 'N') &&
+		(in[8] == 't' || in[8] == 'T')
+}
+
 // parseQualifiedRule parses a rule. If isKeyframes is set, the parser will assume
 // all preludes are keyframes percentage selectors. Otherwise, it will assume
 // the preludes are selector lists.
@@ -101,7 +114,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 						}
 						p.lexer.Next()
 
-						if p.lexer.CurrentString != "important" {
+						if !isImportantString(p.lexer.CurrentString) {
 							p.lexer.Errorf("expected !important, unexpected token: %s", p.lexer.CurrentString)
 						}
 						p.lexer.Next()
