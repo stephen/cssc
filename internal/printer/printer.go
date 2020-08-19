@@ -51,6 +51,11 @@ func (p *printer) print(in ast.Node) {
 			p.print(s)
 		}
 
+	case *ast.KeyframeSelectorList:
+		for _, s := range node.Selectors {
+			p.print(s)
+		}
+
 	case *ast.QualifiedRule:
 		p.print(node.Prelude)
 

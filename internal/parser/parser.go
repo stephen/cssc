@@ -51,13 +51,16 @@ func (p *parser) parse() {
 			p.lexer.Next()
 
 		default:
-			p.parseQualifiedRule()
+			p.ss.Nodes = append(p.ss.Nodes, p.parseQualifiedRule(false))
 		}
 
 	}
 }
 
-func (p *parser) parseQualifiedRule() {
+// parseQualifiedRule parses a rule. If isKeyframes is set, the parser will assume
+// all preludes are keyframes percentage selectors. Otherwise, it will assume
+// the preludes are selector lists.
+func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 	r := &ast.QualifiedRule{
 		Loc: p.lexer.Location(),
 	}
@@ -67,7 +70,6 @@ func (p *parser) parseQualifiedRule() {
 		case lexer.EOF:
 			p.lexer.Errorf("unexpected EOF")
 		case lexer.LCurly:
-			// XXX: Consume a simple block
 			block := &ast.DeclarationBlock{
 				Loc: p.lexer.Location(),
 			}
@@ -116,12 +118,58 @@ func (p *parser) parseQualifiedRule() {
 			}
 			p.lexer.Next()
 
-			p.ss.Nodes = append(p.ss.Nodes, r)
-			return
+			return r
 		default:
+			if isKeyframes {
+				r.Prelude = p.parseKeyframeSelectorList()
+				continue
+			}
+
 			r.Prelude = p.parseSelectorList()
 		}
 	}
+}
+
+func (p *parser) parseKeyframeSelectorList() *ast.KeyframeSelectorList {
+	l := &ast.KeyframeSelectorList{
+		Loc: p.lexer.Location(),
+	}
+
+	for {
+		if p.lexer.Current == lexer.EOF {
+			p.lexer.Errorf("unexpected EOF")
+		}
+
+		switch p.lexer.Current {
+		case lexer.Percentage:
+			l.Selectors = append(l.Selectors, &ast.Percentage{
+				Loc:   p.lexer.Location(),
+				Value: p.lexer.CurrentNumeral,
+			})
+
+		case lexer.Ident:
+			if p.lexer.CurrentString != "from" && p.lexer.CurrentString != "to" {
+				p.lexer.Errorf("unexpected string: %s. keyframe selector can only be from, to, or a percentage", p.lexer.CurrentString)
+			}
+			l.Selectors = append(l.Selectors, &ast.Identifier{
+				Loc:   p.lexer.Location(),
+				Value: p.lexer.CurrentString,
+			})
+
+		default:
+			p.lexer.Errorf("unexepected token: %s. keyframe selector can only be from, to, or a percentage", p.lexer.Current.String())
+		}
+		p.lexer.Next()
+
+		if p.lexer.Current == lexer.Comma {
+			p.lexer.Next()
+			continue
+		}
+
+		break
+	}
+
+	return l
 }
 
 // parseValue parses a possible ast value at the current position. Callers
@@ -229,9 +277,8 @@ func (p *parser) parseAtRule() {
 		p.parseMediaAtRule()
 
 	case "keyframes", "-webkit-keyframes":
-		// XXX: maybe consolidate all at rule AST/parsing?
-		p.lexer.Next()
-		p.parseMediaAtRule()
+		p.parseKeyframes()
+
 	default:
 		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
 	}
@@ -315,6 +362,9 @@ func (p *parser) parseKeyframes() {
 	p.lexer.Expect(lexer.LCurly)
 	for {
 		switch p.lexer.Current {
+		case lexer.EOF:
+			p.lexer.Errorf("unexpected EOF")
+
 		case lexer.RCurly:
 			p.ss.Nodes = append(p.ss.Nodes, r)
 			p.lexer.Next()
