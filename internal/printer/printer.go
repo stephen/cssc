@@ -46,10 +46,13 @@ func (p *printer) print(in ast.Node) {
 			p.s.WriteRune(';')
 		}
 
-	case *ast.QualifiedRule:
+	case *ast.SelectorList:
 		for _, s := range node.Selectors {
 			p.print(s)
 		}
+
+	case *ast.QualifiedRule:
+		p.print(node.Prelude)
 
 		p.s.WriteRune('{')
 		p.print(node.Block)
@@ -165,11 +168,9 @@ func (p *printer) print(in ast.Node) {
 	case *ast.PseudoClassSelector:
 		p.s.WriteRune(':')
 		p.s.WriteString(node.Name)
-		if len(node.Children) > 0 {
+		if node.Arguments != nil {
 			p.s.WriteRune('(')
-			for _, arg := range node.Children {
-				p.print(arg)
-			}
+			p.print(node.Arguments)
 			p.s.WriteRune(')')
 		}
 

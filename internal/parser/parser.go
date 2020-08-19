@@ -119,7 +119,7 @@ func (p *parser) parseQualifiedRule() {
 			p.ss.Nodes = append(p.ss.Nodes, r)
 			return
 		default:
-			r.Selectors = p.parseSelectorList()
+			r.Prelude = p.parseSelectorList()
 		}
 	}
 }

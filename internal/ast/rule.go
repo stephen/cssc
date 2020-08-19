@@ -4,9 +4,16 @@ package ast
 type QualifiedRule struct {
 	Loc
 
-	Selectors []*Selector
+	Prelude Prelude
 
 	Block Block
+}
+
+// Prelude is the prelude for QualifiedRules.
+type Prelude interface {
+	Node
+
+	isPrelude()
 }
 
 var _ Node = QualifiedRule{}

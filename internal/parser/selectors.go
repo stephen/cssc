@@ -5,14 +5,17 @@ import (
 	"github.com/stephen/cssc/internal/lexer"
 )
 
-func (p *parser) parseSelectorList() []*ast.Selector {
-	var l []*ast.Selector
+func (p *parser) parseSelectorList() *ast.SelectorList {
+	l := &ast.SelectorList{
+		Loc: p.lexer.Location(),
+	}
+
 	for {
 		if p.lexer.Current == lexer.EOF {
 			p.lexer.Errorf("unexpected EOF")
 		}
 
-		l = append(l, p.parseSelector())
+		l.Selectors = append(l.Selectors, p.parseSelector())
 
 		if p.lexer.Current == lexer.Comma {
 			p.lexer.Next()
@@ -21,6 +24,7 @@ func (p *parser) parseSelectorList() []*ast.Selector {
 
 		break
 	}
+
 	return l
 }
 
@@ -133,7 +137,7 @@ func (p *parser) parseSelector() *ast.Selector {
 
 				} else {
 					p.innerSelectorList = true
-					pc.Children = p.parseSelectorList()
+					pc.Arguments = p.parseSelectorList()
 					p.innerSelectorList = false
 					p.lexer.Expect(lexer.RParen)
 				}

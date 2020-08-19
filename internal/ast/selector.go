@@ -1,5 +1,17 @@
 package ast
 
+// SelectorList is a type of prelude for QualifiedRule,
+// containing a list of selectors separated by commas.
+type SelectorList struct {
+	Loc
+
+	Selectors []*Selector
+}
+
+func (SelectorList) isPrelude() {}
+
+var _ Prelude = SelectorList{}
+
 // Selector represents a single selector. From the selectors level 4
 // spec, a selector is a flat representation of complex-selector,
 // compound-selector, type-selector, combinator, etc, since we mostly
@@ -57,7 +69,7 @@ type PseudoClassSelector struct {
 	Name string
 
 	// Children holds any arguments to the selector, if specified.
-	Children []*Selector
+	Arguments *SelectorList
 }
 
 // PseudoElementSelector selects a pseudo element, e.g. ::before or ::after.
