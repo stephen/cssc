@@ -379,36 +379,34 @@ func (p *parser) parseKeyframes() {
 // parseMediaAtRule parses a media at rule. It roughly implements
 // https://www.w3.org/TR/mediaqueries-4/#media.
 func (p *parser) parseMediaAtRule() {
-	imp := &ast.AtRule{
+	r := &ast.AtRule{
 		Loc:  p.lexer.Location(),
 		Name: p.lexer.CurrentString,
 	}
-
 	p.lexer.Next()
+
 	for p.lexer.Current != lexer.Semicolon && p.lexer.Current != lexer.LCurly {
 		p.lexer.Next()
 	}
+	// XXX: actually parse media query.
 
-	// XXX: actually parse media query and inner block.
-	if p.lexer.Current == lexer.LCurly {
-		p.lexer.Next()
-		inner := 0
-	skip:
-		for {
-			switch p.lexer.Current {
-			case lexer.LCurly:
-				inner++
+	block := &ast.QualifiedRuleBlock{
+		Loc: p.lexer.Location(),
+	}
+	r.Block = block
+	p.lexer.Expect(lexer.LCurly)
+	for {
+		switch p.lexer.Current {
+		case lexer.EOF:
+			p.lexer.Errorf("unexpected EOF")
 
-			case lexer.RCurly:
-				if inner == 0 {
-					break skip
-				}
-				inner--
-			}
+		case lexer.RCurly:
+			p.ss.Nodes = append(p.ss.Nodes, r)
 			p.lexer.Next()
+			return
+
+		default:
+			block.Rules = append(block.Rules, p.parseQualifiedRule(false))
 		}
 	}
-	p.lexer.Next()
-
-	p.ss.Nodes = append(p.ss.Nodes, imp)
 }
