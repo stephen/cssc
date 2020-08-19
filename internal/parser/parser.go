@@ -223,11 +223,11 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 func (p *parser) parseAtRule() {
 	switch p.lexer.CurrentString {
 	case "import":
-		p.lexer.Next()
 		p.parseImportAtRule()
+
 	case "media":
-		p.lexer.Next()
 		p.parseMediaAtRule()
+
 	case "keyframes", "-webkit-keyframes":
 		// XXX: maybe consolidate all at rule AST/parsing?
 		p.lexer.Next()
@@ -246,9 +246,10 @@ func (p *parser) parseImportAtRule() {
 
 	imp := &ast.AtRule{
 		Loc:     p.lexer.Location(),
-		Name:    "import",
+		Name:    p.lexer.CurrentString,
 		Prelude: prelude,
 	}
+	p.lexer.Next()
 
 	switch p.lexer.Current {
 	case lexer.URL:
@@ -280,12 +281,57 @@ func (p *parser) parseImportAtRule() {
 	p.ss.Nodes = append(p.ss.Nodes, imp)
 }
 
+// parseKeyframes parses a keyframes at rule. It roughly implements
+// https://www.w3.org/TR/css-animations-1/#keyframes
+func (p *parser) parseKeyframes() {
+	r := &ast.AtRule{
+		Loc:  p.lexer.Location(),
+		Name: p.lexer.CurrentString,
+	}
+	p.lexer.Next()
+
+	switch p.lexer.Current {
+	case lexer.String:
+		r.Prelude = &ast.String{
+			Loc:   p.lexer.Location(),
+			Value: p.lexer.CurrentString,
+		}
+
+	case lexer.Ident:
+		r.Prelude = &ast.Identifier{
+			Loc:   p.lexer.Location(),
+			Value: p.lexer.CurrentString,
+		}
+
+	default:
+		p.lexer.Errorf("unexpected token %s, expected string or identifier for keyframes", p.lexer.Current.String())
+	}
+	p.lexer.Next()
+
+	block := &ast.QualifiedRuleBlock{
+		Loc: p.lexer.Location(),
+	}
+	r.Block = block
+	p.lexer.Expect(lexer.LCurly)
+	for {
+		switch p.lexer.Current {
+		case lexer.RCurly:
+			p.ss.Nodes = append(p.ss.Nodes, r)
+			p.lexer.Next()
+			return
+
+		default:
+			block.Rules = append(block.Rules, p.parseQualifiedRule(true))
+		}
+	}
+}
+
 // parseMediaAtRule parses a media at rule. It roughly implements
 // https://www.w3.org/TR/mediaqueries-4/#media.
 func (p *parser) parseMediaAtRule() {
 	imp := &ast.AtRule{
 		Loc:  p.lexer.Location(),
-		Name: "media",
+		Name: p.lexer.CurrentString,
 	}
 
 	p.lexer.Next()
