@@ -28,12 +28,33 @@ type Comment struct {
 	Text string
 }
 
-// Block is a set of declarations.
-type Block struct {
+// Block can either be a block of rules or declarations.
+// See https://www.w3.org/TR/css-syntax-3/#declaration-rule-list.
+type Block interface {
+	Node
+
+	isBlock()
+}
+
+// DeclarationBlock is a block containing a set of declarations.
+type DeclarationBlock struct {
 	Loc
 
 	Declarations []*Declaration
 }
+
+// QualifiedRuleBlock is a block containing a set of rules.
+type QualifiedRuleBlock struct {
+	Loc
+
+	Rules []*QualifiedRule
+}
+
+func (DeclarationBlock) isBlock()   {}
+func (QualifiedRuleBlock) isBlock() {}
+
+var _ Block = DeclarationBlock{}
+var _ Block = QualifiedRuleBlock{}
 
 // Declaration is a property assignment, e.g. width: 2px.
 type Declaration struct {

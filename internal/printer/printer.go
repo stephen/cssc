@@ -52,10 +52,18 @@ func (p *printer) print(in ast.Node) {
 		}
 
 		p.s.WriteRune('{')
-		for _, decl := range node.Block.Declarations {
-			p.print(decl)
-		}
+		p.print(node.Block)
 		p.s.WriteRune('}')
+
+	case *ast.QualifiedRuleBlock:
+		for _, r := range node.Rules {
+			p.print(r)
+		}
+
+	case *ast.DeclarationBlock:
+		for _, d := range node.Declarations {
+			p.print(d)
+		}
 
 	case *ast.Declaration:
 		p.s.WriteString(node.Property)

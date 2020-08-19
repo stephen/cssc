@@ -68,9 +68,11 @@ func (p *parser) parseQualifiedRule() {
 			p.lexer.Errorf("unexpected EOF")
 		case lexer.LCurly:
 			// XXX: Consume a simple block
-			r.Block = &ast.Block{
+			block := &ast.DeclarationBlock{
 				Loc: p.lexer.Location(),
 			}
+
+			r.Block = block
 			p.lexer.Next()
 
 			for p.lexer.Current != lexer.RCurly {
@@ -88,7 +90,7 @@ func (p *parser) parseQualifiedRule() {
 					case lexer.Semicolon:
 						// XXX: if no values, get upset.
 						p.lexer.Next()
-						r.Block.Declarations = append(r.Block.Declarations, decl)
+						block.Declarations = append(block.Declarations, decl)
 
 						break values
 					case lexer.Delim:

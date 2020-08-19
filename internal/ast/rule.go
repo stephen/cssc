@@ -6,7 +6,7 @@ type QualifiedRule struct {
 
 	Selectors []*Selector
 
-	Block *Block
+	Block Block
 }
 
 var _ Node = QualifiedRule{}

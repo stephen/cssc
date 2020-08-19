@@ -8,7 +8,7 @@ type AtRule struct {
 
 	Prelude AtPrelude
 
-	Block *Block
+	Block Block
 }
 
 func (String) isAtPrelude() {}
