@@ -82,6 +82,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 		switch p.lexer.Current {
 		case lexer.EOF:
 			p.lexer.Errorf("unexpected EOF")
+
 		case lexer.LCurly:
 			block := &ast.DeclarationBlock{
 				Loc: p.lexer.Location(),
@@ -103,7 +104,9 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 					case lexer.EOF:
 						p.lexer.Errorf("unexpected EOF")
 					case lexer.Semicolon:
-						// XXX: if no values, get upset.
+						if len(decl.Values) == 0 {
+							p.lexer.Errorf("declaration must have a value")
+						}
 						p.lexer.Next()
 						block.Declarations = append(block.Declarations, decl)
 
@@ -130,8 +133,8 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 				}
 			}
 			p.lexer.Next()
-
 			return r
+
 		default:
 			if isKeyframes {
 				r.Prelude = p.parseKeyframeSelectorList()
