@@ -47,8 +47,12 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.SelectorList:
-		for _, s := range node.Selectors {
+		for i, s := range node.Selectors {
 			p.print(s)
+
+			if i+1 < len(node.Selectors) {
+				p.s.WriteRune(',')
+			}
 		}
 
 	case *ast.KeyframeSelectorList:
@@ -143,7 +147,11 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteRune(' ')
 
 	case *ast.Selector:
-		for _, part := range node.Parts {
+		for i, part := range node.Parts {
+			if _, isWhitespace := part.(*ast.Whitespace); i+1 >= len(node.Parts) && isWhitespace {
+				continue
+			}
+
 			p.print(part)
 		}
 
