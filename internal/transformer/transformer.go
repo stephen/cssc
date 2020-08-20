@@ -133,9 +133,8 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 					return
 				}
 
-				if len(v.Arguments) != 1 {
-					// XXX: do fallbacks
-					// warning: expected single argument
+				if len(v.Arguments) == 0 {
+					// warning: expected at least one argument
 					return
 				}
 
@@ -147,7 +146,13 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 
 				vals, ok := t.variables[varName.Value]
 				if !ok {
-					// warning: unknown variable
+					// The first argument is the value, the second is a comma.
+					if len(v.Arguments) > 2 {
+						newValues = v.Arguments[2:]
+						return
+					}
+
+					// warning: unknown variable (and no fallback)
 					return
 				}
 

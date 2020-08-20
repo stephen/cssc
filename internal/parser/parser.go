@@ -268,6 +268,9 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 				p.lexer.Next()
 				break arguments
 			case lexer.Comma:
+				fn.Arguments = append(fn.Arguments, &ast.Comma{
+					Loc: p.lexer.Location(),
+				})
 				p.lexer.Next()
 			default:
 				fn.Arguments = append(fn.Arguments, p.parseValue(fn.IsMath()))
