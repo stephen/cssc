@@ -8,9 +8,11 @@ type SelectorList struct {
 	Selectors []*Selector
 }
 
-func (SelectorList) isPrelude() {}
+func (SelectorList) isPrelude()              {}
+func (SelectorList) isPseudoClassArguments() {}
 
 var _ Prelude = SelectorList{}
+var _ PseudoClassArguments = SelectorList{}
 
 // Selector represents a single selector. From the selectors level 4
 // spec, a selector is a flat representation of complex-selector,
@@ -69,8 +71,34 @@ type PseudoClassSelector struct {
 	Name string
 
 	// Children holds any arguments to the selector, if specified.
-	Arguments *SelectorList
+	Arguments PseudoClassArguments
 }
+
+// PseudoClassArguments is the arguments for a functional pseudo class.
+type PseudoClassArguments interface {
+	Node
+
+	isPseudoClassArguments()
+}
+
+// isPseudoClassArguments implemeents PseudoClassArguments so that
+// even/odd can be represented for nth-* pseudo classes.
+func (Identifier) isPseudoClassArguments() {}
+
+var _ PseudoClassArguments = Identifier{}
+
+// ANPlusB is an an+b value type for nth-* pseudo classes.
+type ANPlusB struct {
+	Loc
+
+	A        string
+	Operator string
+	B        string
+}
+
+func (ANPlusB) isPseudoClassArguments() {}
+
+var _ PseudoClassArguments = ANPlusB{}
 
 // PseudoElementSelector selects a pseudo element, e.g. ::before or ::after.
 type PseudoElementSelector struct {

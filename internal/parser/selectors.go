@@ -33,9 +33,10 @@ func (p *parser) parseSelector() *ast.Selector {
 		Loc: p.lexer.Location(),
 	}
 
+	prevRetainWhitespace := p.lexer.RetainWhitespace
 	p.lexer.RetainWhitespace = true
 	defer func() {
-		p.lexer.RetainWhitespace = false
+		p.lexer.RetainWhitespace = prevRetainWhitespace
 	}()
 
 	for {
@@ -129,11 +130,25 @@ func (p *parser) parseSelector() *ast.Selector {
 				p.lexer.Next()
 
 				if pc.Name == "nth-child" || pc.Name == "nth-last-child" || pc.Name == "nth-of-type" || pc.Name == "nth-last-of-type" {
-					for p.lexer.Current != lexer.RParen {
+					switch p.lexer.Current {
+					case lexer.Number:
+						pc.Arguments = p.parseANPlusB()
+					case lexer.Ident:
+						if p.lexer.CurrentString == "n" {
+							pc.Arguments = p.parseANPlusB()
+							break
+						}
+
+						if p.lexer.CurrentString != "even" && p.lexer.CurrentString != "odd" {
+							p.lexer.Errorf("expected even, odd, or an+b syntax")
+						}
+						pc.Arguments = &ast.Identifier{
+							Loc:   p.lexer.Location(),
+							Value: p.lexer.CurrentString,
+						}
 						p.lexer.Next()
 					}
 					p.lexer.Expect(lexer.RParen)
-					// XXX: actually parse an+b syntax.
 
 				} else {
 					p.innerSelectorList = true
@@ -194,4 +209,33 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
 		}
 	}
+}
+
+func (p *parser) parseANPlusB() *ast.ANPlusB {
+	prev := p.lexer.RetainWhitespace
+	p.lexer.RetainWhitespace = false
+	defer func() {
+		p.lexer.RetainWhitespace = prev
+	}()
+	v := &ast.ANPlusB{
+		Loc: p.lexer.Location(),
+	}
+	if p.lexer.Current == lexer.Number {
+		v.A = p.lexer.CurrentNumeral
+		p.lexer.Next()
+	}
+
+	if p.lexer.CurrentString != "n" {
+		p.lexer.Errorf("expected literal n as part of An+B")
+	}
+	p.lexer.Expect(lexer.Ident)
+
+	if p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "+" || p.lexer.CurrentString == "-") {
+		v.Operator = p.lexer.CurrentString
+		p.lexer.Next()
+
+		v.B = p.lexer.CurrentNumeral
+		p.lexer.Expect(lexer.Number)
+	}
+	return v
 }

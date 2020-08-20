@@ -195,6 +195,16 @@ func (p *printer) print(in ast.Node) {
 			p.s.WriteRune(')')
 		}
 
+	case *ast.ANPlusB:
+		if node.A != "" {
+			p.s.WriteString(node.A)
+		}
+		p.s.WriteRune('n')
+		if node.B != "" {
+			p.s.WriteRune('+')
+			p.s.WriteString(node.B)
+		}
+
 	default:
 		panic(fmt.Sprintf("unknown ast node: %s", reflect.TypeOf(in).String()))
 	}
