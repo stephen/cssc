@@ -79,8 +79,14 @@ func (p *printer) print(in ast.Node) {
 		for i, val := range node.Values {
 			p.print(val)
 
+			// Print space if we're not the last value and the previous or current
+			// value was not a comma.
 			if i+1 < len(node.Values) {
-				p.s.WriteRune(' ')
+				if _, nextIsComma := node.Values[i+1].(*ast.Comma); !nextIsComma {
+					if _, isComma := val.(*ast.Comma); !isComma {
+						p.s.WriteRune(' ')
+					}
+				}
 			}
 		}
 

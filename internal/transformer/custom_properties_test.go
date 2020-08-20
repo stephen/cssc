@@ -26,8 +26,7 @@ func TestCustomProperties(t *testing.T) {
 	margin: 0rem var(--var-width);
 }`))
 
-	// XXX: fix spacing in printer.
-	assert.Equal(t, `.class {font-family:"Helvetica" , sans-serif , other;}`, Transform(`:root {
+	assert.Equal(t, `.class {font-family:"Helvetica",sans-serif,other;}`, Transform(`:root {
 		--font: "Helvetica", sans-serif, other;
 }
 
@@ -46,9 +45,7 @@ func TestCustomProperties_Fallback(t *testing.T) {
 	margin: 0rem var(--var-width, 2rem 1rem 3rem);
 }`))
 
-	// XXX: this doesn't work because we have to preserve commas in
-	// function input.
-	assert.Equal(t, `.class {font-family:"Helvetica" , sans-serif;}`, Transform(`.class {
+	assert.Equal(t, `.class {font-family:"Helvetica",sans-serif;}`, Transform(`.class {
 		font-family: var(--font, "Helvetica", sans-serif);
 	}`))
 }
