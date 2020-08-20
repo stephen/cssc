@@ -69,8 +69,12 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.DeclarationBlock:
-		for _, d := range node.Declarations {
+		for i, d := range node.Declarations {
 			p.print(d)
+
+			if i+1 < len(node.Declarations) {
+				p.s.WriteRune(';')
+			}
 		}
 
 	case *ast.Declaration:
@@ -93,8 +97,6 @@ func (p *printer) print(in ast.Node) {
 		if node.Important {
 			p.s.WriteString("!important")
 		}
-
-		p.s.WriteRune(';')
 
 	case *ast.Comma:
 		p.s.WriteRune(',')
