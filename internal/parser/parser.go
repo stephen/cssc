@@ -208,7 +208,6 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 
 	case lexer.Number:
 		defer p.lexer.Next()
-		// XXX: should we make sure this is 0?
 		return &ast.Number{
 			Loc:   p.lexer.Location(),
 			Value: p.lexer.CurrentNumeral,
