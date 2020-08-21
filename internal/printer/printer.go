@@ -205,6 +205,46 @@ func (p *printer) print(in ast.Node) {
 			p.s.WriteString(node.B)
 		}
 
+	case *ast.MediaQueryList:
+		for i, q := range node.Queries {
+			p.print(q)
+
+			if i+1 < len(node.Queries) {
+				p.s.WriteRune(',')
+			}
+		}
+
+	case *ast.MediaQuery:
+		for i, part := range node.Parts {
+			p.print(part)
+
+			if i+1 < len(node.Parts) {
+				p.s.WriteRune(' ')
+			}
+		}
+
+	case *ast.MediaFeaturePlain:
+		p.s.WriteRune('(')
+		p.print(node.Property)
+		if node.Value != nil {
+			p.s.WriteRune(':')
+			p.print(node.Value)
+		}
+		p.s.WriteRune(')')
+
+	case *ast.MediaFeatureRange:
+		p.s.WriteRune('(')
+		if node.LeftValue != nil {
+			p.print(node.LeftValue)
+			p.s.WriteString(node.Operator)
+		}
+		p.print(node.Property)
+		if node.RightValue != nil {
+			p.s.WriteString(node.Operator)
+			p.print(node.RightValue)
+		}
+		p.s.WriteRune(')')
+
 	default:
 		panic(fmt.Sprintf("unknown ast node: %s", reflect.TypeOf(in).String()))
 	}

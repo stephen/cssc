@@ -395,10 +395,7 @@ func (p *parser) parseMediaAtRule() {
 	}
 	p.lexer.Next()
 
-	for p.lexer.Current != lexer.Semicolon && p.lexer.Current != lexer.LCurly {
-		p.lexer.Next()
-	}
-	// XXX: actually parse media query.
+	r.Prelude = p.parseMediaQueryList()
 
 	block := &ast.QualifiedRuleBlock{
 		Loc: p.lexer.Location(),
@@ -418,5 +415,169 @@ func (p *parser) parseMediaAtRule() {
 		default:
 			block.Rules = append(block.Rules, p.parseQualifiedRule(false))
 		}
+	}
+}
+
+func (p *parser) parseMediaQueryList() *ast.MediaQueryList {
+	l := &ast.MediaQueryList{
+		Loc: p.lexer.Location(),
+	}
+
+	for {
+		if p.lexer.Current == lexer.EOF {
+			p.lexer.Errorf("unexpected EOF")
+		}
+
+		l.Queries = append(l.Queries, p.parseMediaQuery())
+
+		if p.lexer.Current == lexer.Comma {
+			p.lexer.Next()
+			continue
+		}
+
+		break
+	}
+
+	return l
+}
+
+func (p *parser) parseMediaQuery() *ast.MediaQuery {
+	q := &ast.MediaQuery{
+		Loc: p.lexer.Location(),
+	}
+
+	for {
+		switch p.lexer.Current {
+		case lexer.EOF:
+			p.lexer.Errorf("unexpected EOF")
+			return q
+
+		case lexer.LParen:
+			q.Parts = append(q.Parts, p.parseMediaFeature())
+
+		case lexer.Ident:
+			q.Parts = append(q.Parts, p.parseValue(false).(*ast.Identifier))
+
+		default:
+			return q
+		}
+	}
+}
+
+func (p *parser) parseMediaFeature() ast.MediaFeature {
+	startLoc := p.lexer.Location()
+	p.lexer.Expect(lexer.LParen)
+
+	firstValue := p.parseValue(false)
+
+	switch p.lexer.Current {
+	case lexer.RParen:
+		p.lexer.Next()
+		ident, ok := firstValue.(*ast.Identifier)
+		if !ok {
+			// XXX: this location is wrong. also, can't figure out type since we lost the lexer value.
+			p.lexer.Errorf("expected identifier in media feature with no value")
+		}
+
+		return &ast.MediaFeaturePlain{
+			Loc:      startLoc,
+			Property: ident,
+		}
+
+	case lexer.Colon:
+		p.lexer.Next()
+		ident, ok := firstValue.(*ast.Identifier)
+		if !ok {
+			// XXX: this location is wrong. also, can't figure out type since we lost the lexer value.
+			p.lexer.Errorf("expected identifier in non-range media feature")
+		}
+
+		secondValue := p.parseValue(false)
+
+		p.lexer.Expect(lexer.RParen)
+		return &ast.MediaFeaturePlain{
+			Loc:      startLoc,
+			Property: ident,
+			Value:    secondValue,
+		}
+
+	case lexer.Delim:
+		r := &ast.MediaFeatureRange{
+			Loc:       startLoc,
+			LeftValue: firstValue,
+		}
+		r.Operator = p.parseMediaRangeOperator()
+
+		secondValue := p.parseValue(false)
+
+		maybeIdent, ok := secondValue.(*ast.Identifier)
+		if !ok {
+			// If the first value was an identifier, then we'll call that the property.
+			maybeIdent, ok := firstValue.(*ast.Identifier)
+			if !ok {
+				p.lexer.Errorf("expected identifier")
+			}
+
+			r.LeftValue = nil
+			r.Property = maybeIdent
+			r.RightValue = secondValue
+
+			p.lexer.Expect(lexer.RParen)
+			return r
+		}
+		r.Property = maybeIdent
+
+		if p.lexer.Current == lexer.Delim {
+			op := p.parseMediaRangeOperator()
+			if op != r.Operator {
+				p.lexer.Errorf("operators in a range must be the same")
+			}
+			r.RightValue = p.parseValue(false)
+		}
+
+		p.lexer.Expect(lexer.RParen)
+		return r
+	}
+
+	p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
+	return nil
+}
+
+var (
+	mediaOperatorLT  = "<"
+	mediaOperatorLTE = "<="
+	mediaOperatorGT  = ">"
+	mediaOperatorGTE = ">="
+)
+
+func (p *parser) parseMediaRangeOperator() string {
+	operator := p.lexer.CurrentString
+	p.lexer.Next()
+
+	if p.lexer.Current == lexer.Delim {
+		if p.lexer.CurrentString != "=" || (operator != "<" && operator != ">") {
+			p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
+		}
+
+		p.lexer.Next()
+
+		switch operator {
+		case "<":
+			return mediaOperatorLTE
+		case ">":
+			return mediaOperatorGTE
+		default:
+			p.lexer.Errorf("unknown operator: %s", operator)
+		}
+	}
+
+	switch operator {
+	case "<":
+		return mediaOperatorLT
+	case ">":
+		return mediaOperatorGT
+	default:
+		p.lexer.Errorf("unknown operator: %s", operator)
+		return ""
 	}
 }

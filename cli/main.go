@@ -42,6 +42,25 @@ func main() {
 	[test*=hello] {}
 	[test^=2.5] {}
 	[test] {}
+
+	@media (width: 600px), (200px < width < 600px), (200px < width), (width < 600px) {
+		.c {height: 100%;}
+	}
+
+	@media not screen {
+		.c {height: 100%;}
+	}
+
+	@media screen and (color), projection and (color) {
+		.c {height: 100%;}
+	}
+
+	@media not (width <= -100px) {
+		body { background: green; }
+	}
+	@media (min-width: 30em) and (orientation: landscape) {
+		body { background: green; }
+	 }
 	`,
 	}
 
