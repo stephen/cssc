@@ -48,21 +48,6 @@ func (p *parser) parseSelector() *ast.Selector {
 			s.Parts = append(s.Parts, &ast.Whitespace{Loc: p.lexer.Location()})
 			p.lexer.Next()
 
-		case lexer.Comma:
-			return s
-
-		case lexer.LCurly:
-			if p.innerSelectorList {
-				p.lexer.Errorf("unexpected {")
-			}
-			return s
-
-		case lexer.RParen:
-			if !p.innerSelectorList {
-				p.lexer.Errorf("unexpected )")
-			}
-			return s
-
 		case lexer.Ident:
 			s.Parts = append(s.Parts, &ast.TypeSelector{
 				Loc:  p.lexer.Location(),
@@ -151,9 +136,7 @@ func (p *parser) parseSelector() *ast.Selector {
 					p.lexer.Expect(lexer.RParen)
 
 				} else {
-					p.innerSelectorList = true
 					pc.Arguments = p.parseSelectorList()
-					p.innerSelectorList = false
 					p.lexer.Expect(lexer.RParen)
 				}
 
@@ -206,7 +189,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Expect(lexer.RBracket)
 
 		default:
-			p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
+			return s
 		}
 	}
 }
