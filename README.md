@@ -9,7 +9,13 @@ It's approach is inspired from experimenting with [esbuild](https://github.com/e
 ## Status
 The package is currently **unusable**.
 
-I have the start of a lexer, parser and ast, but they are all incomplete.
+I have the start of a lexer, parser, printer, transformer and ast, but they are all incomplete.
+
+
+| Transform  | Support | Notes |
+| ------------- | ------------- | ------------- |
+| [Custom Properties](https://www.w3.org/TR/css-variables-1/) | Complete | |
+| [Custom Media Queries](https://www.w3.org/TR/mediaqueries-5/#custom-mq) | Partial | Support for custom media lists doesn't work yet. |
 
 ## Benchmarks
 To keep track of performance, I've been benchmarking performance on (partially) [parsing bootstrap.css](https://github.com/postcss/benchmark).
@@ -18,10 +24,8 @@ To keep track of performance, I've been benchmarking performance on (partially) 
 $ go test -bench=. internal/parser/*.go
 goos: darwin
 goarch: amd64
-BenchmarkParser-12    	     316	   3611143 ns/op	  826259 B/op	   23787 allocs/op
+BenchmarkParser-12    	     296	   3934884 ns/op	 1548281 B/op	   45916 allocs/op
 PASS
 ```
-
-For the ~180Kb bootstrap.css file, the parser allocates ~800Kb and takes ~3.5ms.
 
 I expect this to be a moving target as I complete the parser implementation.
