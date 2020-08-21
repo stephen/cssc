@@ -292,6 +292,9 @@ func (p *parser) parseAtRule() {
 	case "keyframes", "-webkit-keyframes":
 		p.parseKeyframes()
 
+	case "custom-media":
+		p.parseCustomMediaAtRule()
+
 	default:
 		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
 	}
@@ -300,6 +303,7 @@ func (p *parser) parseAtRule() {
 // parseImportAtRule parses an import at rule. It roughly implements
 // https://www.w3.org/TR/css-cascade-4/#at-import.
 func (p *parser) parseImportAtRule() {
+	// XXX: this location is wrong.
 	prelude := &ast.String{
 		Loc: p.lexer.Location(),
 	}
@@ -581,4 +585,26 @@ func (p *parser) parseMediaRangeOperator() string {
 		p.lexer.Errorf("unknown operator: %s", operator)
 		return ""
 	}
+}
+
+// parseCustomMediaAtRule parses a @custom-media rule.
+// See: https://www.w3.org/TR/mediaqueries-5/#custom-mq.
+func (p *parser) parseCustomMediaAtRule() {
+	r := &ast.AtRule{
+		Loc:  p.lexer.Location(),
+		Name: p.lexer.CurrentString,
+	}
+	p.lexer.Next()
+
+	maybeName := p.parseValue(false)
+	name, ok := maybeName.(*ast.Identifier)
+	if !ok {
+		// XXX: show received type
+		p.lexer.Errorf("expected identifier")
+	}
+
+	r.Preludes = append(r.Preludes, name)
+	r.Preludes = append(r.Preludes, p.parseMediaQueryList())
+
+	p.ss.Nodes = append(p.ss.Nodes, r)
 }

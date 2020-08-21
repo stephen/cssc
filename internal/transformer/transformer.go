@@ -10,7 +10,8 @@ import (
 // transforms.
 func Transform(s *ast.Stylesheet) *ast.Stylesheet {
 	t := transformer{
-		variables: make(map[string][]ast.Value),
+		variables:   make(map[string][]ast.Value),
+		customMedia: make(map[string]*ast.MediaQueryList),
 	}
 
 	s.Nodes = t.transformNodes(s.Nodes)
@@ -21,7 +22,8 @@ func Transform(s *ast.Stylesheet) *ast.Stylesheet {
 // transformer takes a pass over the AST and makes
 // modifications to the AST, depending on the settings.
 type transformer struct {
-	variables map[string][]ast.Value
+	variables   map[string][]ast.Value
+	customMedia map[string]*ast.MediaQueryList
 }
 
 func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
@@ -82,11 +84,77 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 			}
 			rv = append(rv, node)
 
+		case *ast.AtRule:
+			switch node.Name {
+			case "custom-media":
+				func() {
+
+					if len(node.Preludes) != 2 {
+						return
+					}
+
+					name, ok := node.Preludes[0].(*ast.Identifier)
+					if !ok {
+						return
+					}
+
+					values, ok := node.Preludes[1].(*ast.MediaQueryList)
+					if !ok {
+						return
+					}
+
+					t.customMedia[name.Value] = values
+				}()
+
+			case "media":
+				mq := node.Preludes[0].(*ast.MediaQueryList)
+				mq.Queries = t.transformMediaQueries(mq.Queries)
+				rv = append(rv, node)
+
+			default:
+				rv = append(rv, node)
+			}
+
 		default:
 			rv = append(rv, value)
 		}
 	}
 	return rv
+}
+
+func (t *transformer) transformMediaQueries(queries []*ast.MediaQuery) []*ast.MediaQuery {
+	newQueries := make([]*ast.MediaQuery, 0, len(queries))
+	for _, q := range queries {
+		q.Parts = t.transformMediaQueryParts(q.Parts)
+		newQueries = append(newQueries, q)
+	}
+	return newQueries
+}
+
+func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast.MediaQueryPart {
+	newParts := make([]ast.MediaQueryPart, 0, len(parts))
+	for _, p := range parts {
+		switch part := p.(type) {
+		case *ast.MediaFeaturePlain:
+			if part.Value != nil || !strings.HasPrefix(part.Property.Value, "--") {
+				newParts = append(newParts, p)
+				break
+			}
+
+			replacement, ok := t.customMedia[part.Property.Value]
+			if !ok {
+				newParts = append(newParts, p)
+				break
+			}
+
+			// XXX: uh oh. what do we do if there is a list? i think we have to go back up and duplicate the current rule.
+			newParts = append(newParts, replacement.Queries[0].Parts...)
+
+		default:
+			newParts = append(newParts, p)
+		}
+	}
+	return newParts
 }
 
 func (t *transformer) transformBlock(block ast.Block) ast.Block {
