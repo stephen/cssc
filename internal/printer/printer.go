@@ -127,11 +127,8 @@ func (p *printer) print(in ast.Node) {
 	case *ast.Function:
 		p.s.WriteString(node.Name)
 		p.s.WriteRune('(')
-		for i, arg := range node.Arguments {
+		for _, arg := range node.Arguments {
 			p.print(arg)
-			if !node.IsMath() && i+1 < len(node.Arguments) {
-				p.s.WriteString(",")
-			}
 		}
 		p.s.WriteRune(')')
 
