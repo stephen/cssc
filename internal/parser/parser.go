@@ -30,6 +30,9 @@ func (p *parser) parse() {
 		case lexer.At:
 			p.parseAtRule()
 
+		case lexer.Semicolon:
+			p.lexer.Next()
+
 		case lexer.CDO, lexer.CDC:
 			// From https://www.w3.org/TR/css-syntax-3/#parser-entry-points,
 			// we'll always assume we're parsing from the top-level, so we can discard CDO/CDC.
@@ -302,9 +305,9 @@ func (p *parser) parseImportAtRule() {
 	}
 
 	imp := &ast.AtRule{
-		Loc:     p.lexer.Location(),
-		Name:    p.lexer.CurrentString,
-		Prelude: prelude,
+		Loc:      p.lexer.Location(),
+		Name:     p.lexer.CurrentString,
+		Preludes: []ast.AtPrelude{prelude},
 	}
 	p.lexer.Next()
 
@@ -331,9 +334,7 @@ func (p *parser) parseImportAtRule() {
 		p.lexer.Errorf("unexpected import specifier")
 	}
 
-	p.lexer.Expect(lexer.Semicolon)
-
-	// XXX: support conditional @import
+	imp.Preludes = append(imp.Preludes, p.parseMediaQueryList())
 
 	p.ss.Nodes = append(p.ss.Nodes, imp)
 }
@@ -349,16 +350,16 @@ func (p *parser) parseKeyframes() {
 
 	switch p.lexer.Current {
 	case lexer.String:
-		r.Prelude = &ast.String{
+		r.Preludes = append(r.Preludes, &ast.String{
 			Loc:   p.lexer.Location(),
 			Value: p.lexer.CurrentString,
-		}
+		})
 
 	case lexer.Ident:
-		r.Prelude = &ast.Identifier{
+		r.Preludes = append(r.Preludes, &ast.Identifier{
 			Loc:   p.lexer.Location(),
 			Value: p.lexer.CurrentString,
-		}
+		})
 
 	default:
 		p.lexer.Errorf("unexpected token %s, expected string or identifier for keyframes", p.lexer.Current.String())
@@ -395,7 +396,7 @@ func (p *parser) parseMediaAtRule() {
 	}
 	p.lexer.Next()
 
-	r.Prelude = p.parseMediaQueryList()
+	r.Preludes = []ast.AtPrelude{p.parseMediaQueryList()}
 
 	block := &ast.QualifiedRuleBlock{
 		Loc: p.lexer.Location(),

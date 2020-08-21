@@ -6,7 +6,7 @@ type AtRule struct {
 
 	Name string
 
-	Prelude AtPrelude
+	Preludes []AtPrelude
 
 	Block Block
 }

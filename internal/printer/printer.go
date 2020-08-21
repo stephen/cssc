@@ -33,9 +33,15 @@ func (p *printer) print(in ast.Node) {
 	case *ast.AtRule:
 		p.s.WriteRune('@')
 		p.s.WriteString(node.Name)
-		if node.Prelude != nil {
+		if len(node.Preludes) > 0 {
 			p.s.WriteRune(' ')
-			p.print(node.Prelude)
+			for i, prelude := range node.Preludes {
+				p.print(prelude)
+
+				if i+1 < len(node.Preludes) {
+					p.s.WriteRune(' ')
+				}
+			}
 		}
 
 		if node.Block != nil {

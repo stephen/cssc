@@ -60,7 +60,9 @@ func main() {
 	}
 	@media (min-width: 30em) and (orientation: landscape) {
 		body { background: green; }
-	 }
+	}
+
+	@import url('landscape.css') screen and (orientation: landscape);
 	`,
 	}
 
