@@ -15,7 +15,7 @@ I have the start of a lexer, parser, printer, transformer and ast, but they are 
 | Transform  | Support | Notes |
 | ------------- | ------------- | ------------- |
 | [Custom Properties](https://www.w3.org/TR/css-variables-1/) | Complete | |
-| [Custom Media Queries](https://www.w3.org/TR/mediaqueries-5/#custom-mq) | Partial | Support for custom media lists doesn't work yet. |
+| [Custom Media Queries](https://www.w3.org/TR/mediaqueries-5/#custom-mq) | Complete | |
 
 ## Benchmarks
 To keep track of performance, I've been benchmarking performance on (partially) [parsing bootstrap.css](https://github.com/postcss/benchmark).
