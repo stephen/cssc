@@ -17,4 +17,17 @@ func TestCustomMedia(t *testing.T) {
 	@media (--narrow-window) and (script) {
 		.c { color: red; }
 	}`))
+
+	assert.PanicsWithValue(t, "main.css:2:48\nexpected selector:\n\t  @custom-media --narrow-window (max-width: 30em), print;\n\t                                                 ~", func() {
+		Transform(`
+	@custom-media --narrow-window (max-width: 30em), print;
+
+	@media (--narrow-window) {
+		.a { color: green; }
+	}
+
+	@media (--narrow-window) and (script) {
+		.c { color: red; }
+	}`)
+	})
 }

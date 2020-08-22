@@ -18,6 +18,11 @@ type MediaQuery struct {
 	Parts []MediaQueryPart
 }
 
+// isAtPrelude implements AtPrelude for @custom-media rules.
+func (MediaQuery) isAtPrelude() {}
+
+var _ AtPrelude = MediaQuery{}
+
 // MediaQueryPart is a part of a media query, e.g. a MediaFeature,
 // MediaType, or MediaCombinator.
 type MediaQueryPart interface {

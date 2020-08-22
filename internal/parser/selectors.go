@@ -189,6 +189,9 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Expect(lexer.RBracket)
 
 		default:
+			if len(s.Parts) == 0 {
+				p.lexer.Errorf("expected selector")
+			}
 			return s
 		}
 	}

@@ -11,7 +11,7 @@ import (
 func Transform(s *ast.Stylesheet) *ast.Stylesheet {
 	t := transformer{
 		variables:   make(map[string][]ast.Value),
-		customMedia: make(map[string]*ast.MediaQueryList),
+		customMedia: make(map[string]*ast.MediaQuery),
 	}
 
 	s.Nodes = t.transformNodes(s.Nodes)
@@ -23,7 +23,7 @@ func Transform(s *ast.Stylesheet) *ast.Stylesheet {
 // modifications to the AST, depending on the settings.
 type transformer struct {
 	variables   map[string][]ast.Value
-	customMedia map[string]*ast.MediaQueryList
+	customMedia map[string]*ast.MediaQuery
 }
 
 func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
@@ -98,12 +98,12 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 						return
 					}
 
-					values, ok := node.Preludes[1].(*ast.MediaQueryList)
+					query, ok := node.Preludes[1].(*ast.MediaQuery)
 					if !ok {
 						return
 					}
 
-					t.customMedia[name.Value] = values
+					t.customMedia[name.Value] = query
 				}()
 
 			case "media":
@@ -147,8 +147,7 @@ func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast
 				break
 			}
 
-			// XXX: uh oh. what do we do if there is a list? i think we have to go back up and duplicate the current rule.
-			newParts = append(newParts, replacement.Queries[0].Parts...)
+			newParts = append(newParts, replacement.Parts...)
 
 		default:
 			newParts = append(newParts, p)

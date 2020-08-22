@@ -604,7 +604,7 @@ func (p *parser) parseCustomMediaAtRule() {
 	}
 
 	r.Preludes = append(r.Preludes, name)
-	r.Preludes = append(r.Preludes, p.parseMediaQueryList())
+	r.Preludes = append(r.Preludes, p.parseMediaQuery())
 
 	p.ss.Nodes = append(p.ss.Nodes, r)
 }
