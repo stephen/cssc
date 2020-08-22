@@ -604,7 +604,12 @@ func (p *parser) parseCustomMediaAtRule() {
 	}
 
 	r.Preludes = append(r.Preludes, name)
-	r.Preludes = append(r.Preludes, p.parseMediaQuery())
+	queries := p.parseMediaQueryList()
+	if len(queries.Queries) != 1 {
+		p.lexer.Errorf("@custom-media rule requires a single media query argument")
+	}
+	r.Preludes = append(r.Preludes)
+	r.Preludes = append(r.Preludes, queries.Queries[0])
 
 	p.ss.Nodes = append(p.ss.Nodes, r)
 }

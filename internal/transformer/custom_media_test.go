@@ -18,7 +18,7 @@ func TestCustomMedia(t *testing.T) {
 		.c { color: red; }
 	}`))
 
-	assert.PanicsWithValue(t, "main.css:2:48\nexpected selector:\n\t  @custom-media --narrow-window (max-width: 30em), print;\n\t                                                 ~", func() {
+	assert.PanicsWithValue(t, "main.css:2:55\n@custom-media rule requires a single media query argument:\n\t  @custom-media --narrow-window (max-width: 30em), print;\n\t                                                        ~", func() {
 		Transform(`
 	@custom-media --narrow-window (max-width: 30em), print;
 
