@@ -10,6 +10,14 @@ import (
 
 type printer struct {
 	s strings.Builder
+
+	sourceMappings   strings.Builder
+	lastWritten      int
+	lastMappingState mappingState
+}
+
+type mappingState struct {
+	generatedColumn int32
 }
 
 // Print prints the input AST node into CSS. It should have deterministic
@@ -22,6 +30,33 @@ func Print(in ast.Node) string {
 	return p.s.String()
 }
 
+// addMapping should be called from the printer
+// when a new symbol needs to be added to the sourcemap.
+func (p *printer) addMapping(loc ast.Loc) {
+	newState := p.lastMappingState
+	// Note that String() here does not reallocate the string.
+	for _, ch := range p.s.String()[p.lastWritten:] {
+		if ch == '\n' {
+			newState.generatedColumn = 0
+			p.sourceMappings.WriteRune(';')
+			continue
+		}
+
+		newState.generatedColumn++
+	}
+
+	if p.s.Len() > 0 {
+		lastByte := p.sourceMappings.String()[p.sourceMappings.Len()-1]
+		if lastByte != ';' {
+			p.sourceMappings.WriteRune(',')
+		}
+	}
+	p.sourceMappings.Write(VLQEncode(newState.generatedColumn - p.lastMappingState.generatedColumn))
+
+	p.lastMappingState = newState
+	p.lastWritten = p.s.Len()
+}
+
 // print prints the current ast node to the printer output.
 func (p *printer) print(in ast.Node) {
 	switch node := in.(type) {
@@ -31,6 +66,7 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.AtRule:
+		p.addMapping(node.Loc)
 		p.s.WriteRune('@')
 		p.s.WriteString(node.Name)
 		if len(node.Preludes) > 0 {
@@ -88,6 +124,7 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.Declaration:
+		p.addMapping(node.Loc)
 		p.s.WriteString(node.Property)
 		p.s.WriteRune(':')
 		for i, val := range node.Values {
@@ -155,6 +192,7 @@ func (p *printer) print(in ast.Node) {
 				continue
 			}
 
+			p.addMapping(part.Location())
 			p.print(part)
 		}
 

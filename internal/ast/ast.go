@@ -2,7 +2,7 @@ package ast
 
 // Node is any top-level stylesheet rule.
 type Node interface {
-	Location() int
+	Location() Loc
 }
 
 // Loc is a location in the source.
@@ -11,7 +11,7 @@ type Loc struct {
 }
 
 // Location implements Node.
-func (l Loc) Location() int { return l.Position }
+func (l Loc) Location() Loc { return l }
 
 // Stylesheet is a CSS stylesheet.
 type Stylesheet struct {
@@ -19,7 +19,7 @@ type Stylesheet struct {
 }
 
 // Location implements Node.
-func (l Stylesheet) Location() int { return 0 }
+func (l Stylesheet) Location() Loc { return Loc{} }
 
 // Comment represents a comment.
 type Comment struct {
