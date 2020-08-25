@@ -11,15 +11,6 @@ import (
 	"github.com/stephen/cssc/internal/ast"
 )
 
-// Source is a container for a file and its contents.
-type Source struct {
-	// Path is the path of the source file.
-	Path string
-
-	// Content is the content of the file.
-	Content string
-}
-
 // Lexer lexes the input source. Callers push the lexer
 // along with calls to Next(), which populate the current
 // token and literals.
@@ -70,12 +61,20 @@ func NewLexer(source *Source) *Lexer {
 
 // step consumes the next unicode rune and stores it.
 func (l *Lexer) step() {
+	if l.pos == 0 {
+		l.source.lines = append(l.source.lines, l.pos)
+	}
+
 	cp, size := utf8.DecodeRuneInString(l.source.Content[l.pos:])
 
 	if size == 0 {
 		l.ch = -1
 		l.lastPos = l.pos
 		return
+	}
+
+	if cp == '\n' {
+		l.source.lines = append(l.source.lines, l.pos+1)
 	}
 
 	l.ch = cp
