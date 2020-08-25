@@ -303,10 +303,7 @@ func (p *parser) parseAtRule() {
 // parseImportAtRule parses an import at rule. It roughly implements
 // https://www.w3.org/TR/css-cascade-4/#at-import.
 func (p *parser) parseImportAtRule() {
-	// XXX: this location is wrong.
-	prelude := &ast.String{
-		Loc: p.lexer.Location(),
-	}
+	prelude := &ast.String{}
 
 	imp := &ast.AtRule{
 		Loc:      p.lexer.Location(),
@@ -317,6 +314,7 @@ func (p *parser) parseImportAtRule() {
 
 	switch p.lexer.Current {
 	case lexer.URL:
+		prelude.Loc = p.lexer.Location()
 		prelude.Value = p.lexer.CurrentString
 		p.lexer.Next()
 
@@ -326,11 +324,13 @@ func (p *parser) parseImportAtRule() {
 		}
 		p.lexer.Next()
 
+		prelude.Loc = p.lexer.Location()
 		prelude.Value = p.lexer.CurrentString
 		p.lexer.Expect(lexer.String)
 		p.lexer.Expect(lexer.RParen)
 
 	case lexer.String:
+		prelude.Loc = p.lexer.Location()
 		prelude.Value = p.lexer.CurrentString
 		p.lexer.Expect(lexer.String)
 
