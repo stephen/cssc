@@ -18,5 +18,5 @@ func TestBootstrap(t *testing.T) {
 		Content: string(by),
 	}
 
-	printer.Print(parser.Parse(source))
+	printer.Print(parser.Parse(source), printer.Options{})
 }

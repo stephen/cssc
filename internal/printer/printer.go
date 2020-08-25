@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/stephen/cssc/internal/ast"
+	"github.com/stephen/cssc/internal/lexer"
 )
 
 type printer struct {
-	s strings.Builder
+	options Options
+	s       strings.Builder
 
 	sourceMappings   strings.Builder
 	lastWritten      int
@@ -18,12 +20,21 @@ type printer struct {
 
 type mappingState struct {
 	generatedColumn int32
+	originalLine    int32
+	originalColumn  int32
+}
+
+// Options is a set of options for printing.
+type Options struct {
+	OriginalSource *lexer.Source
 }
 
 // Print prints the input AST node into CSS. It should have deterministic
 // output.
-func Print(in ast.Node) string {
-	p := printer{}
+func Print(in ast.Node, opts Options) string {
+	p := printer{
+		options: opts,
+	}
 
 	p.print(in)
 
@@ -33,7 +44,15 @@ func Print(in ast.Node) string {
 // addMapping should be called from the printer
 // when a new symbol needs to be added to the sourcemap.
 func (p *printer) addMapping(loc ast.Loc) {
+	if p.options.OriginalSource == nil {
+		return
+	}
+
 	newState := p.lastMappingState
+
+	line, col := p.options.OriginalSource.LineAndCol(loc)
+	newState.originalLine, newState.originalColumn = line-1, col-1
+
 	// Note that String() here does not reallocate the string.
 	for _, ch := range p.s.String()[p.lastWritten:] {
 		if ch == '\n' {
@@ -51,7 +70,14 @@ func (p *printer) addMapping(loc ast.Loc) {
 			p.sourceMappings.WriteRune(',')
 		}
 	}
+
 	p.sourceMappings.Write(VLQEncode(newState.generatedColumn - p.lastMappingState.generatedColumn))
+	// XXX: figure out what to do for multiple sources.
+	p.sourceMappings.Write(VLQEncode(0))
+
+	p.sourceMappings.Write(VLQEncode(newState.originalLine - p.lastMappingState.originalLine))
+	p.sourceMappings.Write(VLQEncode(newState.originalColumn - p.lastMappingState.originalColumn))
+	// XXX: 5th item for "names" mapping
 
 	p.lastMappingState = newState
 	p.lastWritten = p.s.Len()
@@ -160,11 +186,13 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteString(node.Value)
 
 	case *ast.String:
+		p.addMapping(node.Loc)
 		p.s.WriteRune('"')
 		p.s.WriteString(node.Value)
 		p.s.WriteRune('"')
 
 	case *ast.Identifier:
+		p.addMapping(node.Loc)
 		p.s.WriteString(node.Value)
 
 	case *ast.Function:

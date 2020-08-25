@@ -13,7 +13,7 @@ func Print(s string) string {
 	return printer.Print(parser.Parse(&lexer.Source{
 		Path:    "main.css",
 		Content: s,
-	}))
+	}), printer.Options{})
 }
 
 func TestClass(t *testing.T) {

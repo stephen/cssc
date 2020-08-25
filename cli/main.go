@@ -68,5 +68,7 @@ func main() {
 
 	sheet := parser.Parse(source)
 	log.Println(spew.Sdump(sheet))
-	log.Println(printer.Print(sheet))
+	log.Println(printer.Print(sheet, printer.Options{
+		OriginalSource: source,
+	}))
 }

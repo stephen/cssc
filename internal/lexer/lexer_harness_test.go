@@ -8,7 +8,7 @@ import (
 )
 
 func NewHarness(t testing.TB, content string) *Harness {
-	return &Harness{t, lexer.NewLexer(&lexer.Source{"main.css", content})}
+	return &Harness{t, lexer.NewLexer(&lexer.Source{Path: "main.css", Content: content})}
 }
 
 // Harness is a simple test harness to expect on the lexer.

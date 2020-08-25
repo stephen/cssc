@@ -11,5 +11,5 @@ func Transform(s string) string {
 	return printer.Print(transformer.Transform(parser.Parse(&lexer.Source{
 		Path:    "main.css",
 		Content: s,
-	})))
+	})), printer.Options{})
 }

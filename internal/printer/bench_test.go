@@ -22,6 +22,6 @@ func BenchmarkPrinter(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_ = Print(ast)
+		_ = Print(ast, Options{})
 	}
 }
