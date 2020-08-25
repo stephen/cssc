@@ -1,6 +1,8 @@
 package printer
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -37,8 +39,33 @@ func Print(in ast.Node, opts Options) string {
 	}
 
 	p.print(in)
+	p.printMapping()
 
 	return p.s.String()
+}
+
+func (p *printer) printMapping() {
+	if p.options.OriginalSource == nil {
+		return
+	}
+
+	b := strings.Builder{}
+	b.WriteString(`{"version": 3,"file":"`)
+	b.WriteString(p.options.OriginalSource.Path)
+	// XXX: sources content and names.
+	b.WriteString(`","sourceRoot":"", "sources": ["source.css"], "sourcesContent":[`)
+	out, err := json.Marshal(p.options.OriginalSource.Content)
+	if err != nil {
+		panic(err)
+	}
+	b.Write(out)
+	b.WriteString(`],"names":[],"mappings":"`)
+	b.WriteString(p.sourceMappings.String())
+	b.WriteString(`"}`)
+	p.s.WriteString("\n/*# sourceMappingURL=data:application/json;base64,")
+	// XXX: allocation.
+	p.s.WriteString(base64.StdEncoding.EncodeToString([]byte(b.String())))
+	p.s.WriteString(" */\n")
 }
 
 // addMapping should be called from the printer
@@ -56,6 +83,7 @@ func (p *printer) addMapping(loc ast.Loc) {
 	// Note that String() here does not reallocate the string.
 	for _, ch := range p.s.String()[p.lastWritten:] {
 		if ch == '\n' {
+			p.lastMappingState.generatedColumn = 0
 			newState.generatedColumn = 0
 			p.sourceMappings.WriteRune(';')
 			continue
@@ -150,7 +178,6 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.Declaration:
-		p.addMapping(node.Loc)
 		p.s.WriteString(node.Property)
 		p.s.WriteRune(':')
 		for i, val := range node.Values {
@@ -186,13 +213,11 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteString(node.Value)
 
 	case *ast.String:
-		p.addMapping(node.Loc)
 		p.s.WriteRune('"')
 		p.s.WriteString(node.Value)
 		p.s.WriteRune('"')
 
 	case *ast.Identifier:
-		p.addMapping(node.Loc)
 		p.s.WriteString(node.Value)
 
 	case *ast.Function:

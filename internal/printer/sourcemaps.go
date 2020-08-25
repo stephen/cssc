@@ -1,7 +1,7 @@
 package printer
 
 var (
-	base64 = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+	base64Forward = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
 
 	base64Reverse = [127]byte{
 		65:  0,
@@ -88,7 +88,7 @@ func VLQEncode(in int32) []byte {
 
 	if in>>5 == 0 {
 		offset := in & 0b11111
-		return []byte(base64[offset : offset+1])
+		return []byte(base64Forward[offset : offset+1])
 	}
 
 	var rv []byte
@@ -105,7 +105,7 @@ func VLQEncode(in int32) []byte {
 			cur |= 0b100000
 		}
 
-		rv = append(rv, base64[cur])
+		rv = append(rv, base64Forward[cur])
 
 		if in <= 0 {
 			break
