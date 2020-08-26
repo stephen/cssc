@@ -14,9 +14,11 @@ I have the start of a lexer, parser, printer, transformer and ast, but they are 
 
 | Transform  | Support | Notes |
 | ------------- | ------------- | ------------- |
+| [`@import` rules](https://www.w3.org/TR/css-cascade-4) | Not Implemented | |
 | [Custom Properties](https://www.w3.org/TR/css-variables-1/) | Complete | Only variables defined on `:root` will be substituted. The compiler will ignore any non-`:root` variables. |
 | [Custom Media Queries](https://www.w3.org/TR/mediaqueries-5/#custom-mq) | Complete | |
 | [Media Feature Ranges](https://www.w3.org/TR/mediaqueries-4/#mq-min-max) | Partial | `<=` and `>=` are supported, but `<` and `>` are not yet. |
+| [`:any-link`](https://www.w3.org/TR/selectors-4/#the-any-link-pseudo) | Complete | |
 
 Note that complete means that the feature is supported as much as possible from simple transforms. For instance, custom properties (`--*`) on non-`:root` selectors cannot be substituted without a more complete cascading analysis.
 
