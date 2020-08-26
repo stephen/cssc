@@ -27,6 +27,40 @@ type transformer struct {
 	customMedia map[string]*ast.MediaQuery
 }
 
+func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {
+	newNodes := make([]*ast.Selector, 0, len(nodes))
+	for _, n := range nodes {
+		newParts := make([]ast.SelectorPart, 0, len(n.Parts))
+		for index, p := range n.Parts {
+			switch part := p.(type) {
+			case *ast.PseudoClassSelector:
+				if part.Name != "any-link" {
+					newParts = append(newParts, p)
+					break
+				}
+
+				// Replace one of them with :link.
+				newParts = append(
+					newParts,
+					&ast.PseudoClassSelector{Name: "link"},
+				)
+
+				// Make a duplicate with :visited.
+				duplicate := *n
+				duplicate.Parts[index] = &ast.PseudoClassSelector{Name: "visited"}
+				newNodes = append(newNodes, &duplicate)
+
+			default:
+				newParts = append(newParts, p)
+			}
+		}
+
+		n.Parts = newParts
+		newNodes = append(newNodes, n)
+	}
+	return newNodes
+}
+
 func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 	rv := make([]ast.Node, 0, len(nodes))
 	for _, value := range nodes {
@@ -77,7 +111,11 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 				declBlock.Declarations = newDecls
 			}()
 
-			// t.transform(node.Prelude)
+			selList, ok := node.Prelude.(*ast.SelectorList)
+			if !ok {
+				panic("expected selector list for qualified rule")
+			}
+			selList.Selectors = t.transformSelectors(selList.Selectors)
 			node.Block = t.transformBlock(node.Block)
 
 			if node.Block == nil {
