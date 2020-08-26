@@ -16,6 +16,7 @@ I have the start of a lexer, parser, printer, transformer and ast, but they are 
 | ------------- | ------------- | ------------- |
 | [Custom Properties](https://www.w3.org/TR/css-variables-1/) | Complete | |
 | [Custom Media Queries](https://www.w3.org/TR/mediaqueries-5/#custom-mq) | Complete | |
+| [Media Feature Ranges](https://www.w3.org/TR/mediaqueries-4/#mq-min-max) | Partial | `<=` and `>=` are supported, but `<` and `>` are not yet. |
 
 ## Benchmarks
 To keep track of performance, I've been benchmarking performance on (partially) [parsing bootstrap.css](https://github.com/postcss/benchmark).

@@ -35,3 +35,8 @@ func TestClass_ComplexSelector(t *testing.T) {
 	assert.Equal(t, `div.test #thing,div.test#thing,div .test#thing{}`,
 		Print(`div.test #thing, div.test#thing, div .test#thing { }`))
 }
+
+func TestMediaQueryRanges(t *testing.T) {
+	assert.Equal(t, `@media (200px<width<600px),(200px<width),(width<600px){}`,
+		Print(`@media (200px < width < 600px), (200px < width), (width < 600px) {}`))
+}

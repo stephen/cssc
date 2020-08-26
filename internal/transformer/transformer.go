@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/stephen/cssc/internal/ast"
@@ -148,6 +149,40 @@ func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast
 			}
 
 			newParts = append(newParts, replacement.Parts...)
+		case *ast.MediaFeatureRange:
+			if part.LeftValue != nil {
+				direction := "min"
+				if part.Operator == ">=" {
+					direction = "max"
+				}
+
+				if part.Operator == "<" || part.Operator == ">" {
+					panic("< and > not yet supported for transformation")
+				}
+
+				newParts = append(newParts, &ast.MediaFeaturePlain{
+					// XXX: replace this allocation with a lookup.
+					Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
+					Value:    part.LeftValue,
+				})
+			}
+
+			if part.RightValue != nil {
+				direction := "max"
+				if part.Operator == ">=" {
+					direction = "min"
+				}
+
+				if part.Operator == "<" || part.Operator == ">" {
+					panic("< and > not yet supported for transformation")
+				}
+
+				newParts = append(newParts, &ast.MediaFeaturePlain{
+					// XXX: replace this allocation with a lookup.
+					Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
+					Value:    part.RightValue,
+				})
+			}
 
 		default:
 			newParts = append(newParts, p)
