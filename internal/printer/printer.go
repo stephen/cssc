@@ -157,6 +157,7 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.QualifiedRule:
+		p.addMapping(node.Location())
 		p.print(node.Prelude)
 
 		p.s.WriteRune('{')
@@ -245,7 +246,6 @@ func (p *printer) print(in ast.Node) {
 				continue
 			}
 
-			p.addMapping(part.Location())
 			p.print(part)
 		}
 
