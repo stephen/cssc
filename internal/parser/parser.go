@@ -98,14 +98,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 					switch p.lexer.Current {
 					case lexer.EOF:
 						p.lexer.Errorf("unexpected EOF")
-					case lexer.Semicolon:
-						if len(decl.Values) == 0 {
-							p.lexer.Errorf("declaration must have a value")
-						}
-						p.lexer.Next()
-						block.Declarations = append(block.Declarations, decl)
 
-						break values
 					case lexer.Delim:
 						if p.lexer.CurrentString != "!" {
 							p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
@@ -123,8 +116,22 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 						p.lexer.Next()
 
 					default:
-						decl.Values = append(decl.Values, p.parseValue(false))
+						val := p.parseValue(false)
+						if val == nil {
+							if len(decl.Values) == 0 {
+								p.lexer.Errorf("declaration must have a value")
+							}
+							block.Declarations = append(block.Declarations, decl)
+
+							break values
+						}
+
+						decl.Values = append(decl.Values, val)
 					}
+				}
+
+				if p.lexer.Current == lexer.Semicolon {
+					p.lexer.Next()
 				}
 			}
 			p.lexer.Next()
@@ -276,7 +283,6 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 
 		return fn
 	default:
-		p.lexer.Errorf("unknown token: %s|%s|%s", p.lexer.Current, p.lexer.CurrentString, p.lexer.CurrentNumeral)
 		return nil
 	}
 }

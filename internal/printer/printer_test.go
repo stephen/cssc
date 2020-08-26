@@ -40,3 +40,13 @@ func TestMediaQueryRanges(t *testing.T) {
 	assert.Equal(t, `@media (200px<width<600px),(200px<width),(width<600px){}`,
 		Print(`@media (200px < width < 600px), (200px < width), (width < 600px) {}`))
 }
+
+func TestKeyframes(t *testing.T) {
+	assert.Equal(t, `@keyframes x{from{opacity:0}to{opacity:1}}`,
+		Print(`@keyframes x { from { opacity: 0 } to { opacity: 1 } }`))
+}
+
+func TestRule_NoSemicolon(t *testing.T) {
+	assert.Equal(t, `.class{width:2rem}`,
+		Print(`.class { width: 2rem }`))
+}
