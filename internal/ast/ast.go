@@ -16,6 +16,8 @@ func (l Loc) Location() Loc { return l }
 // Stylesheet is a CSS stylesheet.
 type Stylesheet struct {
 	Nodes []Node
+
+	Imports []string
 }
 
 // Location implements Node.

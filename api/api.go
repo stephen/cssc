@@ -23,8 +23,10 @@ func newCompilation() *compilation {
 	return &compilation{
 		sources:        make(map[string]int),
 		sourcesByIndex: make(map[int]*lexer.Source),
+		outputsByIndex: make(map[int]struct{}),
 		astsByIndex:    make(map[int]*ast.Stylesheet),
 		lockersByIndex: make(map[int]*sync.Mutex),
+		result:         newResult(),
 	}
 }
 
@@ -36,7 +38,10 @@ type compilation struct {
 
 	sourcesByIndex map[int]*lexer.Source
 	astsByIndex    map[int]*ast.Stylesheet
+	outputsByIndex map[int]struct{}
 	lockersByIndex map[int]*sync.Mutex
+
+	result *Result
 }
 
 // addSource will read in a path and assign it a source index. If
@@ -90,36 +95,62 @@ type Result struct {
 	Errors []error
 }
 
-// Compile runs a compilation with the specified Options.
-func Compile(opts Options) *Result {
-	c := newCompilation()
-	r := newResult()
-	var wg errgroup.Group
+func (c *compilation) parseFile(file string, hasOutput bool) {
+	idx, err := c.addSource(file)
+	if err != nil {
+		c.result.Errors = append(c.result.Errors, err)
+	}
 
-	for _, e := range opts.Entry {
-		entry := e
+	locker := c.lockersByIndex[idx]
+	locker.Lock()
+	if _, ok := c.astsByIndex[idx]; ok {
+		locker.Unlock()
+		return
+	}
+
+	ast := parser.Parse(c.sourcesByIndex[idx])
+	c.astsByIndex[idx] = ast
+	c.outputsByIndex[idx] = struct{}{}
+	locker.Unlock()
+
+	wg := errgroup.Group{}
+	for _, imp := range ast.Imports {
 		wg.Go(func() error {
-			idx, err := c.addSource(entry)
-			if err != nil {
-				r.Errors = append(r.Errors, err)
-			}
-
-			locker := c.lockersByIndex[idx]
-			locker.Lock()
-			ast := parser.Parse(c.sourcesByIndex[idx])
-			c.astsByIndex[idx] = ast
-
-			locker.Unlock()
-
-			locker.Lock()
-			r.Files[e] = printer.Print(c.astsByIndex[idx], printer.Options{
-				OriginalSource: c.sourcesByIndex[idx],
-			})
-			locker.Unlock()
+			// XXX: if @import passthrough is on, then this is true.
+			c.parseFile(imp, false)
 			return nil
 		})
 	}
 	wg.Wait()
 
-	return r
+}
+
+// Compile runs a compilation with the specified Options.
+func Compile(opts Options) *Result {
+	c := newCompilation()
+	var wg errgroup.Group
+
+	for _, e := range opts.Entry {
+		wg.Go(func() error {
+			c.parseFile(e, true)
+			return nil
+		})
+	}
+	wg.Wait()
+
+	wg = errgroup.Group{}
+	for i := range c.outputsByIndex {
+		idx := i
+		wg.Go(func() error {
+			// XXX: this is the wrong file name
+			source := c.sourcesByIndex[idx]
+			c.result.Files[source.Path] = printer.Print(c.astsByIndex[idx], printer.Options{
+				OriginalSource: source,
+			})
+			return nil
+		})
+	}
+	wg.Wait()
+
+	return c.result
 }
