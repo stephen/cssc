@@ -89,6 +89,7 @@ func newResult() *Result {
 
 // Result is the results of a compilation.
 type Result struct {
+	mu    sync.Mutex
 	Files map[string]string
 
 	Errors []error
@@ -154,6 +155,8 @@ func Compile(opts Options) *Result {
 		wg.Go(func() error {
 			// XXX: this is the wrong file name
 			source := c.sourcesByIndex[idx]
+			c.result.mu.Lock()
+			defer c.result.mu.Unlock()
 			c.result.Files[source.Path] = printer.Print(c.astsByIndex[idx], printer.Options{
 				OriginalSource: source,
 			})
