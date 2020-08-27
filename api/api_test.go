@@ -7,6 +7,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestApi_Error(t *testing.T) {
+	result := api.Compile(api.Options{
+		Entry: []string{
+			"testdata/nonexistent/index.css",
+		},
+	})
+
+	assert.Len(t, result.Files, 0)
+	assert.Len(t, result.Errors, 1)
+}
+
 func TestApi_Simple(t *testing.T) {
 	result := api.Compile(api.Options{
 		Entry: []string{

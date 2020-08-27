@@ -99,6 +99,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	idx, err := c.addSource(file)
 	if err != nil {
 		c.result.Errors = append(c.result.Errors, err)
+		return nil
 	}
 
 	locker := c.lockersByIndex[idx]
