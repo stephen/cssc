@@ -17,7 +17,15 @@ func (l Loc) Location() Loc { return l }
 type Stylesheet struct {
 	Nodes []Node
 
-	Imports []string
+	Imports []ImportSpecifier
+}
+
+// ImportSpecifier is a pointer to an import at rule.
+type ImportSpecifier struct {
+	Value string
+
+	// AtRule is a pointer to the at rule that specified this import.
+	AtRule *AtRule
 }
 
 // Location implements Node.

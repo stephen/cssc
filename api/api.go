@@ -95,7 +95,7 @@ type Result struct {
 	Errors []error
 }
 
-func (c *compilation) parseFile(file string, hasOutput bool) {
+func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	idx, err := c.addSource(file)
 	if err != nil {
 		c.result.Errors = append(c.result.Errors, err)
@@ -103,26 +103,47 @@ func (c *compilation) parseFile(file string, hasOutput bool) {
 
 	locker := c.lockersByIndex[idx]
 	locker.Lock()
-	if _, ok := c.astsByIndex[idx]; ok {
+	if ss, ok := c.astsByIndex[idx]; ok {
 		locker.Unlock()
-		return
+		return ss
 	}
 
-	ast := parser.Parse(c.sourcesByIndex[idx])
-	c.astsByIndex[idx] = ast
-	c.outputsByIndex[idx] = struct{}{}
+	source := c.sourcesByIndex[idx]
+	ss := parser.Parse(source)
+	c.astsByIndex[idx] = ss
+	if hasOutput {
+		c.outputsByIndex[idx] = struct{}{}
+	}
 	locker.Unlock()
 
+	replacements := sync.Map{}
+
 	wg := errgroup.Group{}
-	for _, imp := range ast.Imports {
+	for _, imp := range ss.Imports {
 		wg.Go(func() error {
+			rel := filepath.Join(filepath.Dir(source.Path), imp.Value)
 			// XXX: if @import passthrough is on, then this is true.
-			c.parseFile(imp, false)
+			imported := c.parseFile(rel, false)
+
+			replacements.Store(imp.AtRule, imported)
 			return nil
 		})
 	}
 	wg.Wait()
 
+	newNodes := make([]ast.Node, 0, len(ss.Nodes))
+	for _, n := range ss.Nodes {
+		imported, ok := replacements.Load(n)
+		if !ok {
+			newNodes = append(newNodes, n)
+			continue
+		}
+
+		newNodes = append(newNodes, imported.(*ast.Stylesheet).Nodes...)
+	}
+	ss.Nodes = newNodes
+
+	return ss
 }
 
 // Compile runs a compilation with the specified Options.

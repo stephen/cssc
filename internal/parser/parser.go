@@ -322,7 +322,10 @@ func (p *parser) parseImportAtRule() {
 	case lexer.URL:
 		prelude.Loc = p.lexer.Location()
 		prelude.Value = p.lexer.CurrentString
-		p.ss.Imports = append(p.ss.Imports, prelude.Value)
+		p.ss.Imports = append(p.ss.Imports, ast.ImportSpecifier{
+			Value:  prelude.Value,
+			AtRule: imp,
+		})
 		p.lexer.Next()
 
 	case lexer.FunctionStart:
@@ -333,14 +336,20 @@ func (p *parser) parseImportAtRule() {
 
 		prelude.Loc = p.lexer.Location()
 		prelude.Value = p.lexer.CurrentString
-		p.ss.Imports = append(p.ss.Imports, prelude.Value)
+		p.ss.Imports = append(p.ss.Imports, ast.ImportSpecifier{
+			Value:  prelude.Value,
+			AtRule: imp,
+		})
 		p.lexer.Expect(lexer.String)
 		p.lexer.Expect(lexer.RParen)
 
 	case lexer.String:
 		prelude.Loc = p.lexer.Location()
 		prelude.Value = p.lexer.CurrentString
-		p.ss.Imports = append(p.ss.Imports, prelude.Value)
+		p.ss.Imports = append(p.ss.Imports, ast.ImportSpecifier{
+			Value:  prelude.Value,
+			AtRule: imp,
+		})
 		p.lexer.Expect(lexer.String)
 
 	default:
