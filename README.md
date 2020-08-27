@@ -14,7 +14,7 @@ I have the start of a lexer, parser, printer, transformer and ast, but they are 
 
 | Transform  | Support | Notes |
 | ------------- | ------------- | ------------- |
-| [`@import` rules](https://www.w3.org/TR/css-cascade-4) | Not Implemented | |
+| [`@import` rules](https://www.w3.org/TR/css-cascade-4) | Partial | Only non-conditional imports can be inlined. Import conditions will be ignored. |
 | [Custom Properties](https://www.w3.org/TR/css-variables-1/) | Partial | Only variables defined on `:root` will be substituted. The compiler will ignore any non-`:root` variables. [See #3](https://github.com/stephen/cssc/issues/3). |
 | [Custom Media Queries](https://www.w3.org/TR/mediaqueries-5/#custom-mq) | Complete | |
 | [Media Feature Ranges](https://www.w3.org/TR/mediaqueries-4/#mq-min-max) | Partial | `<=` and `>=` are supported, but `<` and `>` are not yet. [See #4](https://github.com/stephen/cssc/issues/4). |
