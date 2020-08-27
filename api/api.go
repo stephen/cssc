@@ -10,6 +10,7 @@ import (
 	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
+	"github.com/stephen/cssc/internal/transformer"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -80,8 +81,6 @@ func (c *compilation) addSource(path string) (int, error) {
 	return i, nil
 }
 
-// parse -> imports -> transform -> print
-
 func newResult() *Result {
 	return &Result{
 		Files: make(map[string]string),
@@ -103,21 +102,19 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 
 	locker := c.lockersByIndex[idx]
 	locker.Lock()
+	defer locker.Unlock()
 	if ss, ok := c.astsByIndex[idx]; ok {
-		locker.Unlock()
 		return ss
 	}
 
 	source := c.sourcesByIndex[idx]
 	ss := parser.Parse(source)
-	c.astsByIndex[idx] = ss
 	if hasOutput {
 		c.outputsByIndex[idx] = struct{}{}
 	}
-	locker.Unlock()
 
-	replacements := sync.Map{}
-
+	var mu sync.Mutex
+	replacements := make(map[*ast.AtRule]*ast.Stylesheet)
 	wg := errgroup.Group{}
 	for _, imp := range ss.Imports {
 		wg.Go(func() error {
@@ -125,24 +122,16 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 			// XXX: if @import passthrough is on, then this is true.
 			imported := c.parseFile(rel, false)
 
-			replacements.Store(imp.AtRule, imported)
+			mu.Lock()
+			defer mu.Unlock()
+			replacements[imp.AtRule] = imported
 			return nil
 		})
 	}
 	wg.Wait()
 
-	newNodes := make([]ast.Node, 0, len(ss.Nodes))
-	for _, n := range ss.Nodes {
-		imported, ok := replacements.Load(n)
-		if !ok {
-			newNodes = append(newNodes, n)
-			continue
-		}
-
-		newNodes = append(newNodes, imported.(*ast.Stylesheet).Nodes...)
-	}
-	ss.Nodes = newNodes
-
+	ss = transformer.Transform(ss, transformer.WithImportReplacements(replacements))
+	c.astsByIndex[idx] = ss
 	return ss
 }
 

@@ -7,12 +7,27 @@ import (
 	"github.com/stephen/cssc/internal/ast"
 )
 
+// TransformOption is an option to modify the transformer.
+type TransformOption func(*transformer)
+
+// WithImportReplacements sets an imports to inline.
+func WithImportReplacements(r map[*ast.AtRule]*ast.Stylesheet) TransformOption {
+	return func(t *transformer) {
+		t.importReplacements = r
+	}
+}
+
 // Transform takes a pass over the input AST and runs various
 // transforms.
-func Transform(s *ast.Stylesheet) *ast.Stylesheet {
-	t := transformer{
-		variables:   make(map[string][]ast.Value),
-		customMedia: make(map[string]*ast.MediaQuery),
+func Transform(s *ast.Stylesheet, opts ...TransformOption) *ast.Stylesheet {
+	t := &transformer{
+		variables:          make(map[string][]ast.Value),
+		customMedia:        make(map[string]*ast.MediaQuery),
+		importReplacements: make(map[*ast.AtRule]*ast.Stylesheet),
+	}
+
+	for _, opt := range opts {
+		opt(t)
 	}
 
 	s.Nodes = t.transformNodes(s.Nodes)
@@ -23,8 +38,9 @@ func Transform(s *ast.Stylesheet) *ast.Stylesheet {
 // transformer takes a pass over the AST and makes
 // modifications to the AST, depending on the settings.
 type transformer struct {
-	variables   map[string][]ast.Value
-	customMedia map[string]*ast.MediaQuery
+	variables          map[string][]ast.Value
+	customMedia        map[string]*ast.MediaQuery
+	importReplacements map[*ast.AtRule]*ast.Stylesheet
 }
 
 func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {
@@ -125,9 +141,16 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 
 		case *ast.AtRule:
 			switch node.Name {
+			case "import":
+				imported, ok := t.importReplacements[node]
+				if !ok {
+					rv = append(rv, node)
+					break
+				}
+				rv = append(rv, imported.Nodes...)
+
 			case "custom-media":
 				func() {
-
 					if len(node.Preludes) != 2 {
 						return
 					}
