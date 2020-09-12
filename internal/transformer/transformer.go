@@ -193,6 +193,45 @@ func (t *transformer) transformMediaQueries(queries []*ast.MediaQuery) []*ast.Me
 	return newQueries
 }
 
+func (t *transformer) transformMediaQueryRange(part *ast.MediaFeatureRange) []ast.MediaQueryPart {
+	var newParts []ast.MediaQueryPart
+	if part.LeftValue != nil {
+		direction := "min"
+		if part.Operator == ">=" {
+			direction = "max"
+		}
+
+		if part.Operator == "<" || part.Operator == ">" {
+			panic("< and > not yet supported for transformation")
+		}
+
+		newParts = append(newParts, &ast.MediaFeaturePlain{
+			// XXX: replace this allocation with a lookup.
+			Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
+			Value:    part.LeftValue,
+		})
+	}
+
+	if part.RightValue != nil {
+		direction := "max"
+		if part.Operator == ">=" {
+			direction = "min"
+		}
+
+		if part.Operator == "<" || part.Operator == ">" {
+			panic("< and > not yet supported for transformation")
+		}
+
+		newParts = append(newParts, &ast.MediaFeaturePlain{
+			// XXX: replace this allocation with a lookup.
+			Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
+			Value:    part.RightValue,
+		})
+	}
+
+	return newParts
+}
+
 func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast.MediaQueryPart {
 	newParts := make([]ast.MediaQueryPart, 0, len(parts))
 	for _, p := range parts {
@@ -211,39 +250,7 @@ func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast
 
 			newParts = append(newParts, replacement.Parts...)
 		case *ast.MediaFeatureRange:
-			if part.LeftValue != nil {
-				direction := "min"
-				if part.Operator == ">=" {
-					direction = "max"
-				}
-
-				if part.Operator == "<" || part.Operator == ">" {
-					panic("< and > not yet supported for transformation")
-				}
-
-				newParts = append(newParts, &ast.MediaFeaturePlain{
-					// XXX: replace this allocation with a lookup.
-					Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
-					Value:    part.LeftValue,
-				})
-			}
-
-			if part.RightValue != nil {
-				direction := "max"
-				if part.Operator == ">=" {
-					direction = "min"
-				}
-
-				if part.Operator == "<" || part.Operator == ">" {
-					panic("< and > not yet supported for transformation")
-				}
-
-				newParts = append(newParts, &ast.MediaFeaturePlain{
-					// XXX: replace this allocation with a lookup.
-					Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
-					Value:    part.RightValue,
-				})
-			}
+			newParts = append(newParts, t.transformMediaQueryRange(part)...)
 
 		default:
 			newParts = append(newParts, p)
