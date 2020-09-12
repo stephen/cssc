@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/stephen/cssc/internal/ast"
+	"github.com/stephen/cssc/internal/logging"
+	"github.com/stephen/cssc/internal/sources"
 )
 
 // TransformOption is an option to modify the transformer.
@@ -17,13 +19,22 @@ func WithImportReplacements(r map[*ast.AtRule]*ast.Stylesheet) TransformOption {
 	}
 }
 
+// WithReporter replaces the reporter used by the transformer.
+func WithReporter(r logging.Reporter) TransformOption {
+	return func(t *transformer) {
+		t.reporter = r
+	}
+}
+
 // Transform takes a pass over the input AST and runs various
 // transforms.
-func Transform(s *ast.Stylesheet, opts ...TransformOption) *ast.Stylesheet {
+func Transform(s *ast.Stylesheet, source *sources.Source, opts ...TransformOption) *ast.Stylesheet {
 	t := &transformer{
+		source:             source,
 		variables:          make(map[string][]ast.Value),
 		customMedia:        make(map[string]*ast.MediaQuery),
 		importReplacements: make(map[*ast.AtRule]*ast.Stylesheet),
+		reporter:           logging.DefaultReporter,
 	}
 
 	for _, opt := range opts {
@@ -38,9 +49,22 @@ func Transform(s *ast.Stylesheet, opts ...TransformOption) *ast.Stylesheet {
 // transformer takes a pass over the AST and makes
 // modifications to the AST, depending on the settings.
 type transformer struct {
+	source *sources.Source
+
 	variables          map[string][]ast.Value
 	customMedia        map[string]*ast.MediaQuery
 	importReplacements map[*ast.AtRule]*ast.Stylesheet
+	reporter           logging.Reporter
+}
+
+func (t *transformer) addError(loc ast.Loc, fmt string, args ...interface{}) {
+	// XXX: we don't have the end locations anymore, but we should...
+	t.reporter.AddError(logging.LocationErrorf(t.source, loc.Location().Position, loc.Location().Position+1, fmt, args...))
+}
+
+func (t *transformer) addWarn(loc ast.Loc, fmt string, args ...interface{}) {
+	// XXX: we don't have the end locations anymore, but we should...
+	t.reporter.AddError(logging.LocationWarnf(t.source, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }
 
 func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {
@@ -129,7 +153,7 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 
 			selList, ok := node.Prelude.(*ast.SelectorList)
 			if !ok {
-				panic("expected selector list for qualified rule")
+				t.addError(node.Prelude.Location(), "expected selector list for qualified rule")
 			}
 			selList.Selectors = t.transformSelectors(selList.Selectors)
 			node.Block = t.transformBlock(node.Block)
@@ -202,7 +226,7 @@ func (t *transformer) transformMediaQueryRange(part *ast.MediaFeatureRange) []as
 		}
 
 		if part.Operator == "<" || part.Operator == ">" {
-			panic("< and > not yet supported for transformation")
+			t.addWarn(part.Location(), "< and > not yet supported for transformation")
 		}
 
 		newParts = append(newParts, &ast.MediaFeaturePlain{
@@ -219,7 +243,7 @@ func (t *transformer) transformMediaQueryRange(part *ast.MediaFeatureRange) []as
 		}
 
 		if part.Operator == "<" || part.Operator == ">" {
-			panic("< and > not yet supported for transformation")
+			t.addWarn(part.Location(), "< and > not yet supported for transformation")
 		}
 
 		newParts = append(newParts, &ast.MediaFeaturePlain{

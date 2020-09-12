@@ -24,6 +24,6 @@ func BenchmarkTransformer(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		Transform(s)
+		Transform(s, source)
 	}
 }

@@ -11,11 +11,18 @@ import (
 )
 
 func Transform(t testing.TB, s string) string {
-	ast, err := parser.Parse(&sources.Source{
+	source := &sources.Source{
 		Path:    "main.css",
 		Content: s,
-	})
+	}
+	ast, err := parser.Parse(source)
 
 	require.NoError(t, err)
-	return printer.Print(transformer.Transform(ast), printer.Options{})
+	return printer.Print(transformer.Transform(ast, source, transformer.WithReporter(&reporter{})), printer.Options{})
+}
+
+type reporter struct{}
+
+func (r *reporter) AddError(err error) {
+	panic(err)
 }

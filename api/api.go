@@ -138,7 +138,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	}
 	wg.Wait()
 
-	ss = transformer.Transform(ss, transformer.WithImportReplacements(replacements))
+	ss = transformer.Transform(ss, source, transformer.WithImportReplacements(replacements))
 	c.astsByIndex[idx] = ss
 	return ss
 }

@@ -2,10 +2,31 @@ package logging
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/stephen/cssc/internal/sources"
 )
+
+// Reporter is an interface for reporting errors and warnings.
+type Reporter interface {
+	AddError(error)
+}
+
+// DefaultReporter is the default reporter, which writes to stderr.
+var DefaultReporter = WriterReporter{os.Stderr}
+
+// WriterReporter is a simple adapter for writing logs to an io.Writer.
+// The default reporter is a WriterReporter(os.Stderr).
+type WriterReporter struct {
+	io.Writer
+}
+
+// AddError implements Reporter.
+func (w WriterReporter) AddError(err error) {
+	fmt.Fprintln(w, err.Error())
+}
 
 // LocationErrorf adds an error from a specific location.
 func LocationErrorf(source *sources.Source, start, end int, f string, args ...interface{}) error {
