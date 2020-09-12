@@ -3,12 +3,12 @@
 package lexer
 
 import (
-	"fmt"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/stephen/cssc/internal/ast"
+	"github.com/stephen/cssc/internal/logging"
+	"github.com/stephen/cssc/internal/sources"
 )
 
 // Lexer lexes the input source. Callers push the lexer
@@ -30,7 +30,7 @@ type Lexer struct {
 	lastPos int
 
 	// source is the current source code being lexed.
-	source *Source
+	source *sources.Source
 
 	// Current is the last token lexed by Next().
 	Current Token
@@ -50,7 +50,7 @@ type Lexer struct {
 }
 
 // NewLexer creates a new lexer for the source.
-func NewLexer(source *Source) *Lexer {
+func NewLexer(source *sources.Source) *Lexer {
 	l := &Lexer{
 		source: source,
 	}
@@ -62,7 +62,7 @@ func NewLexer(source *Source) *Lexer {
 // step consumes the next unicode rune and stores it.
 func (l *Lexer) step() {
 	if l.pos == 0 {
-		l.source.lines = append(l.source.lines, l.pos)
+		l.source.Lines = append(l.source.Lines, l.pos)
 	}
 
 	cp, size := utf8.DecodeRuneInString(l.source.Content[l.pos:])
@@ -74,7 +74,7 @@ func (l *Lexer) step() {
 	}
 
 	if cp == '\n' {
-		l.source.lines = append(l.source.lines, l.pos+1)
+		l.source.Lines = append(l.source.Lines, l.pos+1)
 	}
 
 	l.ch = cp
@@ -554,55 +554,9 @@ func (l *Lexer) nextEscaped() {
 	}
 }
 
-// LocationError is an error that happened at a specific location
-// in the source.
-type LocationError struct {
-	Message string
-
-	source *Source
-	start  int
-	length int
-}
-
-// Error implements error. It's relatively slow because it needs to
-// rescan the source to figure out line and column numbers. The output
-// looks like:
-// file.css:1:1
-// there's a problem here:
-//   contents
-//   ~~~~~~~~
-func (l *LocationError) Error() string {
-	lineNumber, lineStart := 1, 0
-	for i, ch := range l.source.Content[:l.start] {
-		if ch == '\n' {
-			lineNumber++
-			lineStart = i + 1
-		}
-	}
-
-	lineEnd := len(l.source.Content)
-	for i, ch := range l.source.Content[l.start:] {
-		if ch == '\n' {
-			lineEnd = i + l.start
-			break
-		}
-	}
-
-	line := l.source.Content[lineStart:lineEnd]
-	col := l.start - lineStart
-
-	tabCount := strings.Count(line, "\t")
-	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
-
-	indent := strings.Repeat(" ", col+tabCount)
-	underline := strings.Repeat("~", l.length)
-
-	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.source.Path, lineNumber, col, l.Message, withoutTabs, indent, underline)
-}
-
 // LocationErrorf sends up a lexer panic with a custom location.
 func (l *Lexer) LocationErrorf(start, end int, f string, args ...interface{}) {
-	panic((&LocationError{fmt.Sprintf(f, args...), l.source, start, end - start}).Error())
+	panic(logging.NewLocationError(l.source, start, end, f, args...).Error())
 }
 
 // Errorf sends up a lexer panic at the range from start to lastPos.

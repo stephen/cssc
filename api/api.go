@@ -7,9 +7,9 @@ import (
 
 	"github.com/samsarahq/go/oops"
 	"github.com/stephen/cssc/internal/ast"
-	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
+	"github.com/stephen/cssc/internal/sources"
 	"github.com/stephen/cssc/internal/transformer"
 	"golang.org/x/sync/errgroup"
 )
@@ -23,7 +23,7 @@ type Options struct {
 func newCompilation() *compilation {
 	return &compilation{
 		sources:        make(map[string]int),
-		sourcesByIndex: make(map[int]*lexer.Source),
+		sourcesByIndex: make(map[int]*sources.Source),
 		outputsByIndex: make(map[int]struct{}),
 		astsByIndex:    make(map[int]*ast.Stylesheet),
 		lockersByIndex: make(map[int]*sync.Mutex),
@@ -37,7 +37,7 @@ type compilation struct {
 
 	nextIndex int
 
-	sourcesByIndex map[int]*lexer.Source
+	sourcesByIndex map[int]*sources.Source
 	astsByIndex    map[int]*ast.Stylesheet
 	outputsByIndex map[int]struct{}
 	lockersByIndex map[int]*sync.Mutex
@@ -65,7 +65,7 @@ func (c *compilation) addSource(path string) (int, error) {
 		return 0, oops.Wrapf(err, "failed to read file: %s", path)
 	}
 
-	source := &lexer.Source{
+	source := &sources.Source{
 		Content: string(in),
 		Path:    abs,
 	}

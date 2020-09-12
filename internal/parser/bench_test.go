@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/stephen/cssc/internal/lexer"
+	"github.com/stephen/cssc/internal/sources"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +13,7 @@ func BenchmarkParser(b *testing.B) {
 
 	by, err := ioutil.ReadFile("../testdata/bootstrap.css")
 	require.NoError(b, err)
-	source := &lexer.Source{
+	source := &sources.Source{
 		Path:    "bootstrap.css",
 		Content: string(by),
 	}

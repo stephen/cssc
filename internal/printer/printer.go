@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/stephen/cssc/internal/ast"
-	"github.com/stephen/cssc/internal/lexer"
+	"github.com/stephen/cssc/internal/sources"
 )
 
 type printer struct {
@@ -28,7 +28,7 @@ type mappingState struct {
 
 // Options is a set of options for printing.
 type Options struct {
-	OriginalSource *lexer.Source
+	OriginalSource *sources.Source
 }
 
 // Print prints the input AST node into CSS. It should have deterministic

@@ -3,14 +3,14 @@ package printer_test
 import (
 	"testing"
 
-	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
+	"github.com/stephen/cssc/internal/sources"
 	"github.com/stretchr/testify/assert"
 )
 
 func Print(s string) string {
-	return printer.Print(parser.Parse(&lexer.Source{
+	return printer.Print(parser.Parse(&sources.Source{
 		Path:    "main.css",
 		Content: s,
 	}), printer.Options{})

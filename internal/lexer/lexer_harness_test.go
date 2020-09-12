@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/stephen/cssc/internal/lexer"
+	"github.com/stephen/cssc/internal/sources"
 	"github.com/stretchr/testify/assert"
 )
 
 func NewHarness(t testing.TB, content string) *Harness {
-	return &Harness{t, lexer.NewLexer(&lexer.Source{Path: "main.css", Content: content})}
+	return &Harness{t, lexer.NewLexer(&sources.Source{Path: "main.css", Content: content})}
 }
 
 // Harness is a simple test harness to expect on the lexer.

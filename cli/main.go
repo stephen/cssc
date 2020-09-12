@@ -4,13 +4,13 @@ import (
 	"log"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/stephen/cssc/internal/lexer"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
+	"github.com/stephen/cssc/internal/sources"
 )
 
 func main() {
-	source := &lexer.Source{
+	source := &sources.Source{
 		Content: `@import "test.css";
 @import url("./testing.css");
 	@import url(tester.css);

@@ -3,16 +3,17 @@ package parser
 import (
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/lexer"
+	"github.com/stephen/cssc/internal/sources"
 )
 
 // Parse parses an input stylesheet.
-func Parse(source *lexer.Source) *ast.Stylesheet {
+func Parse(source *sources.Source) *ast.Stylesheet {
 	p := newParser(source)
 	p.parse()
 	return p.ss
 }
 
-func newParser(source *lexer.Source) *parser {
+func newParser(source *sources.Source) *parser {
 	return &parser{
 		lexer: lexer.NewLexer(source),
 		ss:    &ast.Stylesheet{},
