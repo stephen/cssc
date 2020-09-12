@@ -6,6 +6,7 @@ import (
 
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/sources"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +19,8 @@ func BenchmarkTransformer(b *testing.B) {
 		Path:    "bootstrap.css",
 		Content: string(by),
 	}
-	s := parser.Parse(source)
+	s, err := parser.Parse(source)
+	assert.NoError(b, err)
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {

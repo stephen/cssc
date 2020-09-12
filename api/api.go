@@ -110,7 +110,11 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	}
 
 	source := c.sourcesByIndex[idx]
-	ss := parser.Parse(source)
+	ss, err := parser.Parse(source)
+	if err != nil {
+		c.result.Errors = append(c.result.Errors, err)
+		return nil
+	}
 	if hasOutput {
 		c.outputsByIndex[idx] = struct{}{}
 	}
@@ -126,7 +130,9 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 
 			mu.Lock()
 			defer mu.Unlock()
-			replacements[imp.AtRule] = imported
+			if imported != nil {
+				replacements[imp.AtRule] = imported
+			}
 			return nil
 		})
 	}

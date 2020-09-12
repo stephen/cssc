@@ -7,10 +7,22 @@ import (
 )
 
 // Parse parses an input stylesheet.
-func Parse(source *sources.Source) *ast.Stylesheet {
+func Parse(source *sources.Source) (ss *ast.Stylesheet, err error) {
+	defer func() {
+		if rErr := recover(); rErr != nil {
+			if errI, ok := rErr.(error); ok {
+				ss, err = nil, errI
+				return
+			}
+
+			// Re-panic unknown issues.
+			panic(err)
+		}
+	}()
+
 	p := newParser(source)
 	p.parse()
-	return p.ss
+	return p.ss, nil
 }
 
 func newParser(source *sources.Source) *parser {

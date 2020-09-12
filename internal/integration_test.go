@@ -18,5 +18,8 @@ func TestBootstrap(t *testing.T) {
 		Content: string(by),
 	}
 
-	printer.Print(parser.Parse(source), printer.Options{})
+	ast, err := parser.Parse(source)
+	require.NoError(t, err)
+
+	printer.Print(ast, printer.Options{})
 }

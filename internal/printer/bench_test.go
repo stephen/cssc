@@ -6,6 +6,7 @@ import (
 
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/sources"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +19,8 @@ func BenchmarkPrinter(b *testing.B) {
 		Path:    "bootstrap.css",
 		Content: string(by),
 	}
-	ast := parser.Parse(source)
+	ast, err := parser.Parse(source)
+	assert.NoError(b, err)
 
 	b.Run("no sourcemap", func(b *testing.B) {
 		b.ReportAllocs()

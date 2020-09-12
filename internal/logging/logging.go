@@ -7,19 +7,31 @@ import (
 	"github.com/stephen/cssc/internal/sources"
 )
 
-// LocationError is an error that happened at a specific location
+// LocationErrorf adds an error from a specific location.
+func LocationErrorf(source *sources.Source, start, end int, f string, args ...interface{}) error {
+	return &locationError{fmt.Errorf(f, args...), false, source, start, end - start}
+}
+
+// LocationWarnf adds a warning from a specific location.
+func LocationWarnf(source *sources.Source, start, end int, f string, args ...interface{}) error {
+	return &locationError{fmt.Errorf(f, args...), true, source, start, end - start}
+}
+
+// locationError is an error that happened at a specific location
 // in the source.
-type LocationError struct {
-	Message string
+type locationError struct {
+	inner error
+
+	warning bool
 
 	Source *sources.Source
 	start  int
 	length int
 }
 
-// NewLocationError returns a new error from a source location.
-func NewLocationError(source *sources.Source, start, end int, f string, args ...interface{}) error {
-	return &LocationError{fmt.Sprintf(f, args...), source, start, end - start}
+// Unwrap satisfies errors.Unwrap.
+func (l *locationError) Unwrap() error {
+	return l.inner
 }
 
 // Error implements error. It's relatively slow because it needs to
@@ -29,7 +41,7 @@ func NewLocationError(source *sources.Source, start, end int, f string, args ...
 // there's a problem here:
 //   contents
 //   ~~~~~~~~
-func (l *LocationError) Error() string {
+func (l *locationError) Error() string {
 	lineNumber, lineStart := 1, 0
 	for i, ch := range l.Source.Content[:l.start] {
 		if ch == '\n' {
@@ -55,5 +67,5 @@ func (l *LocationError) Error() string {
 	indent := strings.Repeat(" ", col+tabCount)
 	underline := strings.Repeat("~", l.length)
 
-	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.Source.Path, lineNumber, col, l.Message, withoutTabs, indent, underline)
+	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.Source.Path, lineNumber, col, l.inner.Error(), withoutTabs, indent, underline)
 }

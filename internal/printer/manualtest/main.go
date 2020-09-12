@@ -42,7 +42,10 @@ func main() {
 	`,
 	}
 
-	sheet := parser.Parse(source)
+	sheet, err := parser.Parse(source)
+	if err != nil {
+		panic(err)
+	}
 	log.Println(spew.Sdump(sheet))
 	out := printer.Print(sheet, printer.Options{
 		OriginalSource: source,

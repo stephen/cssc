@@ -9,23 +9,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Print(s string) string {
-	return printer.Print(parser.Parse(&sources.Source{
+func Print(t testing.TB, s string) string {
+	ss, err := parser.Parse(&sources.Source{
 		Path:    "main.css",
 		Content: s,
-	}), printer.Options{})
+	})
+	assert.NoError(t, err)
+
+	return printer.Print(ss, printer.Options{})
 }
 
 func TestClass(t *testing.T) {
 	assert.Equal(t, `.class{font-family:"Helvetica",sans-serif}`,
-		Print(`.class {
+		Print(t, `.class {
 		font-family: "Helvetica", sans-serif;
 	}`))
 }
 
 func TestClass_MultipleDeclarations(t *testing.T) {
 	assert.Equal(t, `.class{font-family:"Helvetica",sans-serif;width:2rem}`,
-		Print(`.class {
+		Print(t, `.class {
 		font-family: "Helvetica", sans-serif;
 		width: 2rem;
 	}`))
@@ -33,20 +36,20 @@ func TestClass_MultipleDeclarations(t *testing.T) {
 
 func TestClass_ComplexSelector(t *testing.T) {
 	assert.Equal(t, `div.test #thing,div.test#thing,div .test#thing{}`,
-		Print(`div.test #thing, div.test#thing, div .test#thing { }`))
+		Print(t, `div.test #thing, div.test#thing, div .test#thing { }`))
 }
 
 func TestMediaQueryRanges(t *testing.T) {
 	assert.Equal(t, `@media (200px<width<600px),(200px<width),(width<600px){}`,
-		Print(`@media (200px < width < 600px), (200px < width), (width < 600px) {}`))
+		Print(t, `@media (200px < width < 600px), (200px < width), (width < 600px) {}`))
 }
 
 func TestKeyframes(t *testing.T) {
 	assert.Equal(t, `@keyframes x{from{opacity:0}to{opacity:1}}`,
-		Print(`@keyframes x { from { opacity: 0 } to { opacity: 1 } }`))
+		Print(t, `@keyframes x { from { opacity: 0 } to { opacity: 1 } }`))
 }
 
 func TestRule_NoSemicolon(t *testing.T) {
 	assert.Equal(t, `.class{width:2rem}`,
-		Print(`.class { width: 2rem }`))
+		Print(t, `.class { width: 2rem }`))
 }
