@@ -49,6 +49,17 @@ const (
 	CustomPropertiesTransformRoot
 )
 
+// CustomMediaQueries controls transform options for @custom-media usage, specified in CSS Media Queries Level 5.
+// See: https://www.w3.org/TR/mediaqueries-5/#custom-mq.
+type CustomMediaQueries int
+
+const (
+	// CustomMediaQueriesPassthrough passes custom media query definitions and usages through. It is the default.
+	CustomMediaQueriesPassthrough CustomMediaQueries = iota
+	// CustomMediaQueriesTransform will transform custom media queries when used in @media rules.
+	CustomMediaQueriesTransform
+)
+
 // Options sets options about what transforms to run. By default,
 // no transforms are run.
 type Options struct {
@@ -56,4 +67,5 @@ type Options struct {
 	MediaFeatureRanges
 	AnyLink
 	CustomProperties
+	CustomMediaQueries
 }

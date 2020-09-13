@@ -31,8 +31,7 @@ type Options struct {
 // transforms.
 func Transform(s *ast.Stylesheet, opts Options) *ast.Stylesheet {
 	t := &transformer{
-		Options:     opts,
-		customMedia: make(map[string]*ast.MediaQuery),
+		Options: opts,
 	}
 
 	if opts.Reporter == nil {
@@ -41,6 +40,10 @@ func Transform(s *ast.Stylesheet, opts Options) *ast.Stylesheet {
 
 	if opts.CustomProperties != transforms.CustomPropertiesPassthrough {
 		t.variables = make(map[string][]ast.Value)
+	}
+
+	if opts.CustomMediaQueries != transforms.CustomMediaQueriesPassthrough {
+		t.customMedia = make(map[string]*ast.MediaQuery)
 	}
 
 	if opts.ImportReplacements == nil && opts.ImportRules == transforms.ImportRulesInline {
@@ -183,6 +186,10 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 
 			case "custom-media":
 				func() {
+					if t.customMedia == nil {
+						return
+					}
+
 					if len(node.Preludes) != 2 {
 						return
 					}
@@ -274,6 +281,11 @@ func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast
 		switch part := p.(type) {
 		case *ast.MediaFeaturePlain:
 			if part.Value != nil || !strings.HasPrefix(part.Property.Value, "--") {
+				newParts = append(newParts, p)
+				break
+			}
+
+			if t.customMedia == nil {
 				newParts = append(newParts, p)
 				break
 			}
