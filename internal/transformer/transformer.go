@@ -30,11 +30,10 @@ func WithReporter(r logging.Reporter) TransformOption {
 // transforms.
 func Transform(s *ast.Stylesheet, source *sources.Source, opts ...TransformOption) *ast.Stylesheet {
 	t := &transformer{
-		source:             source,
-		variables:          make(map[string][]ast.Value),
-		customMedia:        make(map[string]*ast.MediaQuery),
-		importReplacements: make(map[*ast.AtRule]*ast.Stylesheet),
-		reporter:           logging.DefaultReporter,
+		source:      source,
+		variables:   make(map[string][]ast.Value),
+		customMedia: make(map[string]*ast.MediaQuery),
+		reporter:    logging.DefaultReporter,
 	}
 
 	for _, opt := range opts {
@@ -49,12 +48,15 @@ func Transform(s *ast.Stylesheet, source *sources.Source, opts ...TransformOptio
 // transformer takes a pass over the AST and makes
 // modifications to the AST, depending on the settings.
 type transformer struct {
-	source *sources.Source
+	source   *sources.Source
+	reporter logging.Reporter
 
-	variables          map[string][]ast.Value
-	customMedia        map[string]*ast.MediaQuery
+	variables   map[string][]ast.Value
+	customMedia map[string]*ast.MediaQuery
+
+	// importReplacements is the set of import references to inline. If nil,
+	// the transformer will assume all imports should be passed in instead of imported.
 	importReplacements map[*ast.AtRule]*ast.Stylesheet
-	reporter           logging.Reporter
 }
 
 func (t *transformer) addError(loc ast.Loc, fmt string, args ...interface{}) {
@@ -166,6 +168,10 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 		case *ast.AtRule:
 			switch node.Name {
 			case "import":
+				if t.importReplacements == nil {
+					rv = append(rv, node)
+				}
+
 				imported, ok := t.importReplacements[node]
 				if !ok {
 					rv = append(rv, node)

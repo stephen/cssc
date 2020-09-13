@@ -23,10 +23,12 @@ type Options struct {
 	// Reporter is the error and warning reporter. If not specified, the default
 	// reporter prints to stderr.
 	Reporter Reporter
+
+	Transforms TransformOptions
 }
 
-func newCompilation() *compilation {
-	return &compilation{
+func newCompilation(opts Options) *compilation {
+	c := &compilation{
 		sources:        make(map[string]int),
 		sourcesByIndex: make(map[int]*sources.Source),
 		outputsByIndex: make(map[int]struct{}),
@@ -34,7 +36,14 @@ func newCompilation() *compilation {
 		lockersByIndex: make(map[int]*sync.Mutex),
 		result:         newResult(),
 		reporter:       logging.DefaultReporter,
+		transforms:     opts.Transforms,
 	}
+
+	if opts.Reporter != nil {
+		c.reporter = opts.Reporter
+	}
+
+	return c
 }
 
 type compilation struct {
@@ -53,6 +62,8 @@ type compilation struct {
 	result *Result
 
 	reporter Reporter
+
+	transforms TransformOptions
 }
 
 // addSource will read in a path and assign it a source index. If
@@ -147,8 +158,8 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	for _, imp := range ss.Imports {
 		wg.Go(func() error {
 			rel := filepath.Join(filepath.Dir(source.Path), imp.Value)
-			// XXX: if @import passthrough is on, then this is true.
-			imported := c.parseFile(rel, false)
+			// If import passthrough is on, then every referenced file makes it to the output.
+			imported := c.parseFile(rel, c.transforms.ImportRules == ImportRulesPassthrough)
 
 			mu.Lock()
 			defer mu.Unlock()
@@ -160,18 +171,22 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	}
 	wg.Wait()
 
-	ss = transformer.Transform(ss, source, transformer.WithImportReplacements(replacements), transformer.WithReporter(c.reporter))
+	opts := []transformer.TransformOption{
+		transformer.WithReporter(c.reporter),
+	}
+
+	if c.transforms.ImportRules == ImportRulesInline {
+		opts = append(opts, transformer.WithImportReplacements(replacements))
+	}
+
+	ss = transformer.Transform(ss, source)
 	c.astsByIndex[idx] = ss
 	return ss
 }
 
 // Compile runs a compilation with the specified Options.
 func Compile(opts Options) *Result {
-	c := newCompilation()
-
-	if opts.Reporter != nil {
-		c.reporter = opts.Reporter
-	}
+	c := newCompilation(opts)
 
 	var wg errgroup.Group
 

@@ -38,16 +38,3 @@ func TestApi_Simple(t *testing.T) {
 	assert.Len(t, result.Files, 1)
 	assert.Len(t, errors, 0)
 }
-
-func TestApi_Imports(t *testing.T) {
-	var errors TestReporter
-	result := api.Compile(api.Options{
-		Entry: []string{
-			"testdata/imports/index.css",
-		},
-		Reporter: &errors,
-	})
-
-	assert.Len(t, result.Files, 1)
-	assert.Len(t, errors, 0)
-}
