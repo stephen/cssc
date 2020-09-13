@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Transform(t testing.TB, s string) string {
+func Transform(t testing.TB, modifier func(o *transformer.Options), s string) string {
 	source := &sources.Source{
 		Path:    "main.css",
 		Content: s,
@@ -18,10 +18,16 @@ func Transform(t testing.TB, s string) string {
 	ast, err := parser.Parse(source)
 
 	require.NoError(t, err)
-	out, err := printer.Print(transformer.Transform(ast, transformer.Options{
+	o := &transformer.Options{
 		OriginalSource: source,
 		Reporter:       &reporter{},
-	}), printer.Options{})
+	}
+
+	if modifier != nil {
+		modifier(o)
+	}
+
+	out, err := printer.Print(transformer.Transform(ast, *o), printer.Options{})
 	require.NoError(t, err)
 	return out
 }

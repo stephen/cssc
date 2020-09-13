@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/stephen/cssc/api/transforms"
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/logging"
 	"github.com/stephen/cssc/internal/sources"
@@ -23,6 +24,8 @@ type Options struct {
 	// ImportReplacements is the set of import references to inline. If nil,
 	// the transformer will assume all imports should be passed in instead of imported.
 	ImportReplacements map[*ast.AtRule]*ast.Stylesheet
+
+	MediaFeatureRanges transforms.MediaFeatureRanges
 }
 
 // Transform takes a pass over the input AST and runs various
@@ -216,7 +219,11 @@ func (t *transformer) transformMediaQueries(queries []*ast.MediaQuery) []*ast.Me
 	return newQueries
 }
 
-func (t *transformer) transformMediaQueryRange(part *ast.MediaFeatureRange) []ast.MediaQueryPart {
+func (t *transformer) transformMediaFeatureRange(part *ast.MediaFeatureRange) []ast.MediaQueryPart {
+	if t.MediaFeatureRanges == transforms.MediaFeatureRangesPassthrough {
+		return []ast.MediaQueryPart{part}
+	}
+
 	var newParts []ast.MediaQueryPart
 	if part.LeftValue != nil {
 		direction := "min"
@@ -273,7 +280,7 @@ func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast
 
 			newParts = append(newParts, replacement.Parts...)
 		case *ast.MediaFeatureRange:
-			newParts = append(newParts, t.transformMediaQueryRange(part)...)
+			newParts = append(newParts, t.transformMediaFeatureRange(part)...)
 
 		default:
 			newParts = append(newParts, p)
