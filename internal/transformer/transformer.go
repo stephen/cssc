@@ -2,6 +2,8 @@ package transformer
 
 import (
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/stephen/cssc/internal/ast"
@@ -232,43 +234,96 @@ func (t *transformer) transformMediaQueries(queries []*ast.MediaQuery) []*ast.Me
 	return newQueries
 }
 
+// addToValue takes an ast.Value and adds diff to it.
+func (t *transformer) addToValue(v ast.Value, diff float64) ast.Value {
+	if diff == 0 {
+		return v
+	}
+
+	switch oldValue := v.(type) {
+	case *ast.Dimension:
+		f, err := strconv.ParseFloat(oldValue.Value, 10)
+		if err != nil {
+			t.addError(oldValue.Location(), "could not parse dimension value to lower media range: %s", oldValue.Value)
+			return oldValue
+		}
+		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64), Unit: oldValue.Unit}
+
+	case *ast.Percentage:
+		f, err := strconv.ParseFloat(oldValue.Value, 10)
+		if err != nil {
+			t.addError(oldValue.Location(), "could not parse percentage value to lower media range: %s", oldValue.Value)
+			return oldValue
+		}
+		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64)}
+
+	case *ast.Number:
+		f, err := strconv.ParseFloat(oldValue.Value, 10)
+		if err != nil {
+			t.addError(oldValue.Location(), "could not parse number value to lower media range: %s", oldValue.Value)
+			return oldValue
+		}
+		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64)}
+	default:
+		t.addError(oldValue.Location(), "tried to modify non-numeric value. expected dimension, percentage, or number, but got: %s", reflect.TypeOf(v).String())
+		return v
+	}
+}
+
 func (t *transformer) transformMediaFeatureRange(part *ast.MediaFeatureRange) []ast.MediaQueryPart {
+	asIs := []ast.MediaQueryPart{part}
 	if t.MediaFeatureRanges == transforms.MediaFeatureRangesPassthrough {
-		return []ast.MediaQueryPart{part}
+		return asIs
 	}
 
 	var newParts []ast.MediaQueryPart
 	if part.LeftValue != nil {
-		direction := "min"
-		if part.Operator == ">=" {
+		var direction string
+		var diff float64
+		switch part.Operator {
+		case ">":
+			diff = -.001
+			fallthrough
+		case ">=":
 			direction = "max"
-		}
-
-		if part.Operator == "<" || part.Operator == ">" {
-			t.addWarn(part.Location(), "< and > not yet supported for transformation")
+		case "<":
+			diff = .001
+			fallthrough
+		case "<=":
+			direction = "min"
 		}
 
 		newParts = append(newParts, &ast.MediaFeaturePlain{
 			// XXX: replace this allocation with a lookup.
 			Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
-			Value:    part.LeftValue,
+			Value:    t.addToValue(part.LeftValue, diff),
 		})
 	}
 
 	if part.RightValue != nil {
-		direction := "max"
-		if part.Operator == ">=" {
-			direction = "min"
+		if part.LeftValue != nil {
+			newParts = append(newParts, &ast.Identifier{Value: "and"})
 		}
 
-		if part.Operator == "<" || part.Operator == ">" {
-			t.addWarn(part.Location(), "< and > not yet supported for transformation")
+		var direction string
+		var diff float64
+		switch part.Operator {
+		case ">":
+			diff = .001
+			fallthrough
+		case ">=":
+			direction = "min"
+		case "<":
+			diff = -.001
+			fallthrough
+		case "<=":
+			direction = "max"
 		}
 
 		newParts = append(newParts, &ast.MediaFeaturePlain{
 			// XXX: replace this allocation with a lookup.
 			Property: &ast.Identifier{Value: fmt.Sprintf("%s-%s", direction, part.Property.Value)},
-			Value:    part.RightValue,
+			Value:    t.addToValue(part.RightValue, diff),
 		})
 	}
 
@@ -297,6 +352,7 @@ func (t *transformer) transformMediaQueryParts(parts []ast.MediaQueryPart) []ast
 			}
 
 			newParts = append(newParts, replacement.Parts...)
+
 		case *ast.MediaFeatureRange:
 			newParts = append(newParts, t.transformMediaFeatureRange(part)...)
 

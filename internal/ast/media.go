@@ -49,13 +49,6 @@ type MediaInParens struct {
 	Parts []MediaQueryPart
 }
 
-// MediaOperator is not, only, and or or.
-type MediaOperator struct {
-	Loc
-
-	Value string
-}
-
 // MediaType is a specific media type.
 type MediaType struct {
 	Loc

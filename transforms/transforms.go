@@ -19,8 +19,9 @@ type MediaFeatureRanges int
 const (
 	// MediaFeatureRangesPassthrough passes @imports down without changes. It is the default.
 	MediaFeatureRangesPassthrough MediaFeatureRanges = iota
-	// MediaFeatureRangesTransform transforms ranges into best-effort min- and max- values. In this version,
-	// it only supports <= and >= syntax and will fail to transform < and > syntax.
+	// MediaFeatureRangesTransform transforms ranges into best-effort min- and max- values. When
+	// > and < are used, we follow the guidance from https://www.w3.org/TR/mediaqueries-5/#mq-min-max and
+	// use min/max with a change in .001 precision.
 	MediaFeatureRangesTransform
 )
 
