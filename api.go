@@ -173,6 +173,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	wg.Wait()
 
 	opts := transformer.Options{
+		Options:        c.transforms,
 		OriginalSource: source,
 		Reporter:       c.reporter,
 	}

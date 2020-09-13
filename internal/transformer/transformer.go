@@ -19,15 +19,12 @@ type Options struct {
 	// Reporter is the reporter for errors and warnings.
 	Reporter logging.Reporter
 
-	// Options for individual transforms below.
+	// Options is the set of transform options. Some transforms may need additional context passed in.
+	transforms.Options
 
-	// ImportReplacements is the set of import references to inline. If nil,
-	// the transformer will assume all imports should be passed in instead of imported.
+	// ImportReplacements is the set of import references to inline. ImportReplacements must be non-nil
+	// if ImportRules is set to ImportRulesInline.
 	ImportReplacements map[*ast.AtRule]*ast.Stylesheet
-
-	transforms.MediaFeatureRanges
-	transforms.AnyLink
-	transforms.CustomProperties
 }
 
 // Transform takes a pass over the input AST and runs various
@@ -44,6 +41,10 @@ func Transform(s *ast.Stylesheet, opts Options) *ast.Stylesheet {
 
 	if opts.CustomProperties != transforms.CustomPropertiesPassthrough {
 		t.variables = make(map[string][]ast.Value)
+	}
+
+	if opts.ImportReplacements == nil && opts.ImportRules == transforms.ImportRulesInline {
+		t.Reporter.AddError(fmt.Errorf("ImportRules is set to ImportRulesInline, but ImportReplacements is not set"))
 	}
 
 	s.Nodes = t.transformNodes(s.Nodes)
