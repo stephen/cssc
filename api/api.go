@@ -7,6 +7,7 @@ import (
 
 	"github.com/samsarahq/go/oops"
 	"github.com/stephen/cssc/internal/ast"
+	"github.com/stephen/cssc/internal/logging"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
 	"github.com/stephen/cssc/internal/sources"
@@ -18,6 +19,10 @@ import (
 type Options struct {
 	// Entry is the set of files to start parsing.
 	Entry []string
+
+	// Reporter is the error and warning reporter. If not specified, the default
+	// reporter prints to stderr.
+	Reporter Reporter
 }
 
 func newCompilation() *compilation {
@@ -28,6 +33,7 @@ func newCompilation() *compilation {
 		astsByIndex:    make(map[int]*ast.Stylesheet),
 		lockersByIndex: make(map[int]*sync.Mutex),
 		result:         newResult(),
+		reporter:       logging.DefaultReporter,
 	}
 }
 
@@ -43,6 +49,8 @@ type compilation struct {
 	lockersByIndex map[int]*sync.Mutex
 
 	result *Result
+
+	reporter Reporter
 }
 
 // addSource will read in a path and assign it a source index. If
@@ -91,14 +99,12 @@ func newResult() *Result {
 type Result struct {
 	mu    sync.Mutex
 	Files map[string]string
-
-	Errors []error
 }
 
 func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	idx, err := c.addSource(file)
 	if err != nil {
-		c.result.Errors = append(c.result.Errors, err)
+		c.reporter.AddError(err)
 		return nil
 	}
 
@@ -112,7 +118,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	source := c.sourcesByIndex[idx]
 	ss, err := parser.Parse(source)
 	if err != nil {
-		c.result.Errors = append(c.result.Errors, err)
+		c.reporter.AddError(err)
 		return nil
 	}
 	if hasOutput {
@@ -146,6 +152,11 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 // Compile runs a compilation with the specified Options.
 func Compile(opts Options) *Result {
 	c := newCompilation()
+
+	if opts.Reporter != nil {
+		c.reporter = opts.Reporter
+	}
+
 	var wg errgroup.Group
 
 	for _, e := range opts.Entry {
@@ -173,4 +184,12 @@ func Compile(opts Options) *Result {
 	wg.Wait()
 
 	return c.result
+}
+
+// Reporter is an error and warning reporter.
+//
+// Note that it is the same type as logging.Reporter, which is
+// an internal-only interface.
+type Reporter interface {
+	AddError(err error)
 }

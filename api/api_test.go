@@ -7,35 +7,47 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestReporter []error
+
+func (r *TestReporter) AddError(err error) {
+	*r = append(*r, err)
+}
+
 func TestApi_Error(t *testing.T) {
+	var errors TestReporter
 	result := api.Compile(api.Options{
 		Entry: []string{
 			"testdata/nonexistent/index.css",
 		},
+		Reporter: &errors,
 	})
 
 	assert.Len(t, result.Files, 0)
-	assert.Len(t, result.Errors, 1)
+	assert.Len(t, errors, 1)
 }
 
 func TestApi_Simple(t *testing.T) {
+	var errors TestReporter
 	result := api.Compile(api.Options{
 		Entry: []string{
 			"testdata/simple/index.css",
 		},
+		Reporter: &errors,
 	})
 
 	assert.Len(t, result.Files, 1)
-	assert.Len(t, result.Errors, 0)
+	assert.Len(t, errors, 0)
 }
 
 func TestApi_Imports(t *testing.T) {
+	var errors TestReporter
 	result := api.Compile(api.Options{
 		Entry: []string{
 			"testdata/imports/index.css",
 		},
+		Reporter: &errors,
 	})
 
 	assert.Len(t, result.Files, 1)
-	assert.Len(t, result.Errors, 0)
+	assert.Len(t, errors, 0)
 }
