@@ -1,9 +1,9 @@
-package api_test
+package cssc_test
 
 import (
 	"testing"
 
-	"github.com/stephen/cssc/api"
+	"github.com/stephen/cssc"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +15,7 @@ func (r *TestReporter) AddError(err error) {
 
 func TestApi_Error(t *testing.T) {
 	var errors TestReporter
-	result := api.Compile(api.Options{
+	result := cssc.Compile(cssc.Options{
 		Entry: []string{
 			"testdata/nonexistent/index.css",
 		},
@@ -28,7 +28,7 @@ func TestApi_Error(t *testing.T) {
 
 func TestApi_Simple(t *testing.T) {
 	var errors TestReporter
-	result := api.Compile(api.Options{
+	result := cssc.Compile(cssc.Options{
 		Entry: []string{
 			"testdata/simple/index.css",
 		},

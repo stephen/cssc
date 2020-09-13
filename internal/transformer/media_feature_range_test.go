@@ -3,8 +3,8 @@ package transformer_test
 import (
 	"testing"
 
-	"github.com/stephen/cssc/api/transforms"
 	"github.com/stephen/cssc/internal/transformer"
+	"github.com/stephen/cssc/transforms"
 	"github.com/stretchr/testify/assert"
 )
 

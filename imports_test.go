@@ -1,17 +1,17 @@
-package api_test
+package cssc_test
 
 import (
 	"testing"
 
-	"github.com/stephen/cssc/api"
-	"github.com/stephen/cssc/api/transforms"
+	"github.com/stephen/cssc"
+	"github.com/stephen/cssc/transforms"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestImports(t *testing.T) {
 	t.Run("inline", func(t *testing.T) {
 		var errors TestReporter
-		result := api.Compile(api.Options{
+		result := cssc.Compile(cssc.Options{
 			Entry: []string{
 				"testdata/imports/index.css",
 			},
@@ -27,7 +27,7 @@ func TestImports(t *testing.T) {
 
 	t.Run("passthrough", func(t *testing.T) {
 		var errors TestReporter
-		result := api.Compile(api.Options{
+		result := cssc.Compile(cssc.Options{
 			Entry: []string{
 				"testdata/imports/index.css",
 			},

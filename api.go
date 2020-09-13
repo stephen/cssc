@@ -1,4 +1,4 @@
-package api
+package cssc
 
 import (
 	"io/ioutil"
@@ -6,13 +6,13 @@ import (
 	"sync"
 
 	"github.com/samsarahq/go/oops"
-	"github.com/stephen/cssc/api/transforms"
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/logging"
 	"github.com/stephen/cssc/internal/parser"
 	"github.com/stephen/cssc/internal/printer"
 	"github.com/stephen/cssc/internal/sources"
 	"github.com/stephen/cssc/internal/transformer"
+	"github.com/stephen/cssc/transforms"
 	"golang.org/x/sync/errgroup"
 )
 

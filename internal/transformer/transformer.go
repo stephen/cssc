@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/stephen/cssc/api/transforms"
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/logging"
 	"github.com/stephen/cssc/internal/sources"
+	"github.com/stephen/cssc/transforms"
 )
 
 // Options is the set of options for transformation.
