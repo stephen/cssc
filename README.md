@@ -7,10 +7,9 @@ start with, it aims to be able to replace projects like [postcss-preset-env](htt
 It's approach is inspired from experimenting with [esbuild](https://github.com/evanw/esbuild) (see [here](https://github.com/evanw/esbuild/issues/111#issuecomment-673115702)).
 
 ## Status
-The package is currently **unusable**.
+The package can currently parse and print most standard CSS. There are likely bugs in both.
 
-I have the start of a lexer, parser, printer, transformer and ast, but they are all incomplete.
-
+Some transforms are supported:
 
 | Transform  | Support | Notes |
 | ------------- | ------------- | ------------- |
@@ -20,7 +19,87 @@ I have the start of a lexer, parser, printer, transformer and ast, but they are 
 | [Media Feature Ranges](https://www.w3.org/TR/mediaqueries-4/#mq-min-max) | Complete | |
 | [`:any-link`](https://www.w3.org/TR/selectors-4/#the-any-link-pseudo) | Complete | |
 
-Note that complete means that the feature is supported as much as possible from simple transforms. For instance, custom properties (`--*`) on non-`:root` selectors cannot be substituted without a more complete cascading analysis.
+## API
+For now, there is only a go API.
+
+```golang
+package main
+
+import (
+  "log"
+
+  "github.com/stephen/cssc"
+)
+
+func main() {
+  result := cssc.Compile(cssc.Options{
+    Entry: []string{"css/index.css"},
+  })
+
+  // result.Files is a map of all output files.
+  for path, content := range result.Files {
+    log.Println(path, content)
+  }
+}
+```
+
+### Transforms
+Transforms can be specified via options:
+```golang
+package main
+
+import (
+  "github.com/stephen/cssc"
+  "github.com/stephen/cssc/transforms"
+)
+
+func main() {
+  result := cssc.Compile(cssc.Options{
+    Entry: []string{"css/index.css"},
+    Transforms: transforms.Options{
+      // Transform :any-link into :link and :visited equivalents.
+      AnyLink: transforms.AnyLinkTransform,
+      // Keep @import rules without transforming them or inlining their content.
+      ImportRules: transforms.ImportRulesPassthrough,
+    },
+  })
+
+  // result.Files...
+}
+```
+
+By default, all features are in passthrough mode and will not get transformed.
+
+### Error reporting
+By default, errors and warnings are printed to stderr. You can control this behavior by providing a [Reporter](https://pkg.go.dev/github.com/stephen/cssc?tab=doc#Reporter):
+```golang
+package main
+
+import (
+  "log"
+
+  "github.com/stephen/cssc"
+)
+
+type TestReporter []error
+
+func (r *TestReporter) AddError(err error) {
+  *r = append(*r, err)
+}
+
+func main() {
+  var errors TestReporter
+  result := cssc.Compile(cssc.Options{
+    Entry:    []string{"css/index.css"},
+    Reporter: &errors,
+  })
+
+  for _, err := range errors {
+    log.Println(err)
+  }
+}
+```
+
 
 ## Benchmarks
 To keep track of performance, I've been benchmarking performance on (partially) [parsing bootstrap.css](https://github.com/postcss/benchmark).
