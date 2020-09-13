@@ -36,10 +36,24 @@ const (
 	AnyLinkTransform
 )
 
+// CustomProperties controls transform options for custom properteries (--var) and the var() function
+// from CSS Variables Level 1.
+// See: https://www.w3.org/TR/css-variables-1/.
+type CustomProperties int
+
+const (
+	// CustomPropertiesPassthrough passes variable declarations and var() down without changes. It is the default.
+	CustomPropertiesPassthrough CustomProperties = iota
+	// CustomPropertiesTransformRoot will transform properties defiend in :root selectors. Custom property definitions
+	// under any other selectors will be ignored and passed through.
+	CustomPropertiesTransformRoot
+)
+
 // Options sets options about what transforms to run. By default,
 // no transforms are run.
 type Options struct {
 	ImportRules
 	MediaFeatureRanges
 	AnyLink
+	CustomProperties
 }

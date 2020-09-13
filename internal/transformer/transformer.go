@@ -27,6 +27,7 @@ type Options struct {
 
 	transforms.MediaFeatureRanges
 	transforms.AnyLink
+	transforms.CustomProperties
 }
 
 // Transform takes a pass over the input AST and runs various
@@ -34,12 +35,15 @@ type Options struct {
 func Transform(s *ast.Stylesheet, opts Options) *ast.Stylesheet {
 	t := &transformer{
 		Options:     opts,
-		variables:   make(map[string][]ast.Value),
 		customMedia: make(map[string]*ast.MediaQuery),
 	}
 
 	if opts.Reporter == nil {
 		t.Reporter = logging.DefaultReporter
+	}
+
+	if opts.CustomProperties != transforms.CustomPropertiesPassthrough {
+		t.variables = make(map[string][]ast.Value)
 	}
 
 	s.Nodes = t.transformNodes(s.Nodes)
@@ -139,7 +143,7 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 
 				newDecls := make([]*ast.Declaration, 0, len(declBlock.Declarations))
 				for _, decl := range declBlock.Declarations {
-					if strings.HasPrefix(decl.Property, "--") {
+					if strings.HasPrefix(decl.Property, "--") && t.variables != nil {
 						t.variables[decl.Property] = decl.Values
 						continue
 					}
@@ -334,14 +338,18 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 					return
 				}
 
+				if t.variables == nil {
+					return
+				}
+
 				if len(v.Arguments) == 0 {
-					// warning: expected at least one argument
+					t.addError(v.Location(), "expected at least one argument to var()")
 					return
 				}
 
 				varName, ok := v.Arguments[0].(*ast.Identifier)
 				if !ok {
-					// warning: expected identifier
+					t.addError(v.Location(), "expected identifier as argument to var()")
 					return
 				}
 
@@ -353,7 +361,7 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 						return
 					}
 
-					// warning: unknown variable (and no fallback)
+					t.addWarn(v.Location(), "use of undefined variable without fallback: %s", varName.Value)
 					return
 				}
 
