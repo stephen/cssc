@@ -24,9 +24,22 @@ const (
 	MediaFeatureRangesTransform
 )
 
+// AnyLink controls transform options for :any-link selectors.
+// introduced in CSS Selectors Level 4.
+// See: https://www.w3.org/TR/selectors-4/#the-any-link-pseudo
+type AnyLink int
+
+const (
+	// AnyLinkPassthrough passes :any-link down without changes. It is the default.
+	AnyLinkPassthrough AnyLink = iota
+	// AnyLinkTransform transforms :any-link selectors into selectors for both :visited and :link.
+	AnyLinkTransform
+)
+
 // Options sets options about what transforms to run. By default,
 // no transforms are run.
 type Options struct {
 	ImportRules
 	MediaFeatureRanges
+	AnyLink
 }

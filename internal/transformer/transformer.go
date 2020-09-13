@@ -25,7 +25,8 @@ type Options struct {
 	// the transformer will assume all imports should be passed in instead of imported.
 	ImportReplacements map[*ast.AtRule]*ast.Stylesheet
 
-	MediaFeatureRanges transforms.MediaFeatureRanges
+	transforms.MediaFeatureRanges
+	transforms.AnyLink
 }
 
 // Transform takes a pass over the input AST and runs various
@@ -72,7 +73,7 @@ func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector 
 		for index, p := range n.Parts {
 			switch part := p.(type) {
 			case *ast.PseudoClassSelector:
-				if part.Name != "any-link" {
+				if part.Name != "any-link" || t.AnyLink == transforms.AnyLinkPassthrough {
 					newParts = append(newParts, p)
 					break
 				}
