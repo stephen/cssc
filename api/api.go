@@ -45,6 +45,8 @@ type compilation struct {
 
 	sourcesByIndex map[int]*sources.Source
 	astsByIndex    map[int]*ast.Stylesheet
+
+	// outputsByIndex is the set of sources to write outputs for.
 	outputsByIndex map[int]struct{}
 	lockersByIndex map[int]*sync.Mutex
 
@@ -101,13 +103,27 @@ type Result struct {
 	Files map[string]string
 }
 
+// parseFile assigns the file a source index and parses the source. It also
+// looks at imported files and adds them to the compilation. hasOutput should
+// be called if the file should be included in compilation output.
+//
+// parseFile also runs the last transformation pass on the output. Note that we
+// don't make this function print the output as well so that we can make the current
+// file available to any callers as a dependency.
 func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
+	// Assign the file a source index.
 	idx, err := c.addSource(file)
 	if err != nil {
 		c.reporter.AddError(err)
 		return nil
 	}
 
+	if hasOutput {
+		c.outputsByIndex[idx] = struct{}{}
+	}
+
+	// Grab the lock for this source, since multiple callers might try
+	// to parse the same file.
 	locker := c.lockersByIndex[idx]
 	locker.Lock()
 	defer locker.Unlock()
@@ -121,13 +137,13 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 		c.reporter.AddError(err)
 		return nil
 	}
-	if hasOutput {
-		c.outputsByIndex[idx] = struct{}{}
-	}
 
+	// Immediately look at the imports from the file and feed those dependencies
+	// into parseFile as well. If we're set to inline imports, then we'll use
+	// collect those dependency ASTs to let the transformer replace them.
 	var mu sync.Mutex
 	replacements := make(map[*ast.AtRule]*ast.Stylesheet)
-	wg := errgroup.Group{}
+	var wg errgroup.Group
 	for _, imp := range ss.Imports {
 		wg.Go(func() error {
 			rel := filepath.Join(filepath.Dir(source.Path), imp.Value)
