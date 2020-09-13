@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/samsarahq/go/oops"
+	"github.com/stephen/cssc/api/transforms"
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/logging"
 	"github.com/stephen/cssc/internal/parser"
@@ -24,7 +25,7 @@ type Options struct {
 	// reporter prints to stderr.
 	Reporter Reporter
 
-	Transforms TransformOptions
+	Transforms transforms.Options
 }
 
 func newCompilation(opts Options) *compilation {
@@ -63,7 +64,7 @@ type compilation struct {
 
 	reporter Reporter
 
-	transforms TransformOptions
+	transforms transforms.Options
 }
 
 // addSource will read in a path and assign it a source index. If
@@ -159,7 +160,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 		wg.Go(func() error {
 			rel := filepath.Join(filepath.Dir(source.Path), imp.Value)
 			// If import passthrough is on, then every referenced file makes it to the output.
-			imported := c.parseFile(rel, c.transforms.ImportRules == ImportRulesPassthrough)
+			imported := c.parseFile(rel, c.transforms.ImportRules == transforms.ImportRulesPassthrough)
 
 			mu.Lock()
 			defer mu.Unlock()
@@ -171,15 +172,16 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	}
 	wg.Wait()
 
-	opts := []transformer.TransformOption{
-		transformer.WithReporter(c.reporter),
+	opts := transformer.Options{
+		OriginalSource: source,
+		Reporter:       c.reporter,
 	}
 
-	if c.transforms.ImportRules == ImportRulesInline {
-		opts = append(opts, transformer.WithImportReplacements(replacements))
+	if c.transforms.ImportRules == transforms.ImportRulesInline {
+		opts.ImportReplacements = replacements
 	}
 
-	ss = transformer.Transform(ss, source)
+	ss = transformer.Transform(ss, opts)
 	c.astsByIndex[idx] = ss
 	return ss
 }

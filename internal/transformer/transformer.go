@@ -9,35 +9,33 @@ import (
 	"github.com/stephen/cssc/internal/sources"
 )
 
-// TransformOption is an option to modify the transformer.
-type TransformOption func(*transformer)
+// Options is the set of options for transformation.
+type Options struct {
+	// OriginalSource is used to report error locations.
+	// XXX: work even if original source is not passed by having janky errors.
+	OriginalSource *sources.Source
 
-// WithImportReplacements sets an imports to inline.
-func WithImportReplacements(r map[*ast.AtRule]*ast.Stylesheet) TransformOption {
-	return func(t *transformer) {
-		t.importReplacements = r
-	}
-}
+	// Reporter is the reporter for errors and warnings.
+	Reporter logging.Reporter
 
-// WithReporter replaces the reporter used by the transformer.
-func WithReporter(r logging.Reporter) TransformOption {
-	return func(t *transformer) {
-		t.reporter = r
-	}
+	// Options for individual transforms below.
+
+	// ImportReplacements is the set of import references to inline. If nil,
+	// the transformer will assume all imports should be passed in instead of imported.
+	ImportReplacements map[*ast.AtRule]*ast.Stylesheet
 }
 
 // Transform takes a pass over the input AST and runs various
 // transforms.
-func Transform(s *ast.Stylesheet, source *sources.Source, opts ...TransformOption) *ast.Stylesheet {
+func Transform(s *ast.Stylesheet, opts Options) *ast.Stylesheet {
 	t := &transformer{
-		source:      source,
+		Options:     opts,
 		variables:   make(map[string][]ast.Value),
 		customMedia: make(map[string]*ast.MediaQuery),
-		reporter:    logging.DefaultReporter,
 	}
 
-	for _, opt := range opts {
-		opt(t)
+	if opts.Reporter == nil {
+		t.Reporter = logging.DefaultReporter
 	}
 
 	s.Nodes = t.transformNodes(s.Nodes)
@@ -48,25 +46,20 @@ func Transform(s *ast.Stylesheet, source *sources.Source, opts ...TransformOptio
 // transformer takes a pass over the AST and makes
 // modifications to the AST, depending on the settings.
 type transformer struct {
-	source   *sources.Source
-	reporter logging.Reporter
+	Options
 
 	variables   map[string][]ast.Value
 	customMedia map[string]*ast.MediaQuery
-
-	// importReplacements is the set of import references to inline. If nil,
-	// the transformer will assume all imports should be passed in instead of imported.
-	importReplacements map[*ast.AtRule]*ast.Stylesheet
 }
 
 func (t *transformer) addError(loc ast.Loc, fmt string, args ...interface{}) {
 	// XXX: we don't have the end locations anymore, but we should...
-	t.reporter.AddError(logging.LocationErrorf(t.source, loc.Location().Position, loc.Location().Position+1, fmt, args...))
+	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }
 
 func (t *transformer) addWarn(loc ast.Loc, fmt string, args ...interface{}) {
 	// XXX: we don't have the end locations anymore, but we should...
-	t.reporter.AddError(logging.LocationWarnf(t.source, loc.Location().Position, loc.Location().Position+1, fmt, args...))
+	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }
 
 func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {
@@ -168,11 +161,11 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 		case *ast.AtRule:
 			switch node.Name {
 			case "import":
-				if t.importReplacements == nil {
+				if t.ImportReplacements == nil {
 					rv = append(rv, node)
 				}
 
-				imported, ok := t.importReplacements[node]
+				imported, ok := t.ImportReplacements[node]
 				if !ok {
 					rv = append(rv, node)
 					break

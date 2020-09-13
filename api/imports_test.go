@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stephen/cssc/api"
+	"github.com/stephen/cssc/api/transforms"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,8 +16,8 @@ func TestImports(t *testing.T) {
 				"testdata/imports/index.css",
 			},
 			Reporter: &errors,
-			Transforms: api.TransformOptions{
-				ImportRules: api.ImportRulesInline,
+			Transforms: transforms.Options{
+				ImportRules: transforms.ImportRulesInline,
 			},
 		})
 
@@ -31,8 +32,8 @@ func TestImports(t *testing.T) {
 				"testdata/imports/index.css",
 			},
 			Reporter: &errors,
-			Transforms: api.TransformOptions{
-				ImportRules: api.ImportRulesPassthrough,
+			Transforms: transforms.Options{
+				ImportRules: transforms.ImportRulesPassthrough,
 			},
 		})
 

@@ -1,4 +1,4 @@
-package api
+package transforms
 
 // ImportRules controls transform behavior for @imports.
 type ImportRules int
@@ -11,8 +11,8 @@ const (
 	ImportRulesInline
 )
 
-// TransformOptions sets options about what transforms to run. By default,
+// Options sets options about what transforms to run. By default,
 // no transforms are run.
-type TransformOptions struct {
+type Options struct {
 	ImportRules
 }

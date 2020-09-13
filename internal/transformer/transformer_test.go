@@ -18,7 +18,10 @@ func Transform(t testing.TB, s string) string {
 	ast, err := parser.Parse(source)
 
 	require.NoError(t, err)
-	out, err := printer.Print(transformer.Transform(ast, source, transformer.WithReporter(&reporter{})), printer.Options{})
+	out, err := printer.Print(transformer.Transform(ast, transformer.Options{
+		OriginalSource: source,
+		Reporter:       &reporter{},
+	}), printer.Options{})
 	require.NoError(t, err)
 	return out
 }
