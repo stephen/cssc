@@ -1,4 +1,6 @@
 # cssc
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/stephen/cssc?tab=doc)](https://pkg.go.dev/github.com/stephen/cssc?tab=doc)
+
 A fast, friendly css compiler in go.
 
 This repo is the start of a css compiler (parser, ast, and printer) and set of transforms to support new CSS syntax in current browsers. To
