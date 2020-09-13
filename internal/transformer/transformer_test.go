@@ -18,7 +18,9 @@ func Transform(t testing.TB, s string) string {
 	ast, err := parser.Parse(source)
 
 	require.NoError(t, err)
-	return printer.Print(transformer.Transform(ast, source, transformer.WithReporter(&reporter{})), printer.Options{})
+	out, err := printer.Print(transformer.Transform(ast, source, transformer.WithReporter(&reporter{})), printer.Options{})
+	require.NoError(t, err)
+	return out
 }
 
 type reporter struct{}

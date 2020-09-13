@@ -33,7 +33,19 @@ type Options struct {
 
 // Print prints the input AST node into CSS. It should have deterministic
 // output.
-func Print(in ast.Node, opts Options) string {
+func Print(in ast.Node, opts Options) (output string, err error) {
+	defer func() {
+		if rErr := recover(); rErr != nil {
+			if errI, ok := rErr.(error); ok {
+				output, err = "", errI
+				return
+			}
+
+			// Re-panic unknown issues.
+			panic(err)
+		}
+	}()
+
 	p := printer{
 		options: opts,
 	}
@@ -41,7 +53,7 @@ func Print(in ast.Node, opts Options) string {
 	p.print(in)
 	p.printMapping()
 
-	return p.s.String()
+	return p.s.String(), nil
 }
 
 func (p *printer) printMapping() {

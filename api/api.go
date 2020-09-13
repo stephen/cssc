@@ -175,9 +175,16 @@ func Compile(opts Options) *Result {
 			source := c.sourcesByIndex[idx]
 			c.result.mu.Lock()
 			defer c.result.mu.Unlock()
-			c.result.Files[source.Path] = printer.Print(c.astsByIndex[idx], printer.Options{
+
+			out, err := printer.Print(c.astsByIndex[idx], printer.Options{
 				OriginalSource: source,
 			})
+			if err != nil {
+				c.reporter.AddError(err)
+				return nil
+			}
+
+			c.result.Files[source.Path] = out
 			return nil
 		})
 	}

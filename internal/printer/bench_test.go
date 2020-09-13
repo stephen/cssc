@@ -25,14 +25,14 @@ func BenchmarkPrinter(b *testing.B) {
 	b.Run("no sourcemap", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			_ = Print(ast, Options{})
+			_, _ = Print(ast, Options{})
 		}
 	})
 
 	b.Run("with sourcemap", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			_ = Print(ast, Options{OriginalSource: source})
+			_, _ = Print(ast, Options{OriginalSource: source})
 		}
 	})
 }

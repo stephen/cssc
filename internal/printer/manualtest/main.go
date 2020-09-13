@@ -47,10 +47,13 @@ func main() {
 		panic(err)
 	}
 	log.Println(spew.Sdump(sheet))
-	out := printer.Print(sheet, printer.Options{
+
+	out, err := printer.Print(sheet, printer.Options{
 		OriginalSource: source,
 	})
-
+	if err != nil {
+		panic(err)
+	}
 	log.Println(out)
 
 	fp := filepath.Join("internal/printer/manualtest/", "index.css")

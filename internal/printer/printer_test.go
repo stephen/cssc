@@ -7,6 +7,7 @@ import (
 	"github.com/stephen/cssc/internal/printer"
 	"github.com/stephen/cssc/internal/sources"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Print(t testing.TB, s string) string {
@@ -14,9 +15,12 @@ func Print(t testing.TB, s string) string {
 		Path:    "main.css",
 		Content: s,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	return printer.Print(ss, printer.Options{})
+	out, err := printer.Print(ss, printer.Options{})
+	require.NoError(t, err)
+
+	return out
 }
 
 func TestClass(t *testing.T) {
