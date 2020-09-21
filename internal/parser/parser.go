@@ -3,16 +3,23 @@ package parser
 import (
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/lexer"
+	"github.com/stephen/cssc/internal/logging"
 	"github.com/stephen/cssc/internal/sources"
 )
 
 // Parse parses an input stylesheet.
 func Parse(source *sources.Source) (ss *ast.Stylesheet, err error) {
+	p := newParser(source)
 	defer func() {
 		if rErr := recover(); rErr != nil {
-			if errI, ok := rErr.(error); ok {
+			if errI, ok := rErr.(*lexer.Error); ok {
 				ss, err = nil, errI
 				return
+			}
+
+			if errI, ok := rErr.(error); ok {
+				start, end := p.lexer.Range()
+				panic(logging.LocationErrorf(source, start, end, "%v", errI))
 			}
 
 			// Re-panic unknown issues.
@@ -20,7 +27,6 @@ func Parse(source *sources.Source) (ss *ast.Stylesheet, err error) {
 		}
 	}()
 
-	p := newParser(source)
 	p.parse()
 	return p.ss, nil
 }
