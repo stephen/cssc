@@ -369,7 +369,11 @@ func (p *parser) parseImportAtRule() {
 		p.lexer.Errorf("unexpected import specifier")
 	}
 
-	imp.Preludes = append(imp.Preludes, p.parseMediaQueryList())
+	// XXX: also support @supports.
+	mq := p.parseMediaQueryList()
+	if mq != nil {
+		imp.Preludes = append(imp.Preludes, mq)
+	}
 
 	p.ss.Nodes = append(p.ss.Nodes, imp)
 }
@@ -464,7 +468,10 @@ func (p *parser) parseMediaQueryList() *ast.MediaQueryList {
 			p.lexer.Errorf("unexpected EOF")
 		}
 
-		l.Queries = append(l.Queries, p.parseMediaQuery())
+		q := p.parseMediaQuery()
+		if q != nil {
+			l.Queries = append(l.Queries, q)
+		}
 
 		if p.lexer.Current == lexer.Comma {
 			p.lexer.Next()
@@ -472,6 +479,10 @@ func (p *parser) parseMediaQueryList() *ast.MediaQueryList {
 		}
 
 		break
+	}
+
+	if len(l.Queries) == 0 {
+		return nil
 	}
 
 	return l
@@ -495,7 +506,11 @@ func (p *parser) parseMediaQuery() *ast.MediaQuery {
 			q.Parts = append(q.Parts, p.parseValue(false).(*ast.Identifier))
 
 		default:
-			return q
+			if len(q.Parts) > 0 {
+				return q
+			}
+
+			return nil
 		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stephen/cssc"
+	"github.com/stephen/cssc/transforms"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,4 +38,20 @@ func TestApi_Simple(t *testing.T) {
 
 	assert.Len(t, result.Files, 1)
 	assert.Len(t, errors, 0)
+}
+
+func TestApi_BrokenImport(t *testing.T) {
+	var errors TestReporter
+	result := cssc.Compile(cssc.Options{
+		Entry: []string{
+			"testdata/brokenimports/index.css",
+		},
+		Transforms: transforms.Options{
+			ImportRules: transforms.ImportRulesInline,
+		},
+		Reporter: &errors,
+	})
+
+	assert.Len(t, result.Files, 1)
+	assert.Len(t, errors, 1)
 }

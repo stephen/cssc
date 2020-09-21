@@ -1,0 +1,9 @@
+@import "./nonsense.css";
+
+div {
+  background-color: green;
+}
+
+body {
+  color: white;
+}

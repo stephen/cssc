@@ -184,6 +184,11 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 					rv = append(rv, node)
 					break
 				}
+
+				if len(node.Preludes) > 1 {
+					t.addWarn(node.Location(), "@import transform does not yet support @supports or media queries")
+				}
+
 				rv = append(rv, imported.Nodes...)
 
 			case "custom-media":
