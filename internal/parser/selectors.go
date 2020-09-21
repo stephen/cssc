@@ -182,7 +182,7 @@ func (p *parser) parseSelector() *ast.Selector {
 					p.lexer.Expect(lexer.Delim)
 				}
 
-				attr.Value = p.parseValue(false)
+				attr.Value = p.parseValue()
 				s.Parts = append(s.Parts, attr)
 			}
 

@@ -135,7 +135,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 						p.lexer.Next()
 
 					default:
-						val := p.parseValue(false)
+						val := p.parseValue()
 						if val == nil {
 							if len(decl.Values) == 0 {
 								p.lexer.Errorf("declaration must have a value")
@@ -209,10 +209,50 @@ func (p *parser) parseKeyframeSelectorList() *ast.KeyframeSelectorList {
 	return l
 }
 
+// parseMathExpression does recursive-descent parsing for sums,
+// products, then individual values. See https://www.w3.org/TR/css-values-3/#calc-syntax.
+func (p *parser) parseMathExpression() ast.Value {
+	return p.parseMathSum()
+}
+
+func (p *parser) parseMathSum() ast.Value {
+	left := p.parseMathProduct()
+
+	for p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "+" || p.lexer.CurrentString == "-") {
+		op := p.lexer.CurrentString
+		p.lexer.Expect(lexer.Delim)
+		left = &ast.MathExpression{
+			Loc:      left.Location(),
+			Left:     left,
+			Operator: op,
+			Right:    p.parseMathProduct(),
+		}
+	}
+
+	return left
+}
+
+func (p *parser) parseMathProduct() ast.Value {
+	left := p.parseValue()
+
+	for p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "*" || p.lexer.CurrentString == "/") {
+		op := p.lexer.CurrentString
+		p.lexer.Expect(lexer.Delim)
+		left = &ast.MathExpression{
+			Loc:      left.Location(),
+			Left:     left,
+			Operator: op,
+			Right:    p.parseValue(),
+		}
+	}
+
+	return left
+}
+
 // parseValue parses a possible ast value at the current position. Callers
 // can set allowMathOperators if the enclosing context allows math expressions.
 // See: https://www.w3.org/TR/css-values-4/#math-function.
-func (p *parser) parseValue(allowMathOperators bool) ast.Value {
+func (p *parser) parseValue() ast.Value {
 	switch p.lexer.Current {
 	case lexer.Dimension:
 		defer p.lexer.Next()
@@ -258,25 +298,6 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 			Value: p.lexer.CurrentString,
 		}
 
-	case lexer.Delim:
-		switch p.lexer.CurrentString {
-		case "*", "/", "+", "-":
-			if !allowMathOperators {
-				p.lexer.Errorf("math operations are only allowed within: calc, min, max, or clamp")
-				return nil
-			}
-			defer p.lexer.Next()
-
-			return &ast.MathOperator{
-				Loc:      p.lexer.Location(),
-				Operator: p.lexer.CurrentString,
-			}
-
-		default:
-			p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
-			return nil
-		}
-
 	case lexer.FunctionStart:
 		fn := &ast.Function{
 			Loc:  p.lexer.Location(),
@@ -296,7 +317,11 @@ func (p *parser) parseValue(allowMathOperators bool) ast.Value {
 				})
 				p.lexer.Next()
 			default:
-				fn.Arguments = append(fn.Arguments, p.parseValue(fn.IsMath()))
+				if fn.IsMath() {
+					fn.Arguments = append(fn.Arguments, p.parseMathExpression())
+					continue
+				}
+				fn.Arguments = append(fn.Arguments, p.parseValue())
 			}
 		}
 
@@ -509,7 +534,7 @@ func (p *parser) parseMediaQuery() *ast.MediaQuery {
 			q.Parts = append(q.Parts, p.parseMediaFeature())
 
 		case lexer.Ident:
-			q.Parts = append(q.Parts, p.parseValue(false).(*ast.Identifier))
+			q.Parts = append(q.Parts, p.parseValue().(*ast.Identifier))
 
 		default:
 			if len(q.Parts) > 0 {
@@ -525,7 +550,7 @@ func (p *parser) parseMediaFeature() ast.MediaFeature {
 	startLoc := p.lexer.Location()
 	p.lexer.Expect(lexer.LParen)
 
-	firstValue := p.parseValue(false)
+	firstValue := p.parseValue()
 
 	switch p.lexer.Current {
 	case lexer.RParen:
@@ -549,7 +574,7 @@ func (p *parser) parseMediaFeature() ast.MediaFeature {
 			p.lexer.Errorf("expected identifier in non-range media feature")
 		}
 
-		secondValue := p.parseValue(false)
+		secondValue := p.parseValue()
 
 		p.lexer.Expect(lexer.RParen)
 		return &ast.MediaFeaturePlain{
@@ -565,7 +590,7 @@ func (p *parser) parseMediaFeature() ast.MediaFeature {
 		}
 		r.Operator = p.parseMediaRangeOperator()
 
-		secondValue := p.parseValue(false)
+		secondValue := p.parseValue()
 
 		maybeIdent, ok := secondValue.(*ast.Identifier)
 		if !ok {
@@ -589,7 +614,7 @@ func (p *parser) parseMediaFeature() ast.MediaFeature {
 			if op != r.Operator {
 				p.lexer.Errorf("operators in a range must be the same")
 			}
-			r.RightValue = p.parseValue(false)
+			r.RightValue = p.parseValue()
 		}
 
 		p.lexer.Expect(lexer.RParen)
@@ -648,7 +673,7 @@ func (p *parser) parseCustomMediaAtRule() {
 	}
 	p.lexer.Next()
 
-	maybeName := p.parseValue(false)
+	maybeName := p.parseValue()
 	name, ok := maybeName.(*ast.Identifier)
 	if !ok {
 		// XXX: show received type

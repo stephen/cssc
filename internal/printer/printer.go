@@ -246,8 +246,10 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteString(node.Text)
 		p.s.WriteString("*/")
 
-	case *ast.MathOperator:
+	case *ast.MathExpression:
+		p.print(node.Left)
 		p.s.WriteString(node.Operator)
+		p.print(node.Right)
 
 	case *ast.Whitespace:
 		p.s.WriteRune(' ')

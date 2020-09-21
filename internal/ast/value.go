@@ -97,12 +97,15 @@ var mathFunctions = map[string]struct{}{
 	"clamp": struct{}{},
 }
 
-// MathOperator is +, -, *, or /.
-type MathOperator struct {
+// MathExpression is a binary expression for math functions.
+type MathExpression struct {
 	Loc
 
 	// Operator +, -, *, or /.
 	Operator string
+
+	Left  Value
+	Right Value
 }
 
 // Comma is a single comma. Some declarations require commas,
@@ -111,22 +114,22 @@ type Comma struct {
 	Loc
 }
 
-func (String) isValue()       {}
-func (Dimension) isValue()    {}
-func (Percentage) isValue()   {}
-func (Number) isValue()       {}
-func (Function) isValue()     {}
-func (MathOperator) isValue() {}
-func (Comma) isValue()        {}
-func (Identifier) isValue()   {}
-func (HexColor) isValue()     {}
+func (String) isValue()         {}
+func (Dimension) isValue()      {}
+func (Percentage) isValue()     {}
+func (Number) isValue()         {}
+func (Function) isValue()       {}
+func (MathExpression) isValue() {}
+func (Comma) isValue()          {}
+func (Identifier) isValue()     {}
+func (HexColor) isValue()       {}
 
 var _ Value = String{}
 var _ Value = Dimension{}
 var _ Value = Percentage{}
 var _ Value = Number{}
 var _ Value = Function{}
-var _ Value = MathOperator{}
+var _ Value = MathExpression{}
 var _ Value = Comma{}
 var _ Value = Identifier{}
 var _ Value = HexColor{}
