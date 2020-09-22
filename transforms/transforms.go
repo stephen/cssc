@@ -61,6 +61,19 @@ const (
 	CustomMediaQueriesTransform
 )
 
+// CalcReduction controls transform options for reducing math functions.
+// calc(), min(), max(), and clamp() are supported.
+// See: https://drafts.csswg.org/css-values-4/#calc-func.
+type CalcReduction int
+
+const (
+	// CalcReductionPassthrough passes through any math functions. It is the default.
+	CalcReductionPassthrough CalcReduction = iota
+	// CalcReductionReduce will attempt to reduce all math functions. If the call cannot be fully reduced, it
+	// will be left.
+	CalcReductionReduce
+)
+
 // Options sets options about what transforms to run. By default,
 // no transforms are run.
 type Options struct {
@@ -69,4 +82,5 @@ type Options struct {
 	AnyLink
 	CustomProperties
 	CustomMediaQueries
+	CalcReduction
 }

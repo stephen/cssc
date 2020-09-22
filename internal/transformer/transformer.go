@@ -442,6 +442,49 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 				newValues = vals
 			}()
 
+			func() {
+				if v.Name != "calc" {
+					return
+				}
+
+				if t.CalcReduction == transforms.CalcReductionPassthrough {
+					return
+				}
+
+				if len(v.Arguments) != 1 {
+					t.addWarn(v.Location(), "expected single argument for calc()")
+					return
+				}
+
+				args := t.transformValues([]ast.Value{v.Arguments[0]})
+				if len(args) != 1 {
+					t.addWarn(v.Location(), "expected single argument for calc()")
+					return
+				}
+
+				arg, ok := args[0].(*ast.MathExpression)
+				if !ok {
+					return
+				}
+
+				l, r := t.transformValues([]ast.Value{arg.Left}), t.transformValues([]ast.Value{arg.Right})
+				if len(l) != 1 {
+					t.addWarn(arg.Left.Location(), "expected left-hand side of math expression to be a single value")
+					return
+				}
+				if len(r) != 1 {
+					t.addWarn(arg.Right.Location(), "expected right-hand side of math expression to be a single value")
+					return
+				}
+
+				newValue := t.evaluateMathExpression(l[0], r[0], arg.Operator)
+				if newValue == nil {
+					return
+				}
+
+				newValues = []ast.Value{newValue}
+			}()
+
 			rv = append(rv, newValues...)
 
 		default:
@@ -450,4 +493,217 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 	}
 
 	return rv
+}
+
+func (t *transformer) doMath(left, right, op string) (float64, error) {
+	leftValue, err := strconv.ParseFloat(left, 10)
+	if err != nil {
+		return 0, fmt.Errorf("could not parse dimension value: %s", left)
+	}
+
+	rightValue, err := strconv.ParseFloat(right, 10)
+	if err != nil {
+		return 0, fmt.Errorf("could not parse dimension value: %s", right)
+	}
+	switch op {
+	case "+":
+		return leftValue + rightValue, nil
+	case "-":
+		return leftValue - rightValue, nil
+	case "*":
+		return leftValue * rightValue, nil
+	case "/":
+		if rightValue == 0 {
+			return 0, fmt.Errorf("cannot divide by zero")
+		}
+		return leftValue / rightValue, nil
+	default:
+		return 0, fmt.Errorf("unknown op: %s", op)
+	}
+}
+
+// evaluateMathExpression attempts to add l + r. If sub is true, subtraction will be applied
+// instead. For sum to succeed, both l and r must be of the same type.
+// See notes from https://www.w3.org/TR/css-values-3/#calc-type-checking.
+func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Value {
+	if expr, ok := l.(*ast.MathExpression); ok {
+		if evaluated := t.evaluateMathExpression(expr.Left, expr.Right, expr.Operator); evaluated != nil {
+			l = evaluated
+		}
+	}
+
+	if expr, ok := r.(*ast.MathExpression); ok {
+		if evaluated := t.evaluateMathExpression(expr.Left, expr.Right, expr.Operator); evaluated != nil {
+			r = evaluated
+		}
+	}
+
+	switch op {
+	case "+", "-":
+		switch left := l.(type) {
+		case *ast.Dimension:
+			right, ok := r.(*ast.Dimension)
+			if !ok {
+				return nil
+			}
+
+			if left.Unit != right.Unit {
+				// Valid css, but we cannot reduce.
+				return nil
+			}
+
+			newValue, err := t.doMath(left.Value, right.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Dimension{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+				Unit:  left.Unit,
+			}
+
+		case *ast.Percentage:
+			right, ok := r.(*ast.Percentage)
+			if !ok {
+				return nil
+			}
+
+			newValue, err := t.doMath(left.Value, right.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Percentage{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			}
+
+		case *ast.Number:
+			right, ok := r.(*ast.Number)
+			if !ok {
+				t.addError(l.Location(), "cannot perform %s between these two types", op)
+				return nil
+			}
+
+			newValue, err := t.doMath(left.Value, right.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Percentage{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			}
+
+		default:
+			t.addError(l.Location(), "cannot perform %s on this type", op)
+			return nil
+		}
+
+	case "*":
+		leftAsNumber, leftIsNumber := l.(*ast.Number)
+		rightAsNumber, rightIsNumber := r.(*ast.Number)
+		if !leftIsNumber && !rightIsNumber {
+			t.addError(l.Location(), "one side of multiplication must be a number (non-percentage/dimension)")
+			return nil
+		}
+
+		// Figure out which one is a potentially the non-number so that we can case on it.
+		maybeNonNumber, number := l, rightAsNumber
+		if leftIsNumber {
+			maybeNonNumber, number = r, leftAsNumber
+		}
+
+		switch other := maybeNonNumber.(type) {
+		case *ast.Dimension:
+			newValue, err := t.doMath(other.Value, number.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Dimension{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+				Unit:  other.Unit,
+			}
+
+		case *ast.Percentage:
+			newValue, err := t.doMath(other.Value, number.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Percentage{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			}
+
+		case *ast.Number:
+			newValue, err := t.doMath(other.Value, number.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Number{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			}
+
+		default:
+			t.addError(l.Location(), "cannot perform %s on this type", op)
+			return nil
+		}
+
+	case "/":
+		rightAsNumber, rightIsNumber := r.(*ast.Number)
+		if !rightIsNumber {
+			t.addError(l.Location(), "right side of division must be a number (non-percentage/dimension)")
+			return nil
+		}
+
+		switch left := l.(type) {
+		case *ast.Dimension:
+			newValue, err := t.doMath(left.Value, rightAsNumber.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Dimension{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+				Unit:  left.Unit,
+			}
+
+		case *ast.Percentage:
+			newValue, err := t.doMath(left.Value, rightAsNumber.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Percentage{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			}
+
+		case *ast.Number:
+			newValue, err := t.doMath(left.Value, rightAsNumber.Value, op)
+			if err != nil {
+				t.addError(l.Location(), err.Error())
+				return nil
+			}
+
+			return &ast.Number{
+				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			}
+
+		default:
+			t.addError(l.Location(), "cannot perform %s on this type", op)
+			return nil
+		}
+
+	default:
+		t.addError(l.Location(), "unknown op: %s", op)
+		return nil
+	}
 }
