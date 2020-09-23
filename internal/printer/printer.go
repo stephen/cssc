@@ -222,9 +222,6 @@ func (p *printer) print(in ast.Node) {
 		p.s.WriteString(node.Value)
 		p.s.WriteRune('%')
 
-	case *ast.Number:
-		p.s.WriteString(node.Value)
-
 	case *ast.String:
 		p.s.WriteRune('"')
 		p.s.WriteString(node.Value)

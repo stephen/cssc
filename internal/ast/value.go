@@ -16,28 +16,21 @@ type String struct {
 	Value string
 }
 
-// Dimension is a numeric value and a unit.
+// Dimension is a numeric value and a unit. Dimension can
+// also represent Percentages (% unit) or Numbers (empty string unit).
 type Dimension struct {
 	Loc
 
 	// Value is the string representation for the value.
 	Value string
 
-	// Unit is the unit (e.g. rem, px) for the dimension.
+	// Unit is the unit (e.g. rem, px) for the dimension. If Unit
+	// is empty, then it's a CSS number type.
 	Unit string
 }
 
 // Percentage is a numeric percentage.
 type Percentage struct {
-	Loc
-
-	// Value is the string representation for the value.
-	Value string
-}
-
-// Number is a number literal. It can be either an integer or
-// real number from https://www.w3.org/TR/css-values-4/.
-type Number struct {
 	Loc
 
 	// Value is the string representation for the value.
@@ -116,8 +109,6 @@ type Comma struct {
 
 func (String) isValue()         {}
 func (Dimension) isValue()      {}
-func (Percentage) isValue()     {}
-func (Number) isValue()         {}
 func (Function) isValue()       {}
 func (MathExpression) isValue() {}
 func (Comma) isValue()          {}
@@ -126,8 +117,6 @@ func (HexColor) isValue()       {}
 
 var _ Value = String{}
 var _ Value = Dimension{}
-var _ Value = Percentage{}
-var _ Value = Number{}
 var _ Value = Function{}
 var _ Value = MathExpression{}
 var _ Value = Comma{}

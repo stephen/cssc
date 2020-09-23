@@ -39,4 +39,10 @@ func TestMath(t *testing.T) {
 	// XXX: this should work but doesn't. because we treat math as left-associative and binary but
 	// 22% - 1rem cannot be reduced into something that can be added to 8rem.
 	// assert.Equal(t, `.class{width:calc(22%+7rem)}`, Transform(t, compileMath, `.class { width: calc(22% - 1rem + 8rem) }`))
+
+	// XXX: does this one work?
+	// calc(var(--x) + 5px)
+	// ((5px + 22%) + 5px)
+	// (((5px + 22%) + 5px) + 5px) = 22% + 15px
+	// (((5px + 22%) + 22%) + 5px) = 44% + 10px
 }

@@ -265,14 +265,15 @@ func (p *parser) parseValue() ast.Value {
 
 	case lexer.Percentage:
 		defer p.lexer.Next()
-		return &ast.Percentage{
+		return &ast.Dimension{
 			Loc:   p.lexer.Location(),
+			Unit:  "%",
 			Value: p.lexer.CurrentNumeral,
 		}
 
 	case lexer.Number:
 		defer p.lexer.Next()
-		return &ast.Number{
+		return &ast.Dimension{
 			Loc:   p.lexer.Location(),
 			Value: p.lexer.CurrentNumeral,
 		}

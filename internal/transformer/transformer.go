@@ -240,6 +240,7 @@ func (t *transformer) transformMediaQueries(queries []*ast.MediaQuery) []*ast.Me
 }
 
 // addToValue takes an ast.Value and adds diff to it.
+// XXX: change this out to only operate on ast.Dimension, since there are no other valid number types now.
 func (t *transformer) addToValue(v ast.Value, diff float64) ast.Value {
 	if diff == 0 {
 		return v
@@ -254,21 +255,6 @@ func (t *transformer) addToValue(v ast.Value, diff float64) ast.Value {
 		}
 		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64), Unit: oldValue.Unit}
 
-	case *ast.Percentage:
-		f, err := strconv.ParseFloat(oldValue.Value, 10)
-		if err != nil {
-			t.addError(oldValue.Location(), "could not parse percentage value to lower media range: %s", oldValue.Value)
-			return oldValue
-		}
-		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64)}
-
-	case *ast.Number:
-		f, err := strconv.ParseFloat(oldValue.Value, 10)
-		if err != nil {
-			t.addError(oldValue.Location(), "could not parse number value to lower media range: %s", oldValue.Value)
-			return oldValue
-		}
-		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64)}
 	default:
 		t.addError(oldValue.Location(), "tried to modify non-numeric value. expected dimension, percentage, or number, but got: %s", reflect.TypeOf(v).String())
 		return v
@@ -548,7 +534,17 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 			}
 
 			if left.Unit != right.Unit {
-				// Valid css, but we cannot reduce.
+				if left.Unit == "" && right.Unit != "" {
+					// Invalid, because we cannot mix number types and lengths, e.g. (2 + 5rem).
+					t.addError(left.Location(), "cannot add number type and %s type together", right.Unit)
+				}
+
+				if left.Unit != "" && right.Unit == "" {
+					// Invalid, because we cannot mix number types and lengths, e.g. (5rem + 2).
+					t.addError(left.Location(), "cannot add number type and %s type together", left.Unit)
+				}
+
+				// Valid css, but we cannot reduce (e.g. 2px + 3rem).
 				return nil
 			}
 
@@ -563,38 +559,14 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 				Unit:  left.Unit,
 			}
 
-		case *ast.Percentage:
-			right, ok := r.(*ast.Percentage)
-			if !ok {
-				return nil
-			}
+		// case *ast.MathExpression:
+		// if left.op is not + or -, return nil
 
-			newValue, err := t.doMath(left.Value, right.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
-
-			return &ast.Percentage{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-			}
-
-		case *ast.Number:
-			right, ok := r.(*ast.Number)
-			if !ok {
-				t.addError(l.Location(), "cannot perform %s between these two types", op)
-				return nil
-			}
-
-			newValue, err := t.doMath(left.Value, right.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
-
-			return &ast.Percentage{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-			}
+		// We know left.Right is an ast.Dimension because of the structure of the parse tree
+		// We know Right is an ast.Dimension
+		// If left.Right.Unit != right.Unit and left.Left.Unit != right.Unit, return nil
+		// left.Right.Unit case: doMath on left.Right.Value and right.Value and return left with Right = [the result of doMath]
+		// left.Left.Unit case: doMath on left.Left.Value and right.Value and return left with Left = [the result of doMath]
 
 		default:
 			t.addError(l.Location(), "cannot perform %s on this type", op)
@@ -602,69 +574,45 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 		}
 
 	case "*":
-		leftAsNumber, leftIsNumber := l.(*ast.Number)
-		rightAsNumber, rightIsNumber := r.(*ast.Number)
-		if !leftIsNumber && !rightIsNumber {
+		leftAsDimension, leftIsDimension := l.(*ast.Dimension)
+		rightAsDimension, rightIsDimension := r.(*ast.Dimension)
+		if !leftIsDimension || !rightIsDimension {
+			return nil
+		}
+
+		if leftAsDimension.Unit != "" && rightAsDimension.Unit != "" {
 			t.addError(l.Location(), "one side of multiplication must be a number (non-percentage/dimension)")
 			return nil
 		}
 
-		// Figure out which one is a potentially the non-number so that we can case on it.
-		maybeNonNumber, number := l, rightAsNumber
-		if leftIsNumber {
-			maybeNonNumber, number = r, leftAsNumber
+		maybeWithUnit, number := leftAsDimension, rightAsDimension
+		if leftAsDimension.Unit == "" {
+			maybeWithUnit, number = rightAsDimension, leftAsDimension
 		}
 
-		switch other := maybeNonNumber.(type) {
-		case *ast.Dimension:
-			newValue, err := t.doMath(other.Value, number.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
+		// XXX: handle cases like calc(var(--x) * 2 * 2)
 
-			return &ast.Dimension{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-				Unit:  other.Unit,
-			}
-
-		case *ast.Percentage:
-			newValue, err := t.doMath(other.Value, number.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
-
-			return &ast.Percentage{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-			}
-
-		case *ast.Number:
-			newValue, err := t.doMath(other.Value, number.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
-
-			return &ast.Number{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-			}
-
-		default:
-			t.addError(l.Location(), "cannot perform %s on this type", op)
+		newValue, err := t.doMath(maybeWithUnit.Value, number.Value, op)
+		if err != nil {
+			t.addError(l.Location(), err.Error())
 			return nil
 		}
 
+		return &ast.Dimension{
+			Value: strconv.FormatFloat(newValue, 'f', -1, 64),
+			Unit:  maybeWithUnit.Unit,
+		}
+
 	case "/":
-		rightAsNumber, rightIsNumber := r.(*ast.Number)
-		if !rightIsNumber {
+		rightAsDimension, rightIsDimension := r.(*ast.Dimension)
+		if !rightIsDimension || rightAsDimension.Unit != "" {
 			t.addError(l.Location(), "right side of division must be a number (non-percentage/dimension)")
 			return nil
 		}
 
 		switch left := l.(type) {
 		case *ast.Dimension:
-			newValue, err := t.doMath(left.Value, rightAsNumber.Value, op)
+			newValue, err := t.doMath(left.Value, rightAsDimension.Value, op)
 			if err != nil {
 				t.addError(l.Location(), err.Error())
 				return nil
@@ -675,27 +623,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 				Unit:  left.Unit,
 			}
 
-		case *ast.Percentage:
-			newValue, err := t.doMath(left.Value, rightAsNumber.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
-
-			return &ast.Percentage{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-			}
-
-		case *ast.Number:
-			newValue, err := t.doMath(left.Value, rightAsNumber.Value, op)
-			if err != nil {
-				t.addError(l.Location(), err.Error())
-				return nil
-			}
-
-			return &ast.Number{
-				Value: strconv.FormatFloat(newValue, 'f', -1, 64),
-			}
+			// case *ast.MathExpression
 
 		default:
 			t.addError(l.Location(), "cannot perform %s on this type", op)
