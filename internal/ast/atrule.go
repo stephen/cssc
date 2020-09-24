@@ -26,5 +26,3 @@ type AtPrelude interface {
 }
 
 var _ Node = AtRule{}
-
-func (r AtRule) isNode() {}

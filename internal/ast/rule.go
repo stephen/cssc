@@ -17,5 +17,3 @@ type Prelude interface {
 }
 
 var _ Node = QualifiedRule{}
-
-func (r QualifiedRule) isNode() {}
