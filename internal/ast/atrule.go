@@ -2,7 +2,7 @@ package ast
 
 // AtRule represents an import statement.
 type AtRule struct {
-	Loc
+	Span
 
 	Name string
 

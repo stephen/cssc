@@ -2,7 +2,7 @@ package ast
 
 // KeyframeSelectorList is a list of selectors used by @keyframes blocks.
 type KeyframeSelectorList struct {
-	Loc
+	Span
 
 	Selectors []KeyframeSelector
 }

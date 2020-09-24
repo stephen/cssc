@@ -10,7 +10,7 @@ type Value interface {
 
 // String is a string literal.
 type String struct {
-	Loc
+	Span
 
 	// Value is the string.
 	Value string
@@ -19,7 +19,7 @@ type String struct {
 // Dimension is a numeric value and a unit. Dimension can
 // also represent Percentages (% unit) or Numbers (empty string unit).
 type Dimension struct {
-	Loc
+	Span
 
 	// Value is the string representation for the value.
 	Value string
@@ -31,7 +31,7 @@ type Dimension struct {
 
 // Percentage is a numeric percentage.
 type Percentage struct {
-	Loc
+	Span
 
 	// Value is the string representation for the value.
 	Value string
@@ -39,7 +39,7 @@ type Percentage struct {
 
 // Identifier is any string identifier value, e.g. inherit or left.
 type Identifier struct {
-	Loc
+	Span
 
 	// Value is the identifier.
 	Value string
@@ -59,7 +59,7 @@ type Image struct {
 
 // HexColor is a hex color (e.g. #aabbccdd) defined by https://www.w3.org/TR/css-color-3/.
 type HexColor struct {
-	Loc
+	Span
 
 	// RGBA is the literal rgba value.
 	RGBA string
@@ -67,7 +67,7 @@ type HexColor struct {
 
 // Function is a css function.
 type Function struct {
-	Loc
+	Span
 
 	// Name is the name of the function.
 	Name string
@@ -92,7 +92,7 @@ var mathFunctions = map[string]struct{}{
 
 // MathExpression is a binary expression for math functions.
 type MathExpression struct {
-	Loc
+	Span
 
 	// Operator +, -, *, or /.
 	Operator string
@@ -104,7 +104,7 @@ type MathExpression struct {
 // Comma is a single comma. Some declarations require commas,
 // e.g. font-family fallbacks or transitions.
 type Comma struct {
-	Loc
+	Span
 }
 
 func (String) isValue()         {}

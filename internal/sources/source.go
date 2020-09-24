@@ -22,7 +22,7 @@ type Source struct {
 
 // LineAndCol computes the 1-index line and column for a given
 // ast.Loc (byte offset in the file).
-func (s *Source) LineAndCol(loc ast.Loc) (int32, int32) {
+func (s *Source) LineAndCol(loc ast.Span) (int32, int32) {
 	line := sort.Search(len(s.Lines), func(i int) bool {
 		return loc.Position < s.Lines[i]
 	})

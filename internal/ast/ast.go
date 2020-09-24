@@ -2,16 +2,16 @@ package ast
 
 // Node is any top-level stylesheet rule.
 type Node interface {
-	Location() Loc
+	Location() Span
 }
 
-// Loc is a location in the source.
-type Loc struct {
+// Span is a location in the source.
+type Span struct {
 	Position int
 }
 
 // Location implements Node.
-func (l Loc) Location() Loc { return l }
+func (l Span) Location() Span { return l }
 
 // Stylesheet is a CSS stylesheet.
 type Stylesheet struct {
@@ -29,11 +29,11 @@ type ImportSpecifier struct {
 }
 
 // Location implements Node.
-func (l Stylesheet) Location() Loc { return Loc{} }
+func (l Stylesheet) Location() Span { return Span{} }
 
 // Comment represents a comment.
 type Comment struct {
-	Loc
+	Span
 
 	Text string
 }
@@ -48,14 +48,14 @@ type Block interface {
 
 // DeclarationBlock is a block containing a set of declarations.
 type DeclarationBlock struct {
-	Loc
+	Span
 
 	Declarations []*Declaration
 }
 
 // QualifiedRuleBlock is a block containing a set of rules.
 type QualifiedRuleBlock struct {
-	Loc
+	Span
 
 	Rules []*QualifiedRule
 }
@@ -68,7 +68,7 @@ var _ Block = QualifiedRuleBlock{}
 
 // Declaration is a property assignment, e.g. width: 2px.
 type Declaration struct {
-	Loc
+	Span
 
 	// Property is the property being assigned.
 	Property string

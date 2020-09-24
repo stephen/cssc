@@ -82,7 +82,7 @@ func (p *printer) printMapping() {
 
 // addMapping should be called from the printer
 // when a new symbol needs to be added to the sourcemap.
-func (p *printer) addMapping(loc ast.Loc) {
+func (p *printer) addMapping(loc ast.Span) {
 	if p.options.OriginalSource == nil {
 		return
 	}

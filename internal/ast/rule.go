@@ -2,7 +2,7 @@ package ast
 
 // QualifiedRule is a prelude (selectors) and set of declarations.
 type QualifiedRule struct {
-	Loc
+	Span
 
 	Prelude Prelude
 

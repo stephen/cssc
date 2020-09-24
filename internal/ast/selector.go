@@ -3,7 +3,7 @@ package ast
 // SelectorList is a type of prelude for QualifiedRule,
 // containing a list of selectors separated by commas.
 type SelectorList struct {
-	Loc
+	Span
 
 	Selectors []*Selector
 }
@@ -19,7 +19,7 @@ var _ PseudoClassArguments = SelectorList{}
 // compound-selector, type-selector, combinator, etc, since we mostly
 // just want tokens to work with.
 type Selector struct {
-	Loc
+	Span
 
 	Parts []SelectorPart
 }
@@ -36,28 +36,28 @@ type SelectorPart interface {
 
 // TypeSelector selects a single type, e.g. div, body, or html.
 type TypeSelector struct {
-	Loc
+	Span
 
 	Name string
 }
 
 // ClassSelector selects a single class, e.g. .test or .Thing.
 type ClassSelector struct {
-	Loc
+	Span
 
 	Name string
 }
 
 // IDSelector selects a single ID, e.g. #container.
 type IDSelector struct {
-	Loc
+	Span
 
 	Name string
 }
 
 // CombinatorSelector operates between two selectors.
 type CombinatorSelector struct {
-	Loc
+	Span
 
 	// The combinator operation, i.e. >, +, ~, or |.
 	Operator string
@@ -65,7 +65,7 @@ type CombinatorSelector struct {
 
 // PseudoClassSelector selects a pseudo class, e.g. :not() or :hover.
 type PseudoClassSelector struct {
-	Loc
+	Span
 
 	// Name is the name of the pseudo selector.
 	Name string
@@ -89,7 +89,7 @@ var _ PseudoClassArguments = Identifier{}
 
 // ANPlusB is an an+b value type for nth-* pseudo classes.
 type ANPlusB struct {
-	Loc
+	Span
 
 	A        string
 	Operator string
@@ -102,7 +102,7 @@ var _ PseudoClassArguments = ANPlusB{}
 
 // PseudoElementSelector selects a pseudo element, e.g. ::before or ::after.
 type PseudoElementSelector struct {
-	Loc
+	Span
 
 	Inner *PseudoClassSelector
 }
@@ -111,13 +111,13 @@ type PseudoElementSelector struct {
 // only kept in the AST when necessary for disambiguating syntax,
 // e.g. in selectors.
 type Whitespace struct {
-	Loc
+	Span
 }
 
 // AttributeSelector selects elements with the specified attributes matching.
 // Note that the = token is implied if Value is non-zero.
 type AttributeSelector struct {
-	Loc
+	Span
 
 	// Property is the attribute to check.
 	Property string

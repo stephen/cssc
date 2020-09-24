@@ -102,8 +102,8 @@ func (l *Lexer) peek(i int) rune {
 
 // Location is the start offset of the current token in the source, i.e.
 // the value of l.pos when Next() was called.
-func (l *Lexer) Location() ast.Loc {
-	return ast.Loc{Position: l.start}
+func (l *Lexer) Location() ast.Span {
+	return ast.Span{Position: l.start}
 }
 
 // Range is the start to end offset of the current token in the source. The returned

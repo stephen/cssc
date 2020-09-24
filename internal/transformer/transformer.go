@@ -66,12 +66,12 @@ type transformer struct {
 	customMedia map[string]*ast.MediaQuery
 }
 
-func (t *transformer) addError(loc ast.Loc, fmt string, args ...interface{}) {
+func (t *transformer) addError(loc ast.Span, fmt string, args ...interface{}) {
 	// XXX: we don't have the end locations anymore, but we should...
 	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }
 
-func (t *transformer) addWarn(loc ast.Loc, fmt string, args ...interface{}) {
+func (t *transformer) addWarn(loc ast.Span, fmt string, args ...interface{}) {
 	// XXX: we don't have the end locations anymore, but we should...
 	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }

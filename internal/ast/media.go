@@ -2,7 +2,7 @@ package ast
 
 // MediaQueryList is a comma-separated list of media queries.
 type MediaQueryList struct {
-	Loc
+	Span
 
 	Queries []*MediaQuery
 }
@@ -13,7 +13,7 @@ var _ AtPrelude = MediaQueryList{}
 
 // MediaQuery is a single media query.
 type MediaQuery struct {
-	Loc
+	Span
 
 	Parts []MediaQueryPart
 }
@@ -44,14 +44,14 @@ var _ MediaQueryPart = MediaInParens{}
 // MediaInParens is a media expression in parenthesis. It is
 // different from MediaQuery in that it implements MediaQueryPart.
 type MediaInParens struct {
-	Loc
+	Span
 
 	Parts []MediaQueryPart
 }
 
 // MediaType is a specific media type.
 type MediaType struct {
-	Loc
+	Span
 
 	Value string
 }
@@ -74,7 +74,7 @@ var _ MediaFeature = MediaFeatureRange{}
 // MediaFeaturePlain is a equivalence check.
 // e.g. (width: 500px) or (color).
 type MediaFeaturePlain struct {
-	Loc
+	Span
 
 	Property *Identifier
 	Value    Value
@@ -83,7 +83,7 @@ type MediaFeaturePlain struct {
 // MediaFeatureRange is a type of media feature that looks
 // like value < name < value or value > name > value.
 type MediaFeatureRange struct {
-	Loc
+	Span
 
 	Property *Identifier
 
