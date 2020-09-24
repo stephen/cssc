@@ -67,13 +67,11 @@ type transformer struct {
 }
 
 func (t *transformer) addError(loc ast.Node, fmt string, args ...interface{}) {
-	// XXX: we don't have the end locations anymore, but we should...
-	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Location().Start, loc.Location().Start+1, fmt, args...))
+	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Location().Start, loc.Location().End, fmt, args...))
 }
 
 func (t *transformer) addWarn(loc ast.Node, fmt string, args ...interface{}) {
-	// XXX: we don't have the end locations anymore, but we should...
-	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Location().Start, loc.Location().Start+1, fmt, args...))
+	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Location().Start, loc.Location().End, fmt, args...))
 }
 
 func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {

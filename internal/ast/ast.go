@@ -6,9 +6,13 @@ type Node interface {
 	Location() *Span
 }
 
-// Span is a location in the source.
+// Span is a range of text in the source.
 type Span struct {
+	// Start is the start of the range, inclusive.
 	Start int
+
+	// End is the end of the range, exclusive.
+	End int
 }
 
 // Stylesheet is a CSS stylesheet.

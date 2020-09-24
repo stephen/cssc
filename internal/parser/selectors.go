@@ -25,6 +25,10 @@ func (p *parser) parseSelectorList() *ast.SelectorList {
 		break
 	}
 
+	// parseSelector will always return a selector or error, so we should
+	// have at least one Selector.
+	l.End = l.Selectors[len(l.Selectors)-1].End
+
 	return l
 }
 
@@ -45,19 +49,19 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Errorf("unexpected EOF")
 
 		case lexer.Whitespace:
-			s.Parts = append(s.Parts, &ast.Whitespace{Span: p.lexer.StartSpan()})
+			s.Parts = append(s.Parts, &ast.Whitespace{Span: p.lexer.TokenSpan()})
 			p.lexer.Next()
 
 		case lexer.Ident:
 			s.Parts = append(s.Parts, &ast.TypeSelector{
-				Span: p.lexer.StartSpan(),
+				Span: p.lexer.TokenSpan(),
 				Name: p.lexer.CurrentString,
 			})
 			p.lexer.Next()
 
 		case lexer.Hash:
 			s.Parts = append(s.Parts, &ast.IDSelector{
-				Span: p.lexer.StartSpan(),
+				Span: p.lexer.TokenSpan(),
 				Name: p.lexer.CurrentString,
 			})
 			p.lexer.Next()
@@ -65,23 +69,26 @@ func (p *parser) parseSelector() *ast.Selector {
 		case lexer.Delim:
 			switch p.lexer.CurrentString {
 			case ".":
+				span := p.lexer.StartSpan()
 				p.lexer.Next()
-				s.Parts = append(s.Parts, &ast.ClassSelector{
-					Span: p.lexer.StartSpan(),
+				cls := &ast.ClassSelector{
+					Span: span,
 					Name: p.lexer.CurrentString,
-				})
+				}
+				s.Parts = append(s.Parts, cls)
+				cls.End = p.lexer.TokenEnd()
 				p.lexer.Expect(lexer.Ident)
 
 			case "+", ">", "~", "|":
 				s.Parts = append(s.Parts, &ast.CombinatorSelector{
-					Span:     p.lexer.StartSpan(),
+					Span:     p.lexer.TokenSpan(),
 					Operator: p.lexer.CurrentString,
 				})
 				p.lexer.Next()
 
 			case "*":
 				s.Parts = append(s.Parts, &ast.TypeSelector{
-					Span: p.lexer.StartSpan(),
+					Span: p.lexer.TokenSpan(),
 					Name: p.lexer.CurrentString,
 				})
 				p.lexer.Next()
@@ -109,6 +116,7 @@ func (p *parser) parseSelector() *ast.Selector {
 
 			switch p.lexer.Current {
 			case lexer.Ident:
+				pc.End = p.lexer.TokenEnd()
 				p.lexer.Next()
 
 			case lexer.FunctionStart:
@@ -128,41 +136,44 @@ func (p *parser) parseSelector() *ast.Selector {
 							p.lexer.Errorf("expected even, odd, or an+b syntax")
 						}
 						pc.Arguments = &ast.Identifier{
-							Span:  p.lexer.StartSpan(),
+							Span:  p.lexer.TokenSpan(),
 							Value: p.lexer.CurrentString,
 						}
 						p.lexer.Next()
 					}
-					p.lexer.Expect(lexer.RParen)
-
 				} else {
 					pc.Arguments = p.parseSelectorList()
-					p.lexer.Expect(lexer.RParen)
 				}
+				pc.End = p.lexer.TokenEnd()
+				p.lexer.Expect(lexer.RParen)
 
 			default:
 				p.lexer.Errorf("unexpected token: %s", p.lexer.Current.String())
 			}
 
 			if wrapper {
-				s.Parts = append(s.Parts, &ast.PseudoElementSelector{
+				wrapped := &ast.PseudoElementSelector{
 					Span:  wrapperLocation,
 					Inner: pc,
-				})
+				}
+				wrapped.End = pc.End
+				s.Parts = append(s.Parts, wrapped)
 				break
 			}
 
 			s.Parts = append(s.Parts, pc)
 
 		case lexer.LBracket:
+			startLoc := p.lexer.StartSpan()
 			p.lexer.Next()
-
 			attr := &ast.AttributeSelector{
-				Span:     p.lexer.StartSpan(),
+				Span:     startLoc,
 				Property: p.lexer.CurrentString,
 			}
+
 			p.lexer.Expect(lexer.Ident)
 			if p.lexer.Current == lexer.RBracket {
+				attr.End = p.lexer.TokenEnd()
 				s.Parts = append(s.Parts, attr)
 				p.lexer.Next()
 				break
@@ -183,15 +194,20 @@ func (p *parser) parseSelector() *ast.Selector {
 				}
 
 				attr.Value = p.parseValue()
+				if attr.Value == nil {
+					p.lexer.Errorf("value must be specified")
+				}
 				s.Parts = append(s.Parts, attr)
 			}
 
+			attr.End = attr.Value.Location().End
 			p.lexer.Expect(lexer.RBracket)
 
 		default:
 			if len(s.Parts) == 0 {
 				p.lexer.Errorf("expected selector")
 			}
+			s.End = s.Parts[len(s.Parts)-1].Location().End
 			return s
 		}
 	}
@@ -203,9 +219,9 @@ func (p *parser) parseANPlusB() *ast.ANPlusB {
 	defer func() {
 		p.lexer.RetainWhitespace = prev
 	}()
-	v := &ast.ANPlusB{
-		Span: p.lexer.StartSpan(),
-	}
+
+	v := &ast.ANPlusB{Span: p.lexer.StartSpan()}
+
 	if p.lexer.Current == lexer.Number {
 		v.A = p.lexer.CurrentNumeral
 		p.lexer.Next()
@@ -214,6 +230,7 @@ func (p *parser) parseANPlusB() *ast.ANPlusB {
 	if p.lexer.CurrentString != "n" {
 		p.lexer.Errorf("expected literal n as part of An+B")
 	}
+	v.End = p.lexer.TokenEnd()
 	p.lexer.Expect(lexer.Ident)
 
 	if p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "+" || p.lexer.CurrentString == "-") {
@@ -221,6 +238,7 @@ func (p *parser) parseANPlusB() *ast.ANPlusB {
 		p.lexer.Next()
 
 		v.B = p.lexer.CurrentNumeral
+		v.End = p.lexer.TokenEnd()
 		p.lexer.Expect(lexer.Number)
 	}
 	return v
