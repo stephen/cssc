@@ -100,9 +100,9 @@ func (l *Lexer) peek(i int) rune {
 	return cp
 }
 
-// Location is the start offset of the current token in the source, i.e.
+// StartSpan is the start offset of the current token in the source, i.e.
 // the value of l.pos when Next() was called.
-func (l *Lexer) Location() ast.Span {
+func (l *Lexer) StartSpan() ast.Span {
 	return ast.Span{Start: l.start}
 }
 

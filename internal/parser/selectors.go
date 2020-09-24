@@ -7,7 +7,7 @@ import (
 
 func (p *parser) parseSelectorList() *ast.SelectorList {
 	l := &ast.SelectorList{
-		Span: p.lexer.Location(),
+		Span: p.lexer.StartSpan(),
 	}
 
 	for {
@@ -30,7 +30,7 @@ func (p *parser) parseSelectorList() *ast.SelectorList {
 
 func (p *parser) parseSelector() *ast.Selector {
 	s := &ast.Selector{
-		Span: p.lexer.Location(),
+		Span: p.lexer.StartSpan(),
 	}
 
 	prevRetainWhitespace := p.lexer.RetainWhitespace
@@ -45,19 +45,19 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Errorf("unexpected EOF")
 
 		case lexer.Whitespace:
-			s.Parts = append(s.Parts, &ast.Whitespace{Span: p.lexer.Location()})
+			s.Parts = append(s.Parts, &ast.Whitespace{Span: p.lexer.StartSpan()})
 			p.lexer.Next()
 
 		case lexer.Ident:
 			s.Parts = append(s.Parts, &ast.TypeSelector{
-				Span: p.lexer.Location(),
+				Span: p.lexer.StartSpan(),
 				Name: p.lexer.CurrentString,
 			})
 			p.lexer.Next()
 
 		case lexer.Hash:
 			s.Parts = append(s.Parts, &ast.IDSelector{
-				Span: p.lexer.Location(),
+				Span: p.lexer.StartSpan(),
 				Name: p.lexer.CurrentString,
 			})
 			p.lexer.Next()
@@ -67,21 +67,21 @@ func (p *parser) parseSelector() *ast.Selector {
 			case ".":
 				p.lexer.Next()
 				s.Parts = append(s.Parts, &ast.ClassSelector{
-					Span: p.lexer.Location(),
+					Span: p.lexer.StartSpan(),
 					Name: p.lexer.CurrentString,
 				})
 				p.lexer.Expect(lexer.Ident)
 
 			case "+", ">", "~", "|":
 				s.Parts = append(s.Parts, &ast.CombinatorSelector{
-					Span:     p.lexer.Location(),
+					Span:     p.lexer.StartSpan(),
 					Operator: p.lexer.CurrentString,
 				})
 				p.lexer.Next()
 
 			case "*":
 				s.Parts = append(s.Parts, &ast.TypeSelector{
-					Span: p.lexer.Location(),
+					Span: p.lexer.StartSpan(),
 					Name: p.lexer.CurrentString,
 				})
 				p.lexer.Next()
@@ -98,12 +98,12 @@ func (p *parser) parseSelector() *ast.Selector {
 			var wrapperLocation ast.Span
 			if p.lexer.Current == lexer.Colon {
 				wrapper = true
-				wrapperLocation = p.lexer.Location()
+				wrapperLocation = p.lexer.StartSpan()
 				p.lexer.Next()
 			}
 
 			pc := &ast.PseudoClassSelector{
-				Span: p.lexer.Location(),
+				Span: p.lexer.StartSpan(),
 				Name: p.lexer.CurrentString,
 			}
 
@@ -128,7 +128,7 @@ func (p *parser) parseSelector() *ast.Selector {
 							p.lexer.Errorf("expected even, odd, or an+b syntax")
 						}
 						pc.Arguments = &ast.Identifier{
-							Span:  p.lexer.Location(),
+							Span:  p.lexer.StartSpan(),
 							Value: p.lexer.CurrentString,
 						}
 						p.lexer.Next()
@@ -158,7 +158,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			p.lexer.Next()
 
 			attr := &ast.AttributeSelector{
-				Span:     p.lexer.Location(),
+				Span:     p.lexer.StartSpan(),
 				Property: p.lexer.CurrentString,
 			}
 			p.lexer.Expect(lexer.Ident)
@@ -204,7 +204,7 @@ func (p *parser) parseANPlusB() *ast.ANPlusB {
 		p.lexer.RetainWhitespace = prev
 	}()
 	v := &ast.ANPlusB{
-		Span: p.lexer.Location(),
+		Span: p.lexer.StartSpan(),
 	}
 	if p.lexer.Current == lexer.Number {
 		v.A = p.lexer.CurrentNumeral
