@@ -66,14 +66,14 @@ type transformer struct {
 	customMedia map[string]*ast.MediaQuery
 }
 
-func (t *transformer) addError(loc *ast.Span, fmt string, args ...interface{}) {
+func (t *transformer) addError(loc ast.Node, fmt string, args ...interface{}) {
 	// XXX: we don't have the end locations anymore, but we should...
-	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Position, loc.Position+1, fmt, args...))
+	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }
 
-func (t *transformer) addWarn(loc *ast.Span, fmt string, args ...interface{}) {
+func (t *transformer) addWarn(loc ast.Node, fmt string, args ...interface{}) {
 	// XXX: we don't have the end locations anymore, but we should...
-	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Position, loc.Position+1, fmt, args...))
+	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Location().Position, loc.Location().Position+1, fmt, args...))
 }
 
 func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {
@@ -162,7 +162,7 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 
 			selList, ok := node.Prelude.(*ast.SelectorList)
 			if !ok {
-				t.addError(node.Prelude.Location(), "expected selector list for qualified rule")
+				t.addError(node.Prelude, "expected selector list for qualified rule")
 			}
 			selList.Selectors = t.transformSelectors(selList.Selectors)
 			node.Block = t.transformBlock(node.Block)
@@ -186,7 +186,7 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 				}
 
 				if len(node.Preludes) > 1 {
-					t.addWarn(node.Location(), "@import transform does not yet support @supports or media queries")
+					t.addWarn(node, "@import transform does not yet support @supports or media queries")
 				}
 
 				rv = append(rv, imported.Nodes...)
@@ -250,13 +250,13 @@ func (t *transformer) addToValue(v ast.Value, diff float64) ast.Value {
 	case *ast.Dimension:
 		f, err := strconv.ParseFloat(oldValue.Value, 10)
 		if err != nil {
-			t.addError(oldValue.Location(), "could not parse dimension value to lower media range: %s", oldValue.Value)
+			t.addError(oldValue, "could not parse dimension value to lower media range: %s", oldValue.Value)
 			return oldValue
 		}
 		return &ast.Dimension{Value: strconv.FormatFloat(f+diff, 'f', -1, 64), Unit: oldValue.Unit}
 
 	default:
-		t.addError(oldValue.Location(), "tried to modify non-numeric value. expected dimension, percentage, or number, but got: %s", reflect.TypeOf(v).String())
+		t.addError(oldValue, "tried to modify non-numeric value. expected dimension, percentage, or number, but got: %s", reflect.TypeOf(v).String())
 		return v
 	}
 }
@@ -403,13 +403,13 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 				}
 
 				if len(v.Arguments) == 0 {
-					t.addError(v.Location(), "expected at least one argument to var()")
+					t.addError(v, "expected at least one argument to var()")
 					return
 				}
 
 				varName, ok := v.Arguments[0].(*ast.Identifier)
 				if !ok {
-					t.addError(v.Location(), "expected identifier as argument to var()")
+					t.addError(v, "expected identifier as argument to var()")
 					return
 				}
 
@@ -421,7 +421,7 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 						return
 					}
 
-					t.addWarn(v.Location(), "use of undefined variable without fallback: %s", varName.Value)
+					t.addWarn(v, "use of undefined variable without fallback: %s", varName.Value)
 					return
 				}
 
@@ -438,13 +438,13 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 				}
 
 				if len(v.Arguments) != 1 {
-					t.addWarn(v.Location(), "expected single argument for calc()")
+					t.addWarn(v, "expected single argument for calc()")
 					return
 				}
 
 				args := t.transformValues([]ast.Value{v.Arguments[0]})
 				if len(args) != 1 {
-					t.addWarn(v.Location(), "expected single argument for calc()")
+					t.addWarn(v, "expected single argument for calc()")
 					return
 				}
 
@@ -455,11 +455,11 @@ func (t *transformer) transformValues(values []ast.Value) []ast.Value {
 
 				l, r := t.transformValues([]ast.Value{arg.Left}), t.transformValues([]ast.Value{arg.Right})
 				if len(l) != 1 {
-					t.addWarn(arg.Left.Location(), "expected left-hand side of math expression to be a single value")
+					t.addWarn(arg.Left, "expected left-hand side of math expression to be a single value")
 					return
 				}
 				if len(r) != 1 {
-					t.addWarn(arg.Right.Location(), "expected right-hand side of math expression to be a single value")
+					t.addWarn(arg.Right, "expected right-hand side of math expression to be a single value")
 					return
 				}
 
@@ -536,12 +536,12 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 			if left.Unit != right.Unit {
 				if left.Unit == "" && right.Unit != "" {
 					// Invalid, because we cannot mix number types and lengths, e.g. (2 + 5rem).
-					t.addError(left.Location(), "cannot add number type and %s type together", right.Unit)
+					t.addError(left, "cannot add number type and %s type together", right.Unit)
 				}
 
 				if left.Unit != "" && right.Unit == "" {
 					// Invalid, because we cannot mix number types and lengths, e.g. (5rem + 2).
-					t.addError(left.Location(), "cannot add number type and %s type together", left.Unit)
+					t.addError(left, "cannot add number type and %s type together", left.Unit)
 				}
 
 				// Valid css, but we cannot reduce (e.g. 2px + 3rem).
@@ -550,7 +550,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 
 			newValue, err := t.doMath(left.Value, right.Value, op)
 			if err != nil {
-				t.addError(l.Location(), err.Error())
+				t.addError(l, err.Error())
 				return nil
 			}
 
@@ -569,7 +569,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 		// left.Left.Unit case: doMath on left.Left.Value and right.Value and return left with Left = [the result of doMath]
 
 		default:
-			t.addError(l.Location(), "cannot perform %s on this type", op)
+			t.addError(l, "cannot perform %s on this type", op)
 			return nil
 		}
 
@@ -581,7 +581,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 		}
 
 		if leftAsDimension.Unit != "" && rightAsDimension.Unit != "" {
-			t.addError(l.Location(), "one side of multiplication must be a number (non-percentage/dimension)")
+			t.addError(l, "one side of multiplication must be a number (non-percentage/dimension)")
 			return nil
 		}
 
@@ -594,7 +594,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 
 		newValue, err := t.doMath(maybeWithUnit.Value, number.Value, op)
 		if err != nil {
-			t.addError(l.Location(), err.Error())
+			t.addError(l, err.Error())
 			return nil
 		}
 
@@ -606,7 +606,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 	case "/":
 		rightAsDimension, rightIsDimension := r.(*ast.Dimension)
 		if !rightIsDimension || rightAsDimension.Unit != "" {
-			t.addError(l.Location(), "right side of division must be a number (non-percentage/dimension)")
+			t.addError(l, "right side of division must be a number (non-percentage/dimension)")
 			return nil
 		}
 
@@ -614,7 +614,7 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 		case *ast.Dimension:
 			newValue, err := t.doMath(left.Value, rightAsDimension.Value, op)
 			if err != nil {
-				t.addError(l.Location(), err.Error())
+				t.addError(l, err.Error())
 				return nil
 			}
 
@@ -626,12 +626,12 @@ func (t *transformer) evaluateMathExpression(l, r ast.Value, op string) ast.Valu
 			// case *ast.MathExpression
 
 		default:
-			t.addError(l.Location(), "cannot perform %s on this type", op)
+			t.addError(l, "cannot perform %s on this type", op)
 			return nil
 		}
 
 	default:
-		t.addError(l.Location(), "unknown op: %s", op)
+		t.addError(l, "unknown op: %s", op)
 		return nil
 	}
 }
