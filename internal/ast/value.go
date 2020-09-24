@@ -45,18 +45,6 @@ type Identifier struct {
 	Value string
 }
 
-// Image is an image. Only one of the URL or Gradient fields
-// can be validly non-zero.
-// See: https://www.w3.org/TR/css-images-3/.
-type Image struct {
-	// URL is the referenced image.
-	URL string
-
-	// Gradient is a gradient defined by
-	// https://www.w3.org/TR/css-images-3/#gradients.
-	Gradient string
-}
-
 // HexColor is a hex color (e.g. #aabbccdd) defined by https://www.w3.org/TR/css-color-3/.
 type HexColor struct {
 	Span
