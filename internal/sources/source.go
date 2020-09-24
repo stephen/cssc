@@ -24,8 +24,8 @@ type Source struct {
 // ast.Loc (byte offset in the file).
 func (s *Source) LineAndCol(loc ast.Span) (int32, int32) {
 	line := sort.Search(len(s.Lines), func(i int) bool {
-		return loc.Position < s.Lines[i]
+		return loc.Start < s.Lines[i]
 	})
 
-	return int32(line), int32(loc.Position - s.Lines[line-1] + 1)
+	return int32(line), int32(loc.Start - s.Lines[line-1] + 1)
 }

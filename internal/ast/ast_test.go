@@ -8,6 +8,6 @@ import (
 
 func TestSpanMutability(t *testing.T) {
 	n := &Comma{}
-	n.Location().Position = 10
-	assert.Equal(t, 10, n.Span.Position)
+	n.Location().Start = 10
+	assert.Equal(t, 10, n.Span.Start)
 }

@@ -8,7 +8,7 @@ type Node interface {
 
 // Span is a location in the source.
 type Span struct {
-	Position int
+	Start int
 }
 
 // Stylesheet is a CSS stylesheet.
