@@ -19,15 +19,19 @@ type Lexer struct {
 	// no more runes, ch is -1.
 	ch rune
 
-	// pos is the current byte (not codepoint) offset within source.
+	// pos is the current byte offset within source.
 	pos int
 
-	// start is the position at the beginning of a Next() call. It's
-	// only used for providing locations, not for processing.
-	start int
-
-	// lastPos is the last byte (not codepoint) offset within source.
+	// lastPos is the most recently read byte offset within source, i.e.
+	// one codepoint before pos. We need to keep track of this separate from
+	// pos because it's possible that the previous position was multiple
+	// bytes away (due to ut8 codepoints being bigger than a byte).
 	lastPos int
+
+	// start is bookkeeping for the value of lastPos when Next() was most recently called.
+	// It's only used for providing locations to the lexer's caller, not for stepping
+	// through the source within the lexer.
+	start int
 
 	// source is the current source code being lexed.
 	source *sources.Source
