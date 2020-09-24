@@ -9,6 +9,9 @@ type QualifiedRule struct {
 	Block Block
 }
 
+// Location implements Node.
+func (n *QualifiedRule) Location() *Span { return &n.Span }
+
 // Prelude is the prelude for QualifiedRules.
 type Prelude interface {
 	Node
@@ -16,4 +19,4 @@ type Prelude interface {
 	isPrelude()
 }
 
-var _ Node = QualifiedRule{}
+var _ Node = &QualifiedRule{}

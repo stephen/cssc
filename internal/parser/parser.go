@@ -222,7 +222,7 @@ func (p *parser) parseMathSum() ast.Value {
 		op := p.lexer.CurrentString
 		p.lexer.Expect(lexer.Delim)
 		left = &ast.MathExpression{
-			Span:     left.Location(),
+			Span:     *left.Location(),
 			Left:     left,
 			Operator: op,
 			Right:    p.parseMathProduct(),
@@ -239,7 +239,7 @@ func (p *parser) parseMathProduct() ast.Value {
 		op := p.lexer.CurrentString
 		p.lexer.Expect(lexer.Delim)
 		left = &ast.MathExpression{
-			Span:     left.Location(),
+			Span:     *left.Location(),
 			Left:     left,
 			Operator: op,
 			Right:    p.parseValue(),

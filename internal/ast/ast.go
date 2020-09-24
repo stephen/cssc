@@ -2,16 +2,14 @@ package ast
 
 // Node is any top-level stylesheet rule.
 type Node interface {
-	Location() Span
+	// Location provides a mutable reference to the node's location.
+	Location() *Span
 }
 
 // Span is a location in the source.
 type Span struct {
 	Position int
 }
-
-// Location implements Node.
-func (l Span) Location() Span { return l }
 
 // Stylesheet is a CSS stylesheet.
 type Stylesheet struct {
@@ -29,7 +27,7 @@ type ImportSpecifier struct {
 }
 
 // Location implements Node.
-func (l Stylesheet) Location() Span { return Span{} }
+func (l Stylesheet) Location() *Span { return &Span{} }
 
 // Comment represents a comment.
 type Comment struct {
@@ -37,6 +35,9 @@ type Comment struct {
 
 	Text string
 }
+
+// Location implements Node.
+func (n *Comment) Location() *Span { return &n.Span }
 
 // Block can either be a block of rules or declarations.
 // See https://www.w3.org/TR/css-syntax-3/#declaration-rule-list.
@@ -53,6 +54,9 @@ type DeclarationBlock struct {
 	Declarations []*Declaration
 }
 
+// Location implements Node.
+func (n *DeclarationBlock) Location() *Span { return &n.Span }
+
 // QualifiedRuleBlock is a block containing a set of rules.
 type QualifiedRuleBlock struct {
 	Span
@@ -60,11 +64,14 @@ type QualifiedRuleBlock struct {
 	Rules []*QualifiedRule
 }
 
+// Location implements Node.
+func (n *QualifiedRuleBlock) Location() *Span { return &n.Span }
+
 func (DeclarationBlock) isBlock()   {}
 func (QualifiedRuleBlock) isBlock() {}
 
-var _ Block = DeclarationBlock{}
-var _ Block = QualifiedRuleBlock{}
+var _ Block = &DeclarationBlock{}
+var _ Block = &QualifiedRuleBlock{}
 
 // Declaration is a property assignment, e.g. width: 2px.
 type Declaration struct {
@@ -79,3 +86,8 @@ type Declaration struct {
 	// Important is whether or not the declaration was marked !important.
 	Important bool
 }
+
+// Location implements Node.
+func (n *Declaration) Location() *Span { return &n.Span }
+
+var _ Node = &Declaration{}
