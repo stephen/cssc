@@ -132,7 +132,7 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.AtRule:
-		p.addMapping(node.Loc)
+		p.addMapping(node.Span)
 		p.s.WriteRune('@')
 		p.s.WriteString(node.Name)
 		if len(node.Preludes) > 0 {
