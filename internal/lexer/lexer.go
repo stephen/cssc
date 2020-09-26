@@ -100,13 +100,6 @@ func (l *Lexer) peek(i int) rune {
 	return cp
 }
 
-// StartSpan is the start span of the current token in the source, i.e.
-// the value of l.start and l.lstPos when Next() was called.
-func (l *Lexer) StartSpan() ast.Span {
-	start, end := l.Range()
-	return ast.Span{Start: start, End: end}
-}
-
 // TokenEnd returns the end location of the current token.
 func (l *Lexer) TokenEnd() int {
 	return l.lastPos
@@ -116,13 +109,6 @@ func (l *Lexer) TokenEnd() int {
 // for creating single-token AST nodes, e.g. commas.
 func (l *Lexer) TokenSpan() ast.Span {
 	return ast.Span{Start: l.start, End: l.lastPos}
-}
-
-// Range is the start to end offset of the current token in the source. The returned
-// start should be the same as Location() and the end is the last position stepped through,
-// i.e. l.lastPos.
-func (l *Lexer) Range() (int, int) {
-	return l.start, l.lastPos
 }
 
 // Expect is like Next, except it asserts the current token before moving on. Callers should

@@ -7,7 +7,7 @@ import (
 
 func (p *parser) parseSelectorList() *ast.SelectorList {
 	l := &ast.SelectorList{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 
 	for {
@@ -34,7 +34,7 @@ func (p *parser) parseSelectorList() *ast.SelectorList {
 
 func (p *parser) parseSelector() *ast.Selector {
 	s := &ast.Selector{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 
 	prevRetainWhitespace := p.lexer.RetainWhitespace
@@ -69,7 +69,7 @@ func (p *parser) parseSelector() *ast.Selector {
 		case lexer.Delim:
 			switch p.lexer.CurrentString {
 			case ".":
-				span := p.lexer.StartSpan()
+				span := p.lexer.TokenSpan()
 				p.lexer.Next()
 				cls := &ast.ClassSelector{
 					Span: span,
@@ -105,12 +105,12 @@ func (p *parser) parseSelector() *ast.Selector {
 			var wrapperLocation ast.Span
 			if p.lexer.Current == lexer.Colon {
 				wrapper = true
-				wrapperLocation = p.lexer.StartSpan()
+				wrapperLocation = p.lexer.TokenSpan()
 				p.lexer.Next()
 			}
 
 			pc := &ast.PseudoClassSelector{
-				Span: p.lexer.StartSpan(),
+				Span: p.lexer.TokenSpan(),
 				Name: p.lexer.CurrentString,
 			}
 
@@ -164,7 +164,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			s.Parts = append(s.Parts, pc)
 
 		case lexer.LBracket:
-			startLoc := p.lexer.StartSpan()
+			startLoc := p.lexer.TokenSpan()
 			p.lexer.Next()
 			attr := &ast.AttributeSelector{
 				Span:     startLoc,
@@ -220,7 +220,7 @@ func (p *parser) parseANPlusB() *ast.ANPlusB {
 		p.lexer.RetainWhitespace = prev
 	}()
 
-	v := &ast.ANPlusB{Span: p.lexer.StartSpan()}
+	v := &ast.ANPlusB{Span: p.lexer.TokenSpan()}
 
 	if p.lexer.Current == lexer.Number {
 		v.A = p.lexer.CurrentNumeral

@@ -88,7 +88,7 @@ func isImportantString(in string) bool {
 // the preludes are selector lists.
 func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 	r := &ast.QualifiedRule{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 
 	for {
@@ -98,7 +98,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 
 		case lexer.LCurly:
 			block := &ast.DeclarationBlock{
-				Span: p.lexer.StartSpan(),
+				Span: p.lexer.TokenSpan(),
 			}
 
 			r.Block = block
@@ -106,7 +106,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 
 			for p.lexer.Current != lexer.RCurly {
 				decl := &ast.Declaration{
-					Span:     p.lexer.StartSpan(),
+					Span:     p.lexer.TokenSpan(),
 					Property: p.lexer.CurrentString,
 				}
 				p.lexer.Expect(lexer.Ident)
@@ -175,7 +175,7 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 
 func (p *parser) parseKeyframeSelectorList() *ast.KeyframeSelectorList {
 	l := &ast.KeyframeSelectorList{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 
 	for {
@@ -368,7 +368,7 @@ func (p *parser) parseImportAtRule() {
 	prelude := &ast.String{}
 
 	imp := &ast.AtRule{
-		Span:     p.lexer.StartSpan(),
+		Span:     p.lexer.TokenSpan(),
 		Name:     p.lexer.CurrentString,
 		Preludes: []ast.AtPrelude{prelude},
 	}
@@ -385,7 +385,7 @@ func (p *parser) parseImportAtRule() {
 		p.lexer.Next()
 
 	case lexer.FunctionStart:
-		prelude.Span = p.lexer.StartSpan()
+		prelude.Span = p.lexer.TokenSpan()
 		if p.lexer.CurrentString != "url" {
 			p.lexer.Errorf("@import target must be a url or string")
 		}
@@ -427,7 +427,7 @@ func (p *parser) parseImportAtRule() {
 // https://www.w3.org/TR/css-animations-1/#keyframes
 func (p *parser) parseKeyframes() {
 	r := &ast.AtRule{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 		Name: p.lexer.CurrentString,
 	}
 	p.lexer.Next()
@@ -451,7 +451,7 @@ func (p *parser) parseKeyframes() {
 	p.lexer.Next()
 
 	block := &ast.QualifiedRuleBlock{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 	r.Block = block
 	p.lexer.Expect(lexer.LCurly)
@@ -477,7 +477,7 @@ func (p *parser) parseKeyframes() {
 // https://www.w3.org/TR/mediaqueries-4/#media.
 func (p *parser) parseMediaAtRule() {
 	r := &ast.AtRule{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 		Name: p.lexer.CurrentString,
 	}
 	p.lexer.Next()
@@ -485,7 +485,7 @@ func (p *parser) parseMediaAtRule() {
 	r.Preludes = []ast.AtPrelude{p.parseMediaQueryList()}
 
 	block := &ast.QualifiedRuleBlock{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 	r.Block = block
 	p.lexer.Expect(lexer.LCurly)
@@ -509,7 +509,7 @@ func (p *parser) parseMediaAtRule() {
 
 func (p *parser) parseMediaQueryList() *ast.MediaQueryList {
 	l := &ast.MediaQueryList{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 
 	for {
@@ -540,7 +540,7 @@ func (p *parser) parseMediaQueryList() *ast.MediaQueryList {
 
 func (p *parser) parseMediaQuery() *ast.MediaQuery {
 	q := &ast.MediaQuery{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 	}
 
 	for {
@@ -566,7 +566,7 @@ func (p *parser) parseMediaQuery() *ast.MediaQuery {
 }
 
 func (p *parser) parseMediaFeature() ast.MediaFeature {
-	startLoc := p.lexer.StartSpan()
+	startLoc := p.lexer.TokenSpan()
 	p.lexer.Expect(lexer.LParen)
 
 	firstValue := p.parseValue()
@@ -697,7 +697,7 @@ func (p *parser) parseMediaRangeOperator() string {
 // See: https://www.w3.org/TR/mediaqueries-5/#custom-mq.
 func (p *parser) parseCustomMediaAtRule() {
 	r := &ast.AtRule{
-		Span: p.lexer.StartSpan(),
+		Span: p.lexer.TokenSpan(),
 		Name: p.lexer.CurrentString,
 	}
 	p.lexer.Next()
