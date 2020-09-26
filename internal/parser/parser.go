@@ -333,6 +333,7 @@ func (p *parser) parseValue() ast.Value {
 		for {
 			switch p.lexer.Current {
 			case lexer.RParen:
+				fn.End = p.lexer.TokenEnd()
 				p.lexer.Next()
 				break arguments
 			case lexer.Comma:

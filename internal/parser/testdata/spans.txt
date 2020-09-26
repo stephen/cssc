@@ -316,15 +316,15 @@
 
 *ast.Declaration:18:2
 	  background-color: rgba(calc(0 + 1), 2, 3);
-	  ~~~~~~~~~~~~~~~~~~~~~~~
+	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Function:18:20
 	  background-color: rgba(calc(0 + 1), 2, 3);
-	                    ~~~~~
+	                    ~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Function:18:25
 	  background-color: rgba(calc(0 + 1), 2, 3);
-	                         ~~~~~
+	                         ~~~~~~~~~~~
 
 *ast.MathExpression:18:30
 	  background-color: rgba(calc(0 + 1), 2, 3);
@@ -356,11 +356,11 @@
 
 *ast.Declaration:19:2
 	  width: calc(2px / 2 + 1rem * 8)
-	  ~~~~~~~~~~~~
+	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Function:19:9
 	  width: calc(2px / 2 + 1rem * 8)
-	         ~~~~~
+	         ~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.MathExpression:19:14
 	  width: calc(2px / 2 + 1rem * 8)
