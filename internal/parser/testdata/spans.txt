@@ -230,7 +230,11 @@
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
 	                   ~~~~
 
-*ast.PseudoElementSelector:16:25
+*ast.PseudoElementSelector:16:24
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                       ~~~~~~~
+
+*ast.PseudoClassSelector:16:25
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
 	                        ~~~~~~
 
@@ -242,9 +246,9 @@
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
 	                                ~
 
-*ast.PseudoClassSelector:16:35
+*ast.PseudoClassSelector:16:34
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                  ~~~~
+	                                 ~~~~~
 
 *ast.Selector:16:41
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
@@ -254,9 +258,9 @@
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
 	                                        ~
 
-*ast.PseudoClassSelector:16:43
+*ast.PseudoClassSelector:16:42
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                          ~~~~~~~
+	                                         ~~~~~~~~
 
 *ast.Selector:16:52
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
@@ -270,9 +274,9 @@
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
 	                                                      ~~
 
-*ast.PseudoClassSelector:16:58
+*ast.PseudoClassSelector:16:57
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                                         ~~~~~~~
+	                                                        ~~~~~~~~
 
 *ast.Whitespace:16:65
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {

@@ -98,6 +98,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			}
 
 		case lexer.Colon:
+			span := p.lexer.TokenSpan()
 			p.lexer.Next()
 
 			// Wrap it in a PseudoElementSelector if there are two colons.
@@ -105,12 +106,13 @@ func (p *parser) parseSelector() *ast.Selector {
 			var wrapperLocation ast.Span
 			if p.lexer.Current == lexer.Colon {
 				wrapper = true
-				wrapperLocation = p.lexer.TokenSpan()
+				wrapperLocation = span
+				span = p.lexer.TokenSpan()
 				p.lexer.Next()
 			}
 
 			pc := &ast.PseudoClassSelector{
-				Span: p.lexer.TokenSpan(),
+				Span: span,
 				Name: p.lexer.CurrentString,
 			}
 

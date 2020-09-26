@@ -88,6 +88,9 @@ func Walk(start Node, visit func(n Node)) {
 			Walk(arg, visit)
 		}
 
+	case *PseudoElementSelector:
+		Walk(s.Inner, visit)
+
 	case *ClassSelector:
 	case *Comma:
 	case *Comment:
@@ -97,7 +100,6 @@ func Walk(start Node, visit func(n Node)) {
 	case *CombinatorSelector:
 	case *PseudoClassSelector:
 	case *ANPlusB:
-	case *PseudoElementSelector:
 	case *HexColor:
 	case *Percentage:
 	case *Dimension:
