@@ -93,7 +93,12 @@ func AnnotateSourceSpan(source *sources.Source, span ast.Span) string {
 	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
 
 	indent := strings.Repeat(" ", int(col)+tabCount-1)
-	underline := strings.Repeat("~", span.End-span.Start)
+	underline := strings.Repeat("~", span.End-span.Start)[:]
+	excessMarker := ""
+	if excess := span.End - lineEnd; excess > 0 {
+		underline = underline[:len(underline)-excess]
+		excessMarker = ">"
+	}
 
-	return fmt.Sprintf("\t%s\n\t%s%s", withoutTabs, indent, underline)
+	return fmt.Sprintf("\t%s\n\t%s%s%s", withoutTabs, indent, underline, excessMarker)
 }
