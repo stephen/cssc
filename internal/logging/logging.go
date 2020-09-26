@@ -58,29 +58,42 @@ func (l *locationError) Unwrap() error {
 // Error implements error. It's relatively slow because it needs to
 // rescan the source to figure out line and column numbers. The output
 // looks like:
-// file.css:1:1
+// file.css:1:4
 // there's a problem here:
-//   contents
-//   ~~~~~~~~
+//   (contents) or (other thing)
+//    ~~~~~~~~
 func (l *locationError) Error() string {
+	// Unfortunately, AnnotateSourceSpan will also call LineAndCol, so we'll
+	// end up duplicating that effort. It's probably okay since we're unlikely to be
+	// generating high-throughput errors.
 	lineNumber, col := l.Source.LineAndCol(l.Span)
-	lineStart := l.Source.Lines[lineNumber-1]
 
-	lineEnd := len(l.Source.Content)
-	for i, ch := range l.Source.Content[l.Start:] {
+	return fmt.Sprintf("%s:%d:%d\n%s:\n%s", l.Source.Path, lineNumber, col, l.inner.Error(), AnnotateSourceSpan(l.Source, l.Span))
+}
+
+// AnnotateSourceSpan annotates a span from a single line in the source code.
+// The output looks like:
+//   (contents) or (other thing)
+//    ~~~~~~~~
+func AnnotateSourceSpan(source *sources.Source, span ast.Span) string {
+	lineNumber, col := source.LineAndCol(span)
+	lineStart := source.Lines[lineNumber-1]
+
+	lineEnd := len(source.Content)
+	for i, ch := range source.Content[span.Start:] {
 		if ch == '\n' {
-			lineEnd = i + l.Start
+			lineEnd = i + span.Start
 			break
 		}
 	}
 
-	line := l.Source.Content[lineStart:lineEnd]
+	line := source.Content[lineStart:lineEnd]
 
 	tabCount := strings.Count(line, "\t")
 	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
 
 	indent := strings.Repeat(" ", int(col)+tabCount-1)
-	underline := strings.Repeat("~", l.End-l.Start)
+	underline := strings.Repeat("~", span.End-span.Start)
 
-	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.Source.Path, lineNumber, col, l.inner.Error(), withoutTabs, indent, underline)
+	return fmt.Sprintf("\t%s\n\t%s%s", withoutTabs, indent, underline)
 }
