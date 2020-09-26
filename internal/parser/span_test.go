@@ -36,6 +36,8 @@ func TestSpans(t *testing.T) {
 @media (screen) or (print) {
 	#id {
 		line-height: 2rem;
+    space-indented:1rem;
+    tab-in-values:	1rem;
 	}
 }
 
