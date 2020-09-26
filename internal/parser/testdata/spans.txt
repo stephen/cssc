@@ -120,15 +120,15 @@
 
 *ast.MediaQueryList:9:8
 	@media (screen) or (print) {
-	       ~~~~~~~~~~~~~~~~~~
+	       ~~~~~~~~~~~~~~~~~~~
 
 *ast.MediaQuery:9:8
 	@media (screen) or (print) {
-	       ~~~~~~~~~~~~~~~~~~
+	       ~~~~~~~~~~~~~~~~~~~
 
 *ast.MediaFeaturePlain:9:8
 	@media (screen) or (print) {
-	       ~~~~~~~
+	       ~~~~~~~~
 
 *ast.Identifier:9:9
 	@media (screen) or (print) {
@@ -140,7 +140,7 @@
 
 *ast.MediaFeaturePlain:9:20
 	@media (screen) or (print) {
-	                   ~~~~~~
+	                   ~~~~~~~
 
 *ast.Identifier:9:21
 	@media (screen) or (print) {
@@ -356,7 +356,7 @@
 
 *ast.AtRule:21:1
 	@custom-media test (800px < width < 1000px) or (print);
-	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Identifier:21:15
 	@custom-media test (800px < width < 1000px) or (print);
@@ -364,7 +364,7 @@
 
 *ast.MediaQuery:21:20
 	@custom-media test (800px < width < 1000px) or (print);
-	                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.MediaFeatureRange:21:20
 	@custom-media test (800px < width < 1000px) or (print);
@@ -384,7 +384,7 @@
 
 *ast.MediaFeaturePlain:21:48
 	@custom-media test (800px < width < 1000px) or (print);
-	                                               ~~~~~~
+	                                               ~~~~~~~
 
 *ast.Identifier:21:49
 	@custom-media test (800px < width < 1000px) or (print);

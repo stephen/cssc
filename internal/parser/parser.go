@@ -573,6 +573,7 @@ func (p *parser) parseMediaFeature() ast.MediaFeature {
 
 	switch p.lexer.Current {
 	case lexer.RParen:
+		startLoc.End = p.lexer.TokenEnd()
 		p.lexer.Next()
 		ident, ok := firstValue.(*ast.Identifier)
 		if !ok {
@@ -580,7 +581,6 @@ func (p *parser) parseMediaFeature() ast.MediaFeature {
 			p.lexer.Errorf("expected identifier in media feature with no value")
 		}
 
-		startLoc.End = ident.End
 		return &ast.MediaFeaturePlain{
 			Span:     startLoc,
 			Property: ident,
