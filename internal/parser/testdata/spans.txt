@@ -1,0 +1,452 @@
+*ast.Stylesheet:1:1
+	
+	
+
+*ast.QualifiedRule:2:1
+	.simple { margin: 1px 2px; }
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.SelectorList:2:1
+	.simple { margin: 1px 2px; }
+	~~~~~~~~
+
+*ast.Selector:2:1
+	.simple { margin: 1px 2px; }
+	~~~~~~~~
+
+*ast.ClassSelector:2:1
+	.simple { margin: 1px 2px; }
+	~~~~~~~
+
+*ast.Whitespace:2:8
+	.simple { margin: 1px 2px; }
+	       ~
+
+*ast.DeclarationBlock:2:9
+	.simple { margin: 1px 2px; }
+	        ~~~~~~~~~~~~~~~~~~~~
+
+*ast.Declaration:2:11
+	.simple { margin: 1px 2px; }
+	          ~~~~~~~~~~~~~~~
+
+*ast.Dimension:2:19
+	.simple { margin: 1px 2px; }
+	                  ~~~
+
+*ast.Dimension:2:23
+	.simple { margin: 1px 2px; }
+	                      ~~~
+
+*ast.QualifiedRule:3:1
+	.more, .complex { margin: 1px 2px; }
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.SelectorList:3:1
+	.more, .complex { margin: 1px 2px; }
+	~~~~~~~~~~~~~~~~
+
+*ast.Selector:3:1
+	.more, .complex { margin: 1px 2px; }
+	~~~~~
+
+*ast.ClassSelector:3:1
+	.more, .complex { margin: 1px 2px; }
+	~~~~~
+
+*ast.Selector:3:8
+	.more, .complex { margin: 1px 2px; }
+	       ~~~~~~~~~
+
+*ast.ClassSelector:3:8
+	.more, .complex { margin: 1px 2px; }
+	       ~~~~~~~~
+
+*ast.Whitespace:3:16
+	.more, .complex { margin: 1px 2px; }
+	               ~
+
+*ast.DeclarationBlock:3:17
+	.more, .complex { margin: 1px 2px; }
+	                ~~~~~~~~~~~~~~~~~~~~
+
+*ast.Declaration:3:19
+	.more, .complex { margin: 1px 2px; }
+	                  ~~~~~~~~~~~~~~~
+
+*ast.Dimension:3:27
+	.more, .complex { margin: 1px 2px; }
+	                          ~~~
+
+*ast.Dimension:3:31
+	.more, .complex { margin: 1px 2px; }
+	                              ~~~
+
+*ast.QualifiedRule:5:1
+	.multiline {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.SelectorList:5:1
+	.multiline {
+	~~~~~~~~~~~
+
+*ast.Selector:5:1
+	.multiline {
+	~~~~~~~~~~~
+
+*ast.ClassSelector:5:1
+	.multiline {
+	~~~~~~~~~~
+
+*ast.Whitespace:5:11
+	.multiline {
+	          ~
+
+*ast.DeclarationBlock:5:12
+	.multiline {
+	           ~~~~~~~~~~~~~~~~
+
+*ast.Declaration:6:2
+	  width: 50%;
+	  ~~~~~~~~~~
+
+*ast.Dimension:6:9
+	  width: 50%;
+	         ~~~
+
+*ast.AtRule:9:1
+	@media (screen) or (print) {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.MediaQueryList:9:8
+	@media (screen) or (print) {
+	       ~~~~~~~~~~~~~~~~~~
+
+*ast.MediaQuery:9:8
+	@media (screen) or (print) {
+	       ~~~~~~~~~~~~~~~~~~
+
+*ast.MediaFeaturePlain:9:8
+	@media (screen) or (print) {
+	       ~~~~~~~
+
+*ast.Identifier:9:9
+	@media (screen) or (print) {
+	        ~~~~~~
+
+*ast.Identifier:9:17
+	@media (screen) or (print) {
+	                ~~
+
+*ast.MediaFeaturePlain:9:20
+	@media (screen) or (print) {
+	                   ~~~~~~
+
+*ast.Identifier:9:21
+	@media (screen) or (print) {
+	                    ~~~~~
+
+*ast.QualifiedRuleBlock:9:28
+	@media (screen) or (print) {
+	                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.QualifiedRule:10:2
+	  #id {
+	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.SelectorList:10:2
+	  #id {
+	  ~~~~
+
+*ast.Selector:10:2
+	  #id {
+	  ~~~~
+
+*ast.IDSelector:10:2
+	  #id {
+	  ~~~
+
+*ast.Whitespace:10:5
+	  #id {
+	     ~
+
+*ast.DeclarationBlock:10:6
+	  #id {
+	      ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Declaration:11:3
+	    line-height: 2rem;
+	    ~~~~~~~~~~~~~~~~~
+
+*ast.Dimension:11:16
+	    line-height: 2rem;
+	                 ~~~~
+
+*ast.Comment:15:1
+	/* what is this even targetting?? */
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.QualifiedRule:16:1
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.SelectorList:16:1
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Selector:16:1
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	~~~~~~~~~~~~~~~~~
+
+*ast.ClassSelector:16:1
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	~~~~
+
+*ast.IDSelector:16:5
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	    ~~~~~~~
+
+*ast.Whitespace:16:12
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	           ~
+
+*ast.CombinatorSelector:16:13
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	            ~
+
+*ast.Whitespace:16:14
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	             ~
+
+*ast.TypeSelector:16:15
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	              ~~~
+
+*ast.Selector:16:20
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                   ~~~~~~~~~~~
+
+*ast.TypeSelector:16:20
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                   ~~~~
+
+*ast.PseudoElementSelector:16:25
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                        ~~~~~~
+
+*ast.Selector:16:33
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                ~~~~~~
+
+*ast.TypeSelector:16:33
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                ~
+
+*ast.PseudoClassSelector:16:35
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                  ~~~~
+
+*ast.Selector:16:41
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                        ~~~~~~~~~
+
+*ast.TypeSelector:16:41
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                        ~
+
+*ast.PseudoClassSelector:16:43
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                          ~~~~~~~
+
+*ast.Selector:16:52
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.TypeSelector:16:52
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                   ~~~
+
+*ast.ClassSelector:16:55
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                      ~~
+
+*ast.PseudoClassSelector:16:58
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                         ~~~~~~~
+
+*ast.Whitespace:16:65
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                ~
+
+*ast.CombinatorSelector:16:66
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                 ~
+
+*ast.Whitespace:16:67
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                  ~
+
+*ast.TypeSelector:16:68
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                   ~
+
+*ast.AttributeSelector:16:69
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                    ~~~~~~~~~~~~~
+
+*ast.String:16:75
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                          ~~~~~~~
+
+*ast.Whitespace:16:83
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                                  ~
+
+*ast.DeclarationBlock:16:84
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Declaration:17:2
+	  color: purple;
+	  ~~~~~~~~~~~~~
+
+*ast.Identifier:17:9
+	  color: purple;
+	         ~~~~~~
+
+*ast.Declaration:18:2
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	  ~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Function:18:20
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                    ~~~~~
+
+*ast.Function:18:25
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                         ~~~~~
+
+*ast.MathExpression:18:30
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                              ~
+
+*ast.Dimension:18:30
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                              ~
+
+*ast.Dimension:18:34
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                                  ~
+
+*ast.Comma:18:36
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                                    ~
+
+*ast.Dimension:18:38
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                                      ~
+
+*ast.Comma:18:39
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                                       ~
+
+*ast.Dimension:18:41
+	  background-color: rgba(calc(0 + 1), 2, 3);
+	                                         ~
+
+*ast.AtRule:21:1
+	@custom-media test (800px < width < 1000px) or (print);
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Identifier:21:15
+	@custom-media test (800px < width < 1000px) or (print);
+	              ~~~~
+
+*ast.MediaQuery:21:20
+	@custom-media test (800px < width < 1000px) or (print);
+	                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.MediaFeatureRange:21:20
+	@custom-media test (800px < width < 1000px) or (print);
+	                   ~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Dimension:21:21
+	@custom-media test (800px < width < 1000px) or (print);
+	                    ~~~~~
+
+*ast.Dimension:21:37
+	@custom-media test (800px < width < 1000px) or (print);
+	                                    ~~~~~~
+
+*ast.Identifier:21:45
+	@custom-media test (800px < width < 1000px) or (print);
+	                                            ~~
+
+*ast.MediaFeaturePlain:21:48
+	@custom-media test (800px < width < 1000px) or (print);
+	                                               ~~~~~~
+
+*ast.Identifier:21:49
+	@custom-media test (800px < width < 1000px) or (print);
+	                                                ~~~~~
+
+*ast.AtRule:23:1
+	@keyframes custom {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Identifier:23:12
+	@keyframes custom {
+	           ~~~~~~
+
+*ast.QualifiedRuleBlock:23:19
+	@keyframes custom {
+	                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.QualifiedRule:24:2
+	  0% { opacity: 0%; }
+	  ~~~~~~~~~~~~~~~~~~~
+
+*ast.KeyframeSelectorList:24:2
+	  0% { opacity: 0%; }
+	  ~~
+
+*ast.Percentage:24:2
+	  0% { opacity: 0%; }
+	  ~~
+
+*ast.DeclarationBlock:24:5
+	  0% { opacity: 0%; }
+	     ~~~~~~~~~~~~~~~~
+
+*ast.Declaration:24:7
+	  0% { opacity: 0%; }
+	       ~~~~~~~~~~~
+
+*ast.Dimension:24:16
+	  0% { opacity: 0%; }
+	                ~~
+
+*ast.QualifiedRule:25:2
+	  100% { opacity: 100%; }
+	  ~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.KeyframeSelectorList:25:2
+	  100% { opacity: 100%; }
+	  ~~~~
+
+*ast.Percentage:25:2
+	  100% { opacity: 100%; }
+	  ~~~~
+
+*ast.DeclarationBlock:25:7
+	  100% { opacity: 100%; }
+	       ~~~~~~~~~~~~~~~~~~
+
+*ast.Declaration:25:9
+	  100% { opacity: 100%; }
+	         ~~~~~~~~~~~~~
+
+*ast.Dimension:25:18
+	  100% { opacity: 100%; }
+	                  ~~~~
+
