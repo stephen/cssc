@@ -1,6 +1,6 @@
-*ast.Stylesheet:1:1
-	
-	
+*ast.Stylesheet:2:1
+	.simple { margin: 1px 2px; }
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
 
 *ast.QualifiedRule:2:1
 	.simple { margin: 1px 2px; }

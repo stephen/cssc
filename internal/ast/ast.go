@@ -33,7 +33,13 @@ type ImportSpecifier struct {
 }
 
 // Location implements Node.
-func (l Stylesheet) Location() Span { return Span{} }
+func (l Stylesheet) Location() Span {
+	if len(l.Nodes) == 0 {
+		return Span{}
+	}
+
+	return Span{l.Nodes[0].Location().Start, l.Nodes[len(l.Nodes)-1].Location().End}
+}
 
 // Comment represents a comment.
 type Comment struct {
