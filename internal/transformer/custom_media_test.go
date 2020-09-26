@@ -40,7 +40,7 @@ func TestCustomMedia_Unsupported(t *testing.T) {
 		.c { color: red; }
 	}`,
 	})
-	assert.EqualError(t, err, "main.css:2:55\n@custom-media rule requires a single media query argument:\n\t  @custom-media --narrow-window (max-width: 30em), print;\n\t                                                        ~")
+	assert.EqualError(t, err, "main.css:2:56\n@custom-media rule requires a single media query argument:\n\t  @custom-media --narrow-window (max-width: 30em), print;\n\t                                                        ~")
 }
 
 func TestCustomMedia_Passthrough(t *testing.T) {

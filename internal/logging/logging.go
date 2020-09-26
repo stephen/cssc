@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/sources"
 )
 
@@ -63,13 +64,8 @@ func (l *locationError) Unwrap() error {
 //   contents
 //   ~~~~~~~~
 func (l *locationError) Error() string {
-	lineNumber, lineStart := 1, 0
-	for i, ch := range l.Source.Content[:l.start] {
-		if ch == '\n' {
-			lineNumber++
-			lineStart = i + 1
-		}
-	}
+	lineNumber, col := l.Source.LineAndCol(ast.Span{Start: l.start, End: l.start + l.length})
+	lineStart := l.Source.Lines[lineNumber-1]
 
 	lineEnd := len(l.Source.Content)
 	for i, ch := range l.Source.Content[l.start:] {
@@ -80,12 +76,11 @@ func (l *locationError) Error() string {
 	}
 
 	line := l.Source.Content[lineStart:lineEnd]
-	col := l.start - lineStart
 
 	tabCount := strings.Count(line, "\t")
 	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
 
-	indent := strings.Repeat(" ", col+tabCount)
+	indent := strings.Repeat(" ", int(col)+tabCount-1)
 	underline := strings.Repeat("~", l.length)
 
 	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.Source.Path, lineNumber, col, l.inner.Error(), withoutTabs, indent, underline)

@@ -119,7 +119,7 @@ func TestLexer_BrowserPrefix(t *testing.T) {
 }
 
 func TestLexer_Errorf(t *testing.T) {
-	assert.PanicsWithError(t, "main.css:3:6\nunclosed string: unexpected newline:\n\t  bad: \"no good;\n\t       ~~~~~~~~~", func() {
+	assert.PanicsWithError(t, "main.css:3:7\nunclosed string: unexpected newline:\n\t  bad: \"no good;\n\t       ~~~~~~~~~", func() {
 		NewHarness(t, `.class {
 	something: "ok";
 	bad: "no good;
