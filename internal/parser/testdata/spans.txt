@@ -187,128 +187,140 @@
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.QualifiedRule:16:1
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.SelectorList:16:1
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Selector:16:1
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	~~~~~~~~~~~~~~~~~
 
 *ast.ClassSelector:16:1
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	~~~~
 
 *ast.IDSelector:16:5
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	    ~~~~~~~
 
 *ast.Whitespace:16:12
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	           ~
 
 *ast.CombinatorSelector:16:13
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	            ~
 
 *ast.Whitespace:16:14
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	             ~
 
 *ast.TypeSelector:16:15
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	              ~~~
 
 *ast.Selector:16:20
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                   ~~~~~~~~~~~
 
 *ast.TypeSelector:16:20
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                   ~~~~
 
 *ast.PseudoElementSelector:16:24
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                       ~~~~~~~
 
 *ast.PseudoClassSelector:16:25
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                        ~~~~~~
 
 *ast.Selector:16:33
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                ~~~~~~
 
 *ast.TypeSelector:16:33
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                ~
 
 *ast.PseudoClassSelector:16:34
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                 ~~~~~
 
 *ast.Selector:16:41
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                        ~~~~~~~~~
 
 *ast.TypeSelector:16:41
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                        ~
 
 *ast.PseudoClassSelector:16:42
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                         ~~~~~~~~
 
 *ast.Selector:16:52
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.TypeSelector:16:52
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                   ~~~
 
 *ast.ClassSelector:16:55
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                      ~~
 
 *ast.PseudoClassSelector:16:57
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                        ~~~~~~~~
 
 *ast.Whitespace:16:65
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                                ~
 
 *ast.CombinatorSelector:16:66
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                                 ~
 
 *ast.Whitespace:16:67
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                                  ~
 
 *ast.TypeSelector:16:68
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                                   ~
 
 *ast.AttributeSelector:16:69
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                                                    ~~~~~~~~~~~~~
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                                    ~~~~~~~~~~~~~~
 
 *ast.String:16:75
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                                          ~~~~~~~
 
-*ast.Whitespace:16:83
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                                                                  ~
+*ast.Selector:16:85
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                                                    ~~~~~~~~~
 
-*ast.DeclarationBlock:16:84
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*ast.TypeSelector:16:85
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                                                    ~
+
+*ast.AttributeSelector:16:86
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                                                     ~~~~~~~
+
+*ast.Whitespace:16:93
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                                                            ~
+
+*ast.DeclarationBlock:16:94
+	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
+	                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Declaration:17:2
 	  color: purple;

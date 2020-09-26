@@ -40,7 +40,7 @@ func TestSpans(t *testing.T) {
 }
 
 /* what is this even targetting?? */
-.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
+.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	color: purple;
 	background-color: rgba(calc(0 + 1), 2, 3);
 	width: calc(2px / 2 + 1rem * 8)

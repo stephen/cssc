@@ -202,7 +202,7 @@ func (p *parser) parseSelector() *ast.Selector {
 				s.Parts = append(s.Parts, attr)
 			}
 
-			attr.End = attr.Value.Location().End
+			attr.End = p.lexer.TokenEnd()
 			p.lexer.Expect(lexer.RBracket)
 
 		default:
