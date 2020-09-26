@@ -188,7 +188,7 @@
 
 *ast.QualifiedRule:16:1
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.SelectorList:16:1
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
@@ -304,7 +304,7 @@
 
 *ast.DeclarationBlock:16:84
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
-	                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Declaration:17:2
 	  color: purple;
@@ -328,7 +328,7 @@
 
 *ast.MathExpression:18:30
 	  background-color: rgba(calc(0 + 1), 2, 3);
-	                              ~
+	                              ~~~~~
 
 *ast.Dimension:18:30
 	  background-color: rgba(calc(0 + 1), 2, 3);
@@ -354,99 +354,135 @@
 	  background-color: rgba(calc(0 + 1), 2, 3);
 	                                         ~
 
-*ast.AtRule:21:1
+*ast.Declaration:19:2
+	  width: calc(2px / 2 + 1rem * 8)
+	  ~~~~~~~~~~~~
+
+*ast.Function:19:9
+	  width: calc(2px / 2 + 1rem * 8)
+	         ~~~~~
+
+*ast.MathExpression:19:14
+	  width: calc(2px / 2 + 1rem * 8)
+	              ~~~~~~~~~~~~~~~~~~
+
+*ast.MathExpression:19:14
+	  width: calc(2px / 2 + 1rem * 8)
+	              ~~~~~~~
+
+*ast.Dimension:19:14
+	  width: calc(2px / 2 + 1rem * 8)
+	              ~~~
+
+*ast.Dimension:19:20
+	  width: calc(2px / 2 + 1rem * 8)
+	                    ~
+
+*ast.MathExpression:19:24
+	  width: calc(2px / 2 + 1rem * 8)
+	                        ~~~~~~~~
+
+*ast.Dimension:19:24
+	  width: calc(2px / 2 + 1rem * 8)
+	                        ~~~~
+
+*ast.Dimension:19:31
+	  width: calc(2px / 2 + 1rem * 8)
+	                               ~
+
+*ast.AtRule:22:1
 	@custom-media test (800px < width < 1000px) or (print);
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.Identifier:21:15
+*ast.Identifier:22:15
 	@custom-media test (800px < width < 1000px) or (print);
 	              ~~~~
 
-*ast.MediaQuery:21:20
+*ast.MediaQuery:22:20
 	@custom-media test (800px < width < 1000px) or (print);
 	                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.MediaFeatureRange:21:20
+*ast.MediaFeatureRange:22:20
 	@custom-media test (800px < width < 1000px) or (print);
 	                   ~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.Dimension:21:21
+*ast.Dimension:22:21
 	@custom-media test (800px < width < 1000px) or (print);
 	                    ~~~~~
 
-*ast.Dimension:21:37
+*ast.Dimension:22:37
 	@custom-media test (800px < width < 1000px) or (print);
 	                                    ~~~~~~
 
-*ast.Identifier:21:45
+*ast.Identifier:22:45
 	@custom-media test (800px < width < 1000px) or (print);
 	                                            ~~
 
-*ast.MediaFeaturePlain:21:48
+*ast.MediaFeaturePlain:22:48
 	@custom-media test (800px < width < 1000px) or (print);
 	                                               ~~~~~~~
 
-*ast.Identifier:21:49
+*ast.Identifier:22:49
 	@custom-media test (800px < width < 1000px) or (print);
 	                                                ~~~~~
 
-*ast.AtRule:23:1
+*ast.AtRule:24:1
 	@keyframes custom {
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.Identifier:23:12
+*ast.Identifier:24:12
 	@keyframes custom {
 	           ~~~~~~
 
-*ast.QualifiedRuleBlock:23:19
+*ast.QualifiedRuleBlock:24:19
 	@keyframes custom {
 	                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.QualifiedRule:24:2
+*ast.QualifiedRule:25:2
 	  0% { opacity: 0%; }
 	  ~~~~~~~~~~~~~~~~~~~
 
-*ast.KeyframeSelectorList:24:2
+*ast.KeyframeSelectorList:25:2
 	  0% { opacity: 0%; }
 	  ~~
 
-*ast.Percentage:24:2
+*ast.Percentage:25:2
 	  0% { opacity: 0%; }
 	  ~~
 
-*ast.DeclarationBlock:24:5
+*ast.DeclarationBlock:25:5
 	  0% { opacity: 0%; }
 	     ~~~~~~~~~~~~~~~~
 
-*ast.Declaration:24:7
+*ast.Declaration:25:7
 	  0% { opacity: 0%; }
 	       ~~~~~~~~~~~
 
-*ast.Dimension:24:16
+*ast.Dimension:25:16
 	  0% { opacity: 0%; }
 	                ~~
 
-*ast.QualifiedRule:25:2
+*ast.QualifiedRule:26:2
 	  100% { opacity: 100%; }
 	  ~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.KeyframeSelectorList:25:2
+*ast.KeyframeSelectorList:26:2
 	  100% { opacity: 100%; }
 	  ~~~~
 
-*ast.Percentage:25:2
+*ast.Percentage:26:2
 	  100% { opacity: 100%; }
 	  ~~~~
 
-*ast.DeclarationBlock:25:7
+*ast.DeclarationBlock:26:7
 	  100% { opacity: 100%; }
 	       ~~~~~~~~~~~~~~~~~~
 
-*ast.Declaration:25:9
+*ast.Declaration:26:9
 	  100% { opacity: 100%; }
 	         ~~~~~~~~~~~~~
 
-*ast.Dimension:25:18
+*ast.Dimension:26:18
 	  100% { opacity: 100%; }
 	                  ~~~~
 

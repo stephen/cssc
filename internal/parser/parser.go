@@ -232,11 +232,17 @@ func (p *parser) parseMathSum() ast.Value {
 	for p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "+" || p.lexer.CurrentString == "-") {
 		op := p.lexer.CurrentString
 		p.lexer.Expect(lexer.Delim)
+
+		right := p.parseMathProduct()
+
+		span := left.Location()
+		span.End = right.Location().End
+
 		left = &ast.MathExpression{
-			Span:     left.Location(),
+			Span:     span,
 			Left:     left,
 			Operator: op,
-			Right:    p.parseMathProduct(),
+			Right:    right,
 		}
 	}
 
@@ -249,11 +255,17 @@ func (p *parser) parseMathProduct() ast.Value {
 	for p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "*" || p.lexer.CurrentString == "/") {
 		op := p.lexer.CurrentString
 		p.lexer.Expect(lexer.Delim)
+
+		right := p.parseValue()
+
+		span := left.Location()
+		span.End = right.Location().End
+
 		left = &ast.MathExpression{
-			Span:     left.Location(),
+			Span:     span,
 			Left:     left,
 			Operator: op,
-			Right:    p.parseValue(),
+			Right:    right,
 		}
 	}
 

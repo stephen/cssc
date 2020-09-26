@@ -43,6 +43,7 @@ func TestSpans(t *testing.T) {
 .big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"] {
 	color: purple;
 	background-color: rgba(calc(0 + 1), 2, 3);
+	width: calc(2px / 2 + 1rem * 8)
 }
 
 @custom-media test (800px < width < 1000px) or (print);
