@@ -57,10 +57,10 @@ func TestSpans(t *testing.T) {
 
 	var b bytes.Buffer
 	ast.Walk(Parse(t, source), func(n ast.Node) {
-		line, col := source.LineAndCol(*n.Location())
+		line, col := source.LineAndCol(n.Location())
 		fmt.Fprintln(&b, fmt.Sprintf("%s:%d:%d", reflect.TypeOf(n).String(), line, col))
 		// XXX: does Location need to be a pointer still?
-		fmt.Fprintln(&b, logging.AnnotateSourceSpan(source, *n.Location()))
+		fmt.Fprintln(&b, logging.AnnotateSourceSpan(source, n.Location()))
 		fmt.Fprintln(&b)
 	})
 

@@ -16,9 +16,6 @@ type String struct {
 	Value string
 }
 
-// Location implements Node.
-func (n *String) Location() *Span { return &n.Span }
-
 // Dimension is a numeric value and a unit. Dimension can
 // also represent Percentages (% unit) or Numbers (empty string unit).
 type Dimension struct {
@@ -32,9 +29,6 @@ type Dimension struct {
 	Unit string
 }
 
-// Location implements Node.
-func (n *Dimension) Location() *Span { return &n.Span }
-
 // Percentage is a numeric percentage.
 type Percentage struct {
 	Span
@@ -42,9 +36,6 @@ type Percentage struct {
 	// Value is the string representation for the value.
 	Value string
 }
-
-// Location implements Node.
-func (n *Percentage) Location() *Span { return &n.Span }
 
 // Identifier is any string identifier value, e.g. inherit or left.
 type Identifier struct {
@@ -54,9 +45,6 @@ type Identifier struct {
 	Value string
 }
 
-// Location implements Node.
-func (n *Identifier) Location() *Span { return &n.Span }
-
 // HexColor is a hex color (e.g. #aabbccdd) defined by https://www.w3.org/TR/css-color-3/.
 type HexColor struct {
 	Span
@@ -64,9 +52,6 @@ type HexColor struct {
 	// RGBA is the literal rgba value.
 	RGBA string
 }
-
-// Location implements Node.
-func (n *HexColor) Location() *Span { return &n.Span }
 
 // Function is a css function.
 type Function struct {
@@ -78,9 +63,6 @@ type Function struct {
 	// Arguments is the set of values passed into the function.
 	Arguments []Value
 }
-
-// Location implements Node.
-func (f Function) Location() *Span { return &f.Span }
 
 // IsMath returns whether or not this function supports math expressions
 // as values.
@@ -107,17 +89,11 @@ type MathExpression struct {
 	Right Value
 }
 
-// Location implements Node.
-func (n *MathExpression) Location() *Span { return &n.Span }
-
 // Comma is a single comma. Some declarations require commas,
 // e.g. font-family fallbacks or transitions.
 type Comma struct {
 	Span
 }
-
-// Location implements Node.
-func (n *Comma) Location() *Span { return &n.Span }
 
 func (String) isValue()         {}
 func (Dimension) isValue()      {}
@@ -127,10 +103,10 @@ func (Comma) isValue()          {}
 func (Identifier) isValue()     {}
 func (HexColor) isValue()       {}
 
-var _ Value = &String{}
-var _ Value = &Dimension{}
-var _ Value = &Function{}
-var _ Value = &MathExpression{}
-var _ Value = &Comma{}
-var _ Value = &Identifier{}
-var _ Value = &HexColor{}
+var _ Value = String{}
+var _ Value = Dimension{}
+var _ Value = Function{}
+var _ Value = MathExpression{}
+var _ Value = Comma{}
+var _ Value = Identifier{}
+var _ Value = HexColor{}

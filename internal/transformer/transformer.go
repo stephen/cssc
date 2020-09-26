@@ -67,11 +67,11 @@ type transformer struct {
 }
 
 func (t *transformer) addError(loc ast.Node, fmt string, args ...interface{}) {
-	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, *loc.Location(), fmt, args...))
+	t.Reporter.AddError(logging.LocationErrorf(t.OriginalSource, loc.Location(), fmt, args...))
 }
 
 func (t *transformer) addWarn(loc ast.Node, fmt string, args ...interface{}) {
-	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, *loc.Location(), fmt, args...))
+	t.Reporter.AddError(logging.LocationWarnf(t.OriginalSource, loc.Location(), fmt, args...))
 }
 
 func (t *transformer) transformSelectors(nodes []*ast.Selector) []*ast.Selector {

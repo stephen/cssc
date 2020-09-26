@@ -8,14 +8,11 @@ type SelectorList struct {
 	Selectors []*Selector
 }
 
-// Location implements Node.
-func (n *SelectorList) Location() *Span { return &n.Span }
-
 func (SelectorList) isPrelude()              {}
 func (SelectorList) isPseudoClassArguments() {}
 
-var _ Prelude = &SelectorList{}
-var _ PseudoClassArguments = &SelectorList{}
+var _ Prelude = SelectorList{}
+var _ PseudoClassArguments = SelectorList{}
 
 // Selector represents a single selector. From the selectors level 4
 // spec, a selector is a flat representation of complex-selector,
@@ -26,9 +23,6 @@ type Selector struct {
 
 	Parts []SelectorPart
 }
-
-// Location implements Node.
-func (n *Selector) Location() *Span { return &n.Span }
 
 // SelectorPart is a part of a complex selector. It maybe be e.g.
 // a class or id selector, or a + or < combinator, or a pseudoselector.
@@ -47,18 +41,12 @@ type TypeSelector struct {
 	Name string
 }
 
-// Location implements Node.
-func (n *TypeSelector) Location() *Span { return &n.Span }
-
 // ClassSelector selects a single class, e.g. .test or .Thing.
 type ClassSelector struct {
 	Span
 
 	Name string
 }
-
-// Location implements Node.
-func (n *ClassSelector) Location() *Span { return &n.Span }
 
 // IDSelector selects a single ID, e.g. #container.
 type IDSelector struct {
@@ -67,9 +55,6 @@ type IDSelector struct {
 	Name string
 }
 
-// Location implements Node.
-func (n *IDSelector) Location() *Span { return &n.Span }
-
 // CombinatorSelector operates between two selectors.
 type CombinatorSelector struct {
 	Span
@@ -77,9 +62,6 @@ type CombinatorSelector struct {
 	// The combinator operation, i.e. >, +, ~, or |.
 	Operator string
 }
-
-// Location implements Node.
-func (n *CombinatorSelector) Location() *Span { return &n.Span }
 
 // PseudoClassSelector selects a pseudo class, e.g. :not() or :hover.
 type PseudoClassSelector struct {
@@ -92,9 +74,6 @@ type PseudoClassSelector struct {
 	Arguments PseudoClassArguments
 }
 
-// Location implements Node.
-func (n *PseudoClassSelector) Location() *Span { return &n.Span }
-
 // PseudoClassArguments is the arguments for a functional pseudo class.
 type PseudoClassArguments interface {
 	Node
@@ -106,7 +85,7 @@ type PseudoClassArguments interface {
 // even/odd can be represented for nth-* pseudo classes.
 func (Identifier) isPseudoClassArguments() {}
 
-var _ PseudoClassArguments = &Identifier{}
+var _ PseudoClassArguments = Identifier{}
 
 // ANPlusB is an an+b value type for nth-* pseudo classes.
 type ANPlusB struct {
@@ -117,12 +96,9 @@ type ANPlusB struct {
 	B        string
 }
 
-// Location implements Node.
-func (n *ANPlusB) Location() *Span { return &n.Span }
-
 func (ANPlusB) isPseudoClassArguments() {}
 
-var _ PseudoClassArguments = &ANPlusB{}
+var _ PseudoClassArguments = ANPlusB{}
 
 // PseudoElementSelector selects a pseudo element, e.g. ::before or ::after.
 type PseudoElementSelector struct {
@@ -131,18 +107,12 @@ type PseudoElementSelector struct {
 	Inner *PseudoClassSelector
 }
 
-// Location implements Node.
-func (n *PseudoElementSelector) Location() *Span { return &n.Span }
-
 // Whitespace represents any whitespace sequence. Whitespace is
 // only kept in the AST when necessary for disambiguating syntax,
 // e.g. in selectors.
 type Whitespace struct {
 	Span
 }
-
-// Location implements Node.
-func (n *Whitespace) Location() *Span { return &n.Span }
 
 // AttributeSelector selects elements with the specified attributes matching.
 // Note that the = token is implied if Value is non-zero.
@@ -160,17 +130,14 @@ type AttributeSelector struct {
 	Value Value
 }
 
-// Location implements Node.
-func (n *AttributeSelector) Location() *Span { return &n.Span }
-
-var _ SelectorPart = &TypeSelector{}
-var _ SelectorPart = &ClassSelector{}
-var _ SelectorPart = &IDSelector{}
-var _ SelectorPart = &CombinatorSelector{}
-var _ SelectorPart = &PseudoClassSelector{}
-var _ SelectorPart = &PseudoElementSelector{}
-var _ SelectorPart = &Whitespace{}
-var _ SelectorPart = &AttributeSelector{}
+var _ SelectorPart = TypeSelector{}
+var _ SelectorPart = ClassSelector{}
+var _ SelectorPart = IDSelector{}
+var _ SelectorPart = CombinatorSelector{}
+var _ SelectorPart = PseudoClassSelector{}
+var _ SelectorPart = PseudoElementSelector{}
+var _ SelectorPart = Whitespace{}
+var _ SelectorPart = AttributeSelector{}
 
 func (TypeSelector) isSelector()          {}
 func (ClassSelector) isSelector()         {}

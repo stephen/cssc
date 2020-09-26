@@ -7,12 +7,9 @@ type KeyframeSelectorList struct {
 	Selectors []KeyframeSelector
 }
 
-// Location implements Node.
-func (n *KeyframeSelectorList) Location() *Span { return &n.Span }
-
 func (KeyframeSelectorList) isPrelude() {}
 
-var _ Prelude = &KeyframeSelectorList{}
+var _ Prelude = KeyframeSelectorList{}
 
 // KeyframeSelector is a selector for rules in a @keyframes block.KeyframeSelector
 // Valid values are a Percentage or to/from.
@@ -25,5 +22,5 @@ type KeyframeSelector interface {
 func (Percentage) isKeyframeSelector() {}
 func (Identifier) isKeyframeSelector() {}
 
-var _ KeyframeSelector = &Percentage{}
-var _ KeyframeSelector = &Identifier{}
+var _ KeyframeSelector = Percentage{}
+var _ KeyframeSelector = Identifier{}
