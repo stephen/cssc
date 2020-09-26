@@ -30,13 +30,13 @@ func (w WriterReporter) AddError(err error) {
 }
 
 // LocationErrorf adds an error from a specific location.
-func LocationErrorf(source *sources.Source, start, end int, f string, args ...interface{}) error {
-	return &locationError{fmt.Errorf(f, args...), false, source, start, end - start}
+func LocationErrorf(source *sources.Source, span ast.Span, f string, args ...interface{}) error {
+	return &locationError{fmt.Errorf(f, args...), false, source, span}
 }
 
 // LocationWarnf adds a warning from a specific location.
-func LocationWarnf(source *sources.Source, start, end int, f string, args ...interface{}) error {
-	return &locationError{fmt.Errorf(f, args...), true, source, start, end - start}
+func LocationWarnf(source *sources.Source, span ast.Span, f string, args ...interface{}) error {
+	return &locationError{fmt.Errorf(f, args...), true, source, span}
 }
 
 // locationError is an error that happened at a specific location
@@ -47,8 +47,7 @@ type locationError struct {
 	warning bool
 
 	Source *sources.Source
-	start  int
-	length int
+	ast.Span
 }
 
 // Unwrap satisfies errors.Unwrap.
@@ -64,13 +63,13 @@ func (l *locationError) Unwrap() error {
 //   contents
 //   ~~~~~~~~
 func (l *locationError) Error() string {
-	lineNumber, col := l.Source.LineAndCol(ast.Span{Start: l.start, End: l.start + l.length})
+	lineNumber, col := l.Source.LineAndCol(l.Span)
 	lineStart := l.Source.Lines[lineNumber-1]
 
 	lineEnd := len(l.Source.Content)
-	for i, ch := range l.Source.Content[l.start:] {
+	for i, ch := range l.Source.Content[l.Start:] {
 		if ch == '\n' {
-			lineEnd = i + l.start
+			lineEnd = i + l.Start
 			break
 		}
 	}
@@ -81,7 +80,7 @@ func (l *locationError) Error() string {
 	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
 
 	indent := strings.Repeat(" ", int(col)+tabCount-1)
-	underline := strings.Repeat("~", l.length)
+	underline := strings.Repeat("~", l.End-l.Start)
 
 	return fmt.Sprintf("%s:%d:%d\n%s:\n\t%s\n\t%s%s", l.Source.Path, lineNumber, col, l.inner.Error(), withoutTabs, indent, underline)
 }

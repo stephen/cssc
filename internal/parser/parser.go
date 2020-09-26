@@ -18,8 +18,7 @@ func Parse(source *sources.Source) (ss *ast.Stylesheet, err error) {
 			}
 
 			if errI, ok := rErr.(error); ok {
-				start, end := p.lexer.Range()
-				panic(logging.LocationErrorf(source, start, end, "%v", errI))
+				panic(logging.LocationErrorf(source, p.lexer.TokenSpan(), "%v", errI))
 			}
 
 			// Re-panic unknown issues.

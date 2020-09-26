@@ -571,13 +571,13 @@ func (l *Lexer) nextEscaped() {
 }
 
 // LocationErrorf sends up a lexer panic with a custom location.
-func (l *Lexer) LocationErrorf(start, end int, f string, args ...interface{}) {
-	panic(&Error{logging.LocationErrorf(l.source, start, end, f, args...)})
+func (l *Lexer) LocationErrorf(span ast.Span, f string, args ...interface{}) {
+	panic(&Error{logging.LocationErrorf(l.source, span, f, args...)})
 }
 
 // Errorf sends up a lexer panic at the range from start to lastPos.
 func (l *Lexer) Errorf(f string, args ...interface{}) {
-	l.LocationErrorf(l.start, l.lastPos, f, args...)
+	l.LocationErrorf(l.TokenSpan(), f, args...)
 }
 
 // Error is an error that the lexer ran into.
