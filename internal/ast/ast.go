@@ -41,13 +41,6 @@ func (l Stylesheet) Location() Span {
 	return Span{l.Nodes[0].Location().Start, l.Nodes[len(l.Nodes)-1].Location().End}
 }
 
-// Comment represents a comment.
-type Comment struct {
-	Span
-
-	Text string
-}
-
 // Block can either be a block of rules or declarations.
 // See https://www.w3.org/TR/css-syntax-3/#declaration-rule-list.
 type Block interface {

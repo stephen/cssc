@@ -198,10 +198,6 @@
 	    tab-in-values:  1rem;
 	                    ~~~~
 
-*ast.Comment:17:1
-	/* what is this even targetting?? */
-	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 *ast.QualifiedRule:18:1
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>

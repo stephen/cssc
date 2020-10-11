@@ -1,0 +1,20 @@
+/* a comment */
+
+/* stylelint: ignore-or-something */
+.class {
+  /* a comment */
+  width: 50rem /* here too! */;
+  height: /* explanation */ 10rem;
+}
+
+/* hello */ @media /* lol */( /* haha */ print /* good luck */) /* dealing with this */ {
+  .what {
+    /* please */
+    margin: 5rem /* give me a break */ 10rem;
+  } /* also!
+
+                        multiple lines with weird indent
+
+          what could go wrong?
+    */
+}

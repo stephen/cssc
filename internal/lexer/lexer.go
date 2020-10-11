@@ -51,6 +51,11 @@ type Lexer struct {
 	// it will keep whitespace tokens around. This is useful for parsing
 	// some CSS that must be space disambiguated.
 	RetainWhitespace bool
+
+	// RetainComments is settable by the caller of the lexer. When set,
+	// the lexer will emit comment tokens. Otherwise, they are skipped
+	// and ignored.
+	RetainComments bool
 }
 
 // NewLexer creates a new lexer for the source.
@@ -274,6 +279,10 @@ func (l *Lexer) Next() {
 			}
 			l.Current = Comment
 			l.CurrentString = l.source.Content[start:end]
+
+			if !l.RetainWhitespace {
+				continue
+			}
 
 		case '"', '\'':
 			mark := l.ch

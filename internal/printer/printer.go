@@ -238,11 +238,6 @@ func (p *printer) print(in ast.Node) {
 		}
 		p.s.WriteRune(')')
 
-	case *ast.Comment:
-		p.s.WriteString("/*")
-		p.s.WriteString(node.Text)
-		p.s.WriteString("*/")
-
 	case *ast.MathExpression:
 		p.print(node.Left)
 		p.s.WriteString(node.Operator)

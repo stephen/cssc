@@ -92,8 +92,6 @@ func TestLexer_SimpleBlocks(t *testing.T) {
 	h.ExpectAndNext(lexer.Semicolon, "", "")
 	h.ExpectAndNext(lexer.RCurly, "", "")
 
-	h.ExpectAndNext(lexer.Comment, "* this is the root\n\tcontainer id ", "")
-
 	h.ExpectAndNext(lexer.Hash, "id", "")
 	h.ExpectAndNext(lexer.LCurly, "", "")
 	h.ExpectAndNext(lexer.Ident, "margin", "")

@@ -93,7 +93,6 @@ func Walk(start Node, visit func(n Node)) {
 
 	case *ClassSelector:
 	case *Comma:
-	case *Comment:
 	case *IDSelector:
 	case *String:
 	case *TypeSelector:

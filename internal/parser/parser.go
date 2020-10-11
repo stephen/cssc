@@ -56,13 +56,6 @@ func (p *parser) parse() {
 			// we'll always assume we're parsing from the top-level, so we can discard CDO/CDC.
 			p.lexer.Next()
 
-		case lexer.Comment:
-			p.ss.Nodes = append(p.ss.Nodes, &ast.Comment{
-				Span: p.lexer.TokenSpan(),
-				Text: p.lexer.CurrentString,
-			})
-			p.lexer.Next()
-
 		default:
 			p.ss.Nodes = append(p.ss.Nodes, p.parseQualifiedRule(false))
 		}
