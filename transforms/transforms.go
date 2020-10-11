@@ -6,6 +6,9 @@ type ImportRules int
 const (
 	// ImportRulesPassthrough passes @imports down without changes. It is the default.
 	ImportRulesPassthrough ImportRules = iota
+	// ImportRulesFollow passes @imports down without changes. It also follows import specifiers
+	// and adds them to the compilation output.
+	ImportRulesFollow ImportRules = iota
 	// ImportRulesInline inlines imported content where an @import statement is seen. In this
 	// version, it ignores @supports rules and meedia queries.
 	ImportRulesInline

@@ -159,8 +159,8 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	for _, imp := range ss.Imports {
 		wg.Go(func() error {
 			rel := filepath.Join(filepath.Dir(source.Path), imp.Value)
-			// If import passthrough is on, then every referenced file makes it to the output.
-			imported := c.parseFile(rel, c.transforms.ImportRules == transforms.ImportRulesPassthrough)
+			// If import follow is on, then every referenced file makes it to the output.
+			imported := c.parseFile(rel, c.transforms.ImportRules == transforms.ImportRulesFollow)
 
 			mu.Lock()
 			defer mu.Unlock()
