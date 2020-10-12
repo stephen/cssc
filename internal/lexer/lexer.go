@@ -280,7 +280,7 @@ func (l *Lexer) Next() {
 			l.Current = Comment
 			l.CurrentString = l.source.Content[start:end]
 
-			if !l.RetainWhitespace {
+			if !l.RetainComments {
 				continue
 			}
 
