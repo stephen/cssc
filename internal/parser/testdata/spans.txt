@@ -514,3 +514,79 @@
 	  100% { opacity: 100%; }
 	                  ~~~~
 
+*ast.AtRule:31:1
+	@font-face {
+	~~~~~~~~~~~~>
+
+*ast.DeclarationBlock:31:12
+	@font-face {
+	           ~>
+
+*ast.Declaration:32:2
+	  font-family: "whatever";
+	  ~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.String:32:15
+	  font-family: "whatever";
+	               ~~~~~~~~~~
+
+*ast.Declaration:33:3
+	  src: url("/what.eot?") format("eot"),
+	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
+
+*ast.Function:33:8
+	  src: url("/what.eot?") format("eot"),
+	       ~~~~~~~~~~~~~~~~~
+
+*ast.String:33:12
+	  src: url("/what.eot?") format("eot"),
+	           ~~~~~~~~~~~~
+
+*ast.Function:33:26
+	  src: url("/what.eot?") format("eot"),
+	                         ~~~~~~~~~~~~~
+
+*ast.String:33:33
+	  src: url("/what.eot?") format("eot"),
+	                                ~~~~~
+
+*ast.Comma:33:39
+	  src: url("/what.eot?") format("eot"),
+	                                      ~
+
+*ast.Function:34:5
+	    url("./what.woff") format("woff"),
+	    ~~~~~~~~~~~~~~~~~~
+
+*ast.String:34:9
+	    url("./what.woff") format("woff"),
+	        ~~~~~~~~~~~~~
+
+*ast.Function:34:24
+	    url("./what.woff") format("woff"),
+	                       ~~~~~~~~~~~~~~
+
+*ast.String:34:31
+	    url("./what.woff") format("woff"),
+	                              ~~~~~~
+
+*ast.Comma:34:38
+	    url("./what.woff") format("woff"),
+	                                     ~
+
+*ast.Function:35:3
+	    url("./what.ttf") format("truetype");
+	    ~~~~~~~~~~~~~~~~~
+
+*ast.String:35:7
+	    url("./what.ttf") format("truetype");
+	        ~~~~~~~~~~~~
+
+*ast.Function:35:21
+	    url("./what.ttf") format("truetype");
+	                      ~~~~~~~~~~~~~~~~~~
+
+*ast.String:35:28
+	    url("./what.ttf") format("truetype");
+	                             ~~~~~~~~~~
+

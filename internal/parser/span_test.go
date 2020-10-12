@@ -55,6 +55,12 @@ func TestSpans(t *testing.T) {
 	100% { opacity: 100%; }
 }
 
+@font-face {
+	font-family: "whatever";
+  src: url("/what.eot?") format("eot"),
+    url("./what.woff") format("woff"),
+		url("./what.ttf") format("truetype");
+}
 `,
 	}
 

@@ -90,69 +90,8 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 			p.lexer.Errorf("unexpected EOF")
 
 		case lexer.LCurly:
-			block := &ast.DeclarationBlock{
-				Span: p.lexer.TokenSpan(),
-			}
-
-			r.Block = block
-			p.lexer.Next()
-
-			for p.lexer.Current != lexer.RCurly {
-				decl := &ast.Declaration{
-					Span:     p.lexer.TokenSpan(),
-					Property: p.lexer.CurrentString,
-				}
-				p.lexer.Expect(lexer.Ident)
-				p.lexer.Expect(lexer.Colon)
-			values:
-				for {
-					switch p.lexer.Current {
-					case lexer.EOF:
-						p.lexer.Errorf("unexpected EOF")
-
-					case lexer.Delim:
-						if p.lexer.CurrentString != "!" {
-							p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
-						}
-						p.lexer.Next()
-
-						if !isImportantString(p.lexer.CurrentString) {
-							p.lexer.Errorf("expected !important, unexpected token: %s", p.lexer.CurrentString)
-						}
-						decl.End = p.lexer.TokenEnd()
-						p.lexer.Next()
-						decl.Important = true
-
-					case lexer.Comma:
-						decl.Values = append(decl.Values, &ast.Comma{Span: p.lexer.TokenSpan()})
-						p.lexer.Next()
-
-					default:
-						val := p.parseValue()
-						if val == nil {
-							if len(decl.Values) == 0 {
-								p.lexer.Errorf("declaration must have a value")
-							}
-							if lastValueEnd := decl.Values[len(decl.Values)-1].Location().End; lastValueEnd > decl.End {
-								decl.End = lastValueEnd
-							}
-
-							block.Declarations = append(block.Declarations, decl)
-
-							break values
-						}
-
-						decl.Values = append(decl.Values, val)
-					}
-				}
-
-				if p.lexer.Current == lexer.Semicolon {
-					p.lexer.Next()
-				}
-			}
-			block.End = p.lexer.TokenEnd()
-			r.End = block.End
-			p.lexer.Next()
+			r.Block = p.parseDeclarationBlock()
+			r.End = r.Block.Location().End
 			return r
 
 		default:
@@ -164,6 +103,72 @@ func (p *parser) parseQualifiedRule(isKeyframes bool) *ast.QualifiedRule {
 			r.Prelude = p.parseSelectorList()
 		}
 	}
+}
+
+// parseDeclarationBlock parses a {} block with declarations, e.g.
+// { width: 1px; }.
+func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
+	block := &ast.DeclarationBlock{
+		Span: p.lexer.TokenSpan(),
+	}
+	p.lexer.Next()
+
+	for p.lexer.Current != lexer.RCurly {
+		decl := &ast.Declaration{
+			Span:     p.lexer.TokenSpan(),
+			Property: p.lexer.CurrentString,
+		}
+		p.lexer.Expect(lexer.Ident)
+		p.lexer.Expect(lexer.Colon)
+	values:
+		for {
+			switch p.lexer.Current {
+			case lexer.EOF:
+				p.lexer.Errorf("unexpected EOF")
+
+			case lexer.Delim:
+				if p.lexer.CurrentString != "!" {
+					p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
+				}
+				p.lexer.Next()
+
+				if !isImportantString(p.lexer.CurrentString) {
+					p.lexer.Errorf("expected !important, unexpected token: %s", p.lexer.CurrentString)
+				}
+				decl.End = p.lexer.TokenEnd()
+				p.lexer.Next()
+				decl.Important = true
+
+			case lexer.Comma:
+				decl.Values = append(decl.Values, &ast.Comma{Span: p.lexer.TokenSpan()})
+				p.lexer.Next()
+
+			default:
+				val := p.parseValue()
+				if val == nil {
+					if len(decl.Values) == 0 {
+						p.lexer.Errorf("declaration must have a value")
+					}
+					if lastValueEnd := decl.Values[len(decl.Values)-1].Location().End; lastValueEnd > decl.End {
+						decl.End = lastValueEnd
+					}
+
+					block.Declarations = append(block.Declarations, decl)
+
+					break values
+				}
+
+				decl.Values = append(decl.Values, val)
+			}
+		}
+
+		if p.lexer.Current == lexer.Semicolon {
+			p.lexer.Next()
+		}
+	}
+	block.End = p.lexer.TokenEnd()
+	p.lexer.Next()
+	return block
 }
 
 func (p *parser) parseKeyframeSelectorList() *ast.KeyframeSelectorList {
@@ -362,6 +367,9 @@ func (p *parser) parseAtRule() {
 
 	case "custom-media":
 		p.parseCustomMediaAtRule()
+
+	case "font-face":
+		p.parseFontFace()
 
 	default:
 		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
@@ -722,6 +730,21 @@ func (p *parser) parseCustomMediaAtRule() {
 	}
 	r.Preludes = append(r.Preludes, queries.Queries[0])
 	r.End = queries.Queries[0].End
+
+	p.ss.Nodes = append(p.ss.Nodes, r)
+}
+
+// parseFontFace parses an @font-face rule.
+// See: https://www.w3.org/TR/css-fonts-4/#font-face-rule
+func (p *parser) parseFontFace() {
+	r := &ast.AtRule{
+		Span: p.lexer.TokenSpan(),
+		Name: p.lexer.CurrentString,
+	}
+	p.lexer.Next()
+
+	r.Block = p.parseDeclarationBlock()
+	r.End = r.Block.Location().End
 
 	p.ss.Nodes = append(p.ss.Nodes, r)
 }

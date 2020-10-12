@@ -1,0 +1,19 @@
+@font-face {
+  font-family: "what";
+  src: url("/what.eot?") format("eot"),
+    url("./what.woff") format("woff"),
+    url("./what.ttf") format("truetype");
+
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "what";
+  src: url("./what-bold.eot?") format("eot"),
+    url("./what-bold.woff") format("woff"),
+    url("./what-bold.ttf") format("truetype");
+
+  font-weight: bold;
+  font-style: normal;
+}
