@@ -270,7 +270,6 @@ func (l *Lexer) Next() {
 						end = maybeEnd
 						break commentToken
 					}
-					l.step()
 				case -1:
 					l.Errorf("unexpected EOF")
 				default:

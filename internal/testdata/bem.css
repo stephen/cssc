@@ -1,0 +1,7 @@
+/** @define SomeComponent **/
+
+.SomeComponent {
+  position: relative;
+  z-index: 10;
+  width: 10rem;
+}

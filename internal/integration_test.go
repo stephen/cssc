@@ -14,6 +14,7 @@ func TestIntegration(t *testing.T) {
 	for _, c := range []string{
 		"testdata/bootstrap.css",
 		"testdata/comments.css",
+		"testdata/bem.css",
 	} {
 		t.Run(c, func(t *testing.T) {
 
