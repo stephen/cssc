@@ -29,3 +29,20 @@ func (s *Source) LineAndCol(loc ast.Span) (int32, int32) {
 
 	return int32(line), int32(loc.Start - s.Lines[line-1] + 1)
 }
+
+// FullLine returns the full line that the span is on. If the
+// span spans multiple lines, then only the span of the first line is returned.
+func (s *Source) FullLine(loc ast.Span) ast.Span {
+	lineNumber, _ := s.LineAndCol(loc)
+	lineStart := s.Lines[lineNumber-1]
+
+	lineEnd := len(s.Content)
+	for i, ch := range s.Content[loc.Start:] {
+		if ch == '\n' {
+			lineEnd = i + loc.Start
+			break
+		}
+	}
+
+	return ast.Span{Start: lineStart, End: lineEnd}
+}

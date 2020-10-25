@@ -71,23 +71,19 @@ func (l *locationError) Error() string {
 	return fmt.Sprintf("%s:%d:%d\n%s:\n%s", l.Source.Path, lineNumber, col, l.inner.Error(), AnnotateSourceSpan(l.Source, l.Span))
 }
 
+// Location returns the source and span for the location error.
+func (l *locationError) Location() (source *sources.Source, span ast.Span) {
+	return l.Source, l.Span
+}
+
 // AnnotateSourceSpan annotates a span from a single line in the source code.
 // The output looks like:
 //   (contents) or (other thing)
 //    ~~~~~~~~
 func AnnotateSourceSpan(source *sources.Source, span ast.Span) string {
-	lineNumber, col := source.LineAndCol(span)
-	lineStart := source.Lines[lineNumber-1]
-
-	lineEnd := len(source.Content)
-	for i, ch := range source.Content[span.Start:] {
-		if ch == '\n' {
-			lineEnd = i + span.Start
-			break
-		}
-	}
-
-	line := source.Content[lineStart:lineEnd]
+	_, col := source.LineAndCol(span)
+	lineSpan := source.FullLine(span)
+	line := source.Content[lineSpan.Start:lineSpan.End]
 
 	tabCount := strings.Count(line, "\t")
 	withoutTabs := strings.ReplaceAll(line, "\t", "  ")
@@ -95,7 +91,7 @@ func AnnotateSourceSpan(source *sources.Source, span ast.Span) string {
 	indent := strings.Repeat(" ", int(col)+tabCount-1)
 	underline := strings.Repeat("~", span.End-span.Start)[:]
 	excessMarker := ""
-	if excess := span.End - lineEnd; excess > 0 {
+	if excess := span.End - lineSpan.End; excess > 0 {
 		underline = underline[:len(underline)-excess]
 		excessMarker = ">"
 	}
