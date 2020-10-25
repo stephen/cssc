@@ -48,9 +48,12 @@ func newCompilation(opts Options) *compilation {
 }
 
 type compilation struct {
-	mu      sync.RWMutex
-	sources map[string]int
+	// mu synchronizes other globals like the error reporter.
+	mu sync.Mutex
 
+	// sourcesMu synchronizes assignment for new source indices.
+	sourcesMu sync.RWMutex
+	sources   map[string]int
 	nextIndex int
 
 	sourcesByIndex map[int]*sources.Source
@@ -65,17 +68,19 @@ type compilation struct {
 	reporter Reporter
 
 	transforms transforms.Options
+
+	resolver Resolver
 }
 
 // addSource will read in a path and assign it a source index. If
 // it's already been loaded, the cached source is returned.
 func (c *compilation) addSource(path string) (int, error) {
-	c.mu.RLock()
+	c.sourcesMu.RLock()
 	if _, ok := c.sources[path]; ok {
-		defer c.mu.RUnlock()
+		defer c.sourcesMu.RUnlock()
 		return c.sources[path], nil
 	}
-	c.mu.RUnlock()
+	c.sourcesMu.RUnlock()
 
 	abs, err := filepath.Abs(path)
 	if err != nil {
@@ -92,8 +97,8 @@ func (c *compilation) addSource(path string) (int, error) {
 		Path:    abs,
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.sourcesMu.Lock()
+	defer c.sourcesMu.Unlock()
 	i := c.nextIndex
 	c.sources[abs] = i
 	c.sourcesByIndex[i] = source
@@ -115,6 +120,12 @@ type Result struct {
 	Files map[string]string
 }
 
+func (c *compilation) addError(err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.reporter.AddError(err)
+}
+
 // parseFile assigns the file a source index and parses the source. It also
 // looks at imported files and adds them to the compilation. hasOutput should
 // be called if the file should be included in compilation output.
@@ -126,7 +137,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	// Assign the file a source index.
 	idx, err := c.addSource(file)
 	if err != nil {
-		c.reporter.AddError(err)
+		c.addError(err)
 		return nil
 	}
 
@@ -146,7 +157,7 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	source := c.sourcesByIndex[idx]
 	ss, err := parser.Parse(source)
 	if err != nil {
-		c.reporter.AddError(err)
+		c.addError(err)
 		return nil
 	}
 
@@ -214,7 +225,7 @@ func Compile(opts Options) *Result {
 				OriginalSource: source,
 			})
 			if err != nil {
-				c.reporter.AddError(err)
+				c.addError(err)
 				return nil
 			}
 
