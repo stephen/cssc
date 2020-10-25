@@ -57,3 +57,41 @@ func TestRule_NoSemicolon(t *testing.T) {
 	assert.Equal(t, `.class{width:2rem}`,
 		Print(t, `.class { width: 2rem }`))
 }
+
+func TestANPlusB(t *testing.T) {
+	assert.Equal(t, `:nth-child(n+3){}`, Print(t, `:nth-child(n + 3) {}`))
+	assert.Equal(t, `:nth-child(n+3){}`, Print(t, `:nth-child(n+ 3) {}`))
+	assert.Equal(t, `:nth-child(n+3){}`, Print(t, `:nth-child(n+3) {}`))
+
+	assert.Equal(t, `:nth-child(2n-1){}`, Print(t, `:nth-child(2n-1) {}`))
+	assert.Equal(t, `:nth-child(2n-1){}`, Print(t, `:nth-child(2n -1) {}`))
+	assert.Equal(t, `:nth-child(2n-1){}`, Print(t, `:nth-child(2n - 1) {}`))
+
+	assert.Equal(t, `:nth-child(2n+3){}`, Print(t, `:nth-child(2n + 3) {}`))
+	assert.Equal(t, `:nth-child(2n+3){}`, Print(t, `:nth-child(2n +3) {}`))
+
+	assert.Equal(t, `:nth-child(-n+6){}`, Print(t, `:nth-child(-n + 6) {}`))
+	assert.Equal(t, `:nth-child(-2n+6){}`, Print(t, `:nth-child(-2n + 6) {}`))
+
+	assert.Equal(t, `:nth-child(n){}`, Print(t, `:nth-child(n) {}`))
+	assert.Equal(t, `:nth-child(-n){}`, Print(t, `:nth-child(-n) {}`))
+
+	// From https://www.w3.org/TR/css-syntax-3/#anb-microsyntax.
+	assert.Equal(t, `:nth-child(2n){}`, Print(t, `:nth-child(2n+0) {}`))
+	assert.Equal(t, `:nth-child(even){}`, Print(t, `:nth-child(even) {}`))
+	assert.Equal(t, `:nth-child(4n+1){}`, Print(t, `:nth-child(4n+1) {}`))
+	assert.Equal(t, `:nth-child(-n+6){}`, Print(t, `:nth-child(-1n+6) {}`))
+	assert.Equal(t, `:nth-child(-4n+10){}`, Print(t, `:nth-child(-4n+10) {}`))
+	assert.Equal(t, `:nth-child(5){}`, Print(t, `:nth-child(0n+5) {}`))
+	assert.Equal(t, `:nth-child(5){}`, Print(t, `:nth-child(5) {}`))
+	assert.Equal(t, `:nth-child(n){}`, Print(t, `:nth-child(1n+0) {}`))
+	assert.Equal(t, `:nth-child(n){}`, Print(t, `:nth-child(n+0) {}`))
+	assert.Equal(t, `:nth-child(n){}`, Print(t, `:nth-child(n) {}`))
+	assert.Equal(t, `:nth-child(2n){}`, Print(t, `:nth-child(2n+0) {}`))
+	assert.Equal(t, `:nth-child(2n){}`, Print(t, `:nth-child(2n) {}`))
+	assert.Equal(t, `:nth-child(3n-6){}`, Print(t, `:nth-child(3n-6) {}`))
+	assert.Equal(t, `:nth-child(3n+1){}`, Print(t, `:nth-child(3n + 1) {}`))
+	assert.Equal(t, `:nth-child(3n-2){}`, Print(t, `:nth-child(+3n - 2) {}`))
+	assert.Equal(t, `:nth-child(-n+6){}`, Print(t, `:nth-child(-n+ 6) {}`))
+	assert.Equal(t, `:nth-child(6){}`, Print(t, `:nth-child(+6) {}`))
+}

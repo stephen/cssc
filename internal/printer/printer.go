@@ -296,12 +296,25 @@ func (p *printer) print(in ast.Node) {
 		}
 
 	case *ast.ANPlusB:
-		if node.A != "" {
-			p.s.WriteString(node.A)
+		wrote := false
+		if node.A != "" && node.A != "1" && node.A != "0" {
+			if node.A == "-1" {
+				p.s.WriteString("-")
+			} else if strings.HasPrefix(node.A, "+") {
+				p.s.WriteString(node.A[1:])
+			} else {
+				p.s.WriteString(node.A)
+			}
+			wrote = true
 		}
-		p.s.WriteRune('n')
-		if node.B != "" {
-			p.s.WriteRune('+')
+		if node.A != "0" {
+			p.s.WriteRune('n')
+			wrote = true
+		}
+		if node.B != "" && node.B != "0" {
+			if wrote {
+				p.s.WriteString(node.Operator)
+			}
 			p.s.WriteString(node.B)
 		}
 
