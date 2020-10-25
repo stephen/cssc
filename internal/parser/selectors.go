@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"strings"
+
 	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/lexer"
 )
@@ -126,10 +128,10 @@ func (p *parser) parseSelector() *ast.Selector {
 
 				if pc.Name == "nth-child" || pc.Name == "nth-last-child" || pc.Name == "nth-of-type" || pc.Name == "nth-last-of-type" {
 					switch p.lexer.Current {
-					case lexer.Number:
+					case lexer.Number, lexer.Dimension:
 						pc.Arguments = p.parseANPlusB()
 					case lexer.Ident:
-						if p.lexer.CurrentString == "n" {
+						if p.lexer.CurrentString == "n" || p.lexer.CurrentString == "-n" {
 							pc.Arguments = p.parseANPlusB()
 							break
 						}
@@ -224,18 +226,66 @@ func (p *parser) parseANPlusB() *ast.ANPlusB {
 
 	v := &ast.ANPlusB{Span: p.lexer.TokenSpan()}
 
-	if p.lexer.Current == lexer.Number {
+	if p.lexer.Current == lexer.Dimension && p.lexer.CurrentString == "n" {
 		v.A = p.lexer.CurrentNumeral
+		v.End = p.lexer.TokenEnd()
 		p.lexer.Next()
+	} else if p.lexer.Current == lexer.Dimension && strings.HasPrefix(p.lexer.CurrentString, "n") {
+		v.A = p.lexer.CurrentNumeral
+		v.End = p.lexer.TokenEnd()
+
+		numeral := p.lexer.CurrentString[1:]
+
+		if strings.HasPrefix(numeral, "-") {
+			v.Operator = "-"
+		} else if strings.HasPrefix(numeral, "+") {
+			v.Operator = "+"
+		} else {
+			p.lexer.Errorf("expected +/- as part of An+B")
+		}
+
+		v.B = numeral[2:]
+		if len(v.B) == 0 {
+			p.lexer.Errorf("expected number after operator")
+		}
+
+		v.End = p.lexer.TokenEnd()
+		p.lexer.Next()
+	} else if p.lexer.Current == lexer.Ident && p.lexer.CurrentString == "n" {
+		v.End = p.lexer.TokenEnd()
+		p.lexer.Expect(lexer.Ident)
+	} else if p.lexer.Current == lexer.Ident && p.lexer.CurrentString == "-n" {
+		v.A = "-1"
+		v.End = p.lexer.TokenEnd()
+		p.lexer.Expect(lexer.Ident)
+	} else if p.lexer.Current == lexer.Number {
+		v.A = "0"
+		v.B = p.lexer.CurrentNumeral
+		if strings.HasPrefix(p.lexer.CurrentNumeral, "-") {
+			v.Operator = "-"
+			v.B = v.B[1:]
+		} else if strings.HasPrefix(p.lexer.CurrentNumeral, "+") {
+			v.Operator = "+"
+			v.B = v.B[1:]
+		}
+		v.End = p.lexer.TokenEnd()
+		p.lexer.Expect(lexer.Number)
 	}
 
-	if p.lexer.CurrentString != "n" {
-		p.lexer.Errorf("expected literal n as part of An+B")
-	}
-	v.End = p.lexer.TokenEnd()
-	p.lexer.Expect(lexer.Ident)
-
-	if p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "+" || p.lexer.CurrentString == "-") {
+	// If there was no whitespace, e.g. n+3, then the lexer will have given
+	// us a number. Otherwise, it'll be n + 3 with a delimiter.
+	if p.lexer.Current == lexer.Number {
+		if strings.HasPrefix(p.lexer.CurrentNumeral, "-") {
+			v.Operator = "-"
+		} else if strings.HasPrefix(p.lexer.CurrentNumeral, "+") {
+			v.Operator = "+"
+		} else {
+			p.lexer.Errorf("expected +/- as part of An+B")
+		}
+		v.B = p.lexer.CurrentNumeral[1:]
+		v.End = p.lexer.TokenEnd()
+		p.lexer.Expect(lexer.Number)
+	} else if p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "+" || p.lexer.CurrentString == "-") {
 		v.Operator = p.lexer.CurrentString
 		p.lexer.Next()
 
