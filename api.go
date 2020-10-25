@@ -26,6 +26,10 @@ type Options struct {
 	Reporter Reporter
 
 	Transforms transforms.Options
+
+	// Resolver is a path resolver. If not specified, the default node-style
+	// resolver will be used.
+	Resolver Resolver
 }
 
 func newCompilation(opts Options) *compilation {
@@ -38,10 +42,15 @@ func newCompilation(opts Options) *compilation {
 		result:         newResult(),
 		reporter:       logging.DefaultReporter,
 		transforms:     opts.Transforms,
+		resolver:       &NodeResolver{},
 	}
 
 	if opts.Reporter != nil {
 		c.reporter = opts.Reporter
+	}
+
+	if opts.Resolver != nil {
+		c.resolver = opts.Resolver
 	}
 
 	return c
@@ -169,7 +178,12 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	var wg errgroup.Group
 	for _, imp := range ss.Imports {
 		wg.Go(func() error {
-			rel := filepath.Join(filepath.Dir(source.Path), imp.Value)
+			rel, err := c.resolver.Resolve(imp.Value, filepath.Dir(source.Path))
+			if err != nil {
+				c.addError(err)
+				return nil
+			}
+
 			// If import follow is on, then every referenced file makes it to the output.
 			imported := c.parseFile(rel, c.transforms.ImportRules == transforms.ImportRulesFollow)
 
