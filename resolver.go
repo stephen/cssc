@@ -28,7 +28,8 @@ type Resolver interface {
 // package.json for resolution.
 type NodeResolver struct {
 	// BaseURL is the root directory of the project. It serves
-	// the same purpose as baseUrl in tsconfig.json.
+	// the same purpose as baseUrl in tsconfig.json. If the value is relative,
+	// it will be resolved against the current working directory.
 	BaseURL string
 }
 
