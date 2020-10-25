@@ -108,11 +108,15 @@ func (c *compilation) addSource(path string) (int, error) {
 	}
 
 	c.sourcesMu.Lock()
-	defer c.sourcesMu.Unlock()
 	i := c.nextIndex
 	c.sources[abs] = i
+	locker := &sync.Mutex{}
+	c.lockersByIndex[i] = locker
+	c.sourcesMu.Unlock()
+
+	locker.Lock()
+	defer locker.Unlock()
 	c.sourcesByIndex[i] = source
-	c.lockersByIndex[i] = &sync.Mutex{}
 
 	c.nextIndex++
 	return i, nil
