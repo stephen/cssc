@@ -1,19 +1,19 @@
-package cssc_test
+package resolver_test
 
 import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stephen/cssc"
+	"github.com/stephen/cssc/resolver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestResolver_Relative(t *testing.T) {
-	testdata, err := filepath.Abs("testdata/resolver/")
+	testdata, err := filepath.Abs("testdata/")
 	require.NoError(t, err)
 
-	r := cssc.NodeResolver{}
+	r := resolver.NodeResolver{}
 
 	result, err := r.Resolve("./case-1.css", testdata)
 	assert.NoError(t, err)
@@ -61,10 +61,10 @@ func TestResolver_Relative(t *testing.T) {
 }
 
 func TestResolver_Absolute_WithBaseURL(t *testing.T) {
-	testdata, err := filepath.Abs("testdata/resolver/")
+	testdata, err := filepath.Abs("testdata/")
 	require.NoError(t, err)
 
-	r := cssc.NodeResolver{BaseURL: testdata}
+	r := resolver.NodeResolver{BaseURL: testdata}
 
 	result, err := r.Resolve("case-1.css", testdata)
 	assert.NoError(t, err)
@@ -92,10 +92,10 @@ func TestResolver_Absolute_WithBaseURL(t *testing.T) {
 }
 
 func TestResolver_Absolute(t *testing.T) {
-	testdata, err := filepath.Abs("testdata/resolver/nested/1/2/")
+	testdata, err := filepath.Abs("testdata/nested/1/2/")
 	require.NoError(t, err)
 
-	r := cssc.NodeResolver{}
+	r := resolver.NodeResolver{}
 
 	result, err := r.Resolve("case-4", testdata)
 	assert.NoError(t, err)

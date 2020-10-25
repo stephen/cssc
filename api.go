@@ -12,6 +12,7 @@ import (
 	"github.com/stephen/cssc/internal/printer"
 	"github.com/stephen/cssc/internal/sources"
 	"github.com/stephen/cssc/internal/transformer"
+	"github.com/stephen/cssc/resolver"
 	"github.com/stephen/cssc/transforms"
 	"golang.org/x/sync/errgroup"
 )
@@ -42,7 +43,7 @@ func newCompilation(opts Options) *compilation {
 		result:         newResult(),
 		reporter:       logging.DefaultReporter,
 		transforms:     opts.Transforms,
-		resolver:       &NodeResolver{},
+		resolver:       &resolver.NodeResolver{},
 	}
 
 	if opts.Reporter != nil {
