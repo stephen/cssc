@@ -238,6 +238,11 @@ func (p *printer) print(in ast.Node) {
 		}
 		p.s.WriteRune(')')
 
+	case *ast.MathParenthesizedExpression:
+		p.s.WriteRune('(')
+		p.print(node.Value)
+		p.s.WriteRune(')')
+
 	case *ast.MathExpression:
 		p.print(node.Left)
 		p.s.WriteString(node.Operator)

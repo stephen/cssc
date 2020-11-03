@@ -89,24 +89,33 @@ type MathExpression struct {
 	Right Value
 }
 
+// MathParenthesizedExpression is a parenthesized math expression.
+type MathParenthesizedExpression struct {
+	Span
+
+	Value Value
+}
+
 // Comma is a single comma. Some declarations require commas,
 // e.g. font-family fallbacks or transitions.
 type Comma struct {
 	Span
 }
 
-func (String) isValue()         {}
-func (Dimension) isValue()      {}
-func (Function) isValue()       {}
-func (MathExpression) isValue() {}
-func (Comma) isValue()          {}
-func (Identifier) isValue()     {}
-func (HexColor) isValue()       {}
+func (String) isValue()                      {}
+func (Dimension) isValue()                   {}
+func (Function) isValue()                    {}
+func (MathExpression) isValue()              {}
+func (MathParenthesizedExpression) isValue() {}
+func (Comma) isValue()                       {}
+func (Identifier) isValue()                  {}
+func (HexColor) isValue()                    {}
 
 var _ Value = String{}
 var _ Value = Dimension{}
 var _ Value = Function{}
 var _ Value = MathExpression{}
+var _ Value = MathParenthesizedExpression{}
 var _ Value = Comma{}
 var _ Value = Identifier{}
 var _ Value = HexColor{}

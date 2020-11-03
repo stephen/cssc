@@ -74,6 +74,9 @@ func Walk(start Node, visit func(n Node)) {
 		Walk(s.LeftValue, visit)
 		Walk(s.RightValue, visit)
 
+	case *MathParenthesizedExpression:
+		Walk(s.Value, visit)
+
 	case *MathExpression:
 		Walk(s.Left, visit)
 		Walk(s.Right, visit)

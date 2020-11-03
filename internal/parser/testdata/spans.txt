@@ -383,210 +383,266 @@
 	                                         ~
 
 *ast.Declaration:21:2
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.Function:21:10
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.MathExpression:21:15
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.MathExpression:21:15
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	               ~~~~~~~
+
+*ast.Dimension:21:15
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	               ~~~
+
+*ast.Dimension:21:21
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                     ~
+
+*ast.MathExpression:21:25
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                         ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*ast.MathParenthesizedExpression:21:25
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                         ~~~~~~~~~~~~~~~~~~~~~
+
+*ast.MathExpression:21:27
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                           ~~~~~~~~~~~~~~~~~~
+
+*ast.MathExpression:21:27
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                           ~~~~~~~~~~~
+
+*ast.Dimension:21:27
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                           ~~~~
+
+*ast.Dimension:21:34
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                                  ~~~~
+
+*ast.Dimension:21:41
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                                         ~~~~
+
+*ast.Dimension:21:49
+	  height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
+	                                                 ~
+
+*ast.Declaration:22:2
 	  width: calc(2px / 2 + 1rem * 8)
 	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.Function:21:9
+*ast.Function:22:9
 	  width: calc(2px / 2 + 1rem * 8)
 	         ~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.MathExpression:21:14
+*ast.MathExpression:22:14
 	  width: calc(2px / 2 + 1rem * 8)
 	              ~~~~~~~~~~~~~~~~~~
 
-*ast.MathExpression:21:14
+*ast.MathExpression:22:14
 	  width: calc(2px / 2 + 1rem * 8)
 	              ~~~~~~~
 
-*ast.Dimension:21:14
+*ast.Dimension:22:14
 	  width: calc(2px / 2 + 1rem * 8)
 	              ~~~
 
-*ast.Dimension:21:20
+*ast.Dimension:22:20
 	  width: calc(2px / 2 + 1rem * 8)
 	                    ~
 
-*ast.MathExpression:21:24
+*ast.MathExpression:22:24
 	  width: calc(2px / 2 + 1rem * 8)
 	                        ~~~~~~~~
 
-*ast.Dimension:21:24
+*ast.Dimension:22:24
 	  width: calc(2px / 2 + 1rem * 8)
 	                        ~~~~
 
-*ast.Dimension:21:31
+*ast.Dimension:22:31
 	  width: calc(2px / 2 + 1rem * 8)
 	                               ~
 
-*ast.AtRule:24:1
+*ast.AtRule:25:1
 	@custom-media test (800px < width < 1000px) or (print);
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.Identifier:24:15
+*ast.Identifier:25:15
 	@custom-media test (800px < width < 1000px) or (print);
 	              ~~~~
 
-*ast.MediaQuery:24:20
+*ast.MediaQuery:25:20
 	@custom-media test (800px < width < 1000px) or (print);
 	                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.MediaFeatureRange:24:20
+*ast.MediaFeatureRange:25:20
 	@custom-media test (800px < width < 1000px) or (print);
 	                   ~~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.Dimension:24:21
+*ast.Dimension:25:21
 	@custom-media test (800px < width < 1000px) or (print);
 	                    ~~~~~
 
-*ast.Dimension:24:37
+*ast.Dimension:25:37
 	@custom-media test (800px < width < 1000px) or (print);
 	                                    ~~~~~~
 
-*ast.Identifier:24:45
+*ast.Identifier:25:45
 	@custom-media test (800px < width < 1000px) or (print);
 	                                            ~~
 
-*ast.MediaFeaturePlain:24:48
+*ast.MediaFeaturePlain:25:48
 	@custom-media test (800px < width < 1000px) or (print);
 	                                               ~~~~~~~
 
-*ast.Identifier:24:49
+*ast.Identifier:25:49
 	@custom-media test (800px < width < 1000px) or (print);
 	                                                ~~~~~
 
-*ast.AtRule:26:1
+*ast.AtRule:27:1
 	@keyframes custom {
 	~~~~~~~~~~~~~~~~~~~>
 
-*ast.Identifier:26:12
+*ast.Identifier:27:12
 	@keyframes custom {
 	           ~~~~~~
 
-*ast.QualifiedRuleBlock:26:19
+*ast.QualifiedRuleBlock:27:19
 	@keyframes custom {
 	                  ~>
 
-*ast.QualifiedRule:27:2
+*ast.QualifiedRule:28:2
 	  0% { opacity: 0%; }
 	  ~~~~~~~~~~~~~~~~~~~
 
-*ast.KeyframeSelectorList:27:2
+*ast.KeyframeSelectorList:28:2
 	  0% { opacity: 0%; }
 	  ~~
 
-*ast.Percentage:27:2
+*ast.Percentage:28:2
 	  0% { opacity: 0%; }
 	  ~~
 
-*ast.DeclarationBlock:27:5
+*ast.DeclarationBlock:28:5
 	  0% { opacity: 0%; }
 	     ~~~~~~~~~~~~~~~~
 
-*ast.Declaration:27:7
+*ast.Declaration:28:7
 	  0% { opacity: 0%; }
 	       ~~~~~~~~~~~
 
-*ast.Dimension:27:16
+*ast.Dimension:28:16
 	  0% { opacity: 0%; }
 	                ~~
 
-*ast.QualifiedRule:28:2
+*ast.QualifiedRule:29:2
 	  100% { opacity: 100%; }
 	  ~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.KeyframeSelectorList:28:2
+*ast.KeyframeSelectorList:29:2
 	  100% { opacity: 100%; }
 	  ~~~~
 
-*ast.Percentage:28:2
+*ast.Percentage:29:2
 	  100% { opacity: 100%; }
 	  ~~~~
 
-*ast.DeclarationBlock:28:7
+*ast.DeclarationBlock:29:7
 	  100% { opacity: 100%; }
 	       ~~~~~~~~~~~~~~~~~~
 
-*ast.Declaration:28:9
+*ast.Declaration:29:9
 	  100% { opacity: 100%; }
 	         ~~~~~~~~~~~~~
 
-*ast.Dimension:28:18
+*ast.Dimension:29:18
 	  100% { opacity: 100%; }
 	                  ~~~~
 
-*ast.AtRule:31:1
+*ast.AtRule:32:1
 	@font-face {
 	~~~~~~~~~~~~>
 
-*ast.DeclarationBlock:31:12
+*ast.DeclarationBlock:32:12
 	@font-face {
 	           ~>
 
-*ast.Declaration:32:2
+*ast.Declaration:33:2
 	  font-family: "whatever";
 	  ~~~~~~~~~~~~~~~~~~~~~~~
 
-*ast.String:32:15
+*ast.String:33:15
 	  font-family: "whatever";
 	               ~~~~~~~~~~
 
-*ast.Declaration:33:3
+*ast.Declaration:34:3
 	  src: url("/what.eot?") format("eot"),
 	  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
 
-*ast.Function:33:8
+*ast.Function:34:8
 	  src: url("/what.eot?") format("eot"),
 	       ~~~~~~~~~~~~~~~~~
 
-*ast.String:33:12
+*ast.String:34:12
 	  src: url("/what.eot?") format("eot"),
 	           ~~~~~~~~~~~~
 
-*ast.Function:33:26
+*ast.Function:34:26
 	  src: url("/what.eot?") format("eot"),
 	                         ~~~~~~~~~~~~~
 
-*ast.String:33:33
+*ast.String:34:33
 	  src: url("/what.eot?") format("eot"),
 	                                ~~~~~
 
-*ast.Comma:33:39
+*ast.Comma:34:39
 	  src: url("/what.eot?") format("eot"),
 	                                      ~
 
-*ast.Function:34:5
+*ast.Function:35:5
 	    url("./what.woff") format("woff"),
 	    ~~~~~~~~~~~~~~~~~~
 
-*ast.String:34:9
+*ast.String:35:9
 	    url("./what.woff") format("woff"),
 	        ~~~~~~~~~~~~~
 
-*ast.Function:34:24
+*ast.Function:35:24
 	    url("./what.woff") format("woff"),
 	                       ~~~~~~~~~~~~~~
 
-*ast.String:34:31
+*ast.String:35:31
 	    url("./what.woff") format("woff"),
 	                              ~~~~~~
 
-*ast.Comma:34:38
+*ast.Comma:35:38
 	    url("./what.woff") format("woff"),
 	                                     ~
 
-*ast.Function:35:3
+*ast.Function:36:3
 	    url("./what.ttf") format("truetype");
 	    ~~~~~~~~~~~~~~~~~
 
-*ast.String:35:7
+*ast.String:36:7
 	    url("./what.ttf") format("truetype");
 	        ~~~~~~~~~~~~
 
-*ast.Function:35:21
+*ast.Function:36:21
 	    url("./what.ttf") format("truetype");
 	                      ~~~~~~~~~~~~~~~~~~
 
-*ast.String:35:28
+*ast.String:36:28
 	    url("./what.ttf") format("truetype");
 	                             ~~~~~~~~~~
 

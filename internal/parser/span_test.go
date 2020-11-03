@@ -45,6 +45,7 @@ func TestSpans(t *testing.T) {
 .big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	color: purple;
 	background-color: rgba(calc(0 + 1), 2, 3);
+	height: calc(2px / 2 + ( 1rem + 3rem + 6rem) * 8);
 	width: calc(2px / 2 + 1rem * 8)
 }
 

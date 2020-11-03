@@ -248,13 +248,13 @@ func (p *parser) parseMathSum() ast.Value {
 }
 
 func (p *parser) parseMathProduct() ast.Value {
-	left := p.parseValue()
+	left := p.parseMathParenthesizedExpression()
 
 	for p.lexer.Current == lexer.Delim && (p.lexer.CurrentString == "*" || p.lexer.CurrentString == "/") {
 		op := p.lexer.CurrentString
 		p.lexer.Expect(lexer.Delim)
 
-		right := p.parseValue()
+		right := p.parseMathParenthesizedExpression()
 
 		span := left.Location()
 		span.End = right.Location().End
@@ -268,6 +268,22 @@ func (p *parser) parseMathProduct() ast.Value {
 	}
 
 	return left
+}
+
+func (p *parser) parseMathParenthesizedExpression() ast.Value {
+	if p.lexer.Current != lexer.LParen {
+		return p.parseValue()
+	}
+
+	loc := p.lexer.TokenSpan()
+	p.lexer.Expect(lexer.LParen)
+	expr := &ast.MathParenthesizedExpression{
+		Span:  loc,
+		Value: p.parseMathSum(),
+	}
+	expr.End = p.lexer.TokenSpan().End
+	p.lexer.Expect(lexer.RParen)
+	return expr
 }
 
 // parseValue parses a possible ast value at the current position. Callers
