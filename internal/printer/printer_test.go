@@ -95,3 +95,8 @@ func TestANPlusB(t *testing.T) {
 	assert.Equal(t, `:nth-child(-n+6){}`, Print(t, `:nth-child(-n+ 6) {}`))
 	assert.Equal(t, `:nth-child(6){}`, Print(t, `:nth-child(+6) {}`))
 }
+
+func TestURLValues(t *testing.T) {
+	assert.Equal(t, `a{background:url(https://example.com/test.png)}`, Print(t, `a { background: url(https://example.com/test.png); }`))
+	assert.Equal(t, `svg{filter:url(#example)}`, Print(t, `svg { filter: url(#example); }`))
+}

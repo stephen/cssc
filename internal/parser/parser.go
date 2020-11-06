@@ -336,6 +336,14 @@ func (p *parser) parseValue() ast.Value {
 			Value: p.lexer.CurrentString,
 		}
 
+	case lexer.URL:
+		defer p.lexer.Next()
+		return &ast.Function{
+			Span:      p.lexer.TokenSpan(),
+			Name:      "url",
+			Arguments: []ast.Value{&ast.Identifier{Value: p.lexer.CurrentString}},
+		}
+
 	case lexer.FunctionStart:
 		fn := &ast.Function{
 			Span: p.lexer.TokenSpan(),
