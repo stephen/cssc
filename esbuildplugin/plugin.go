@@ -68,39 +68,41 @@ func WithResolver(resolver cssc.Resolver) Option {
 }
 
 // Plugin is an esbuild plugin for importing .css files.
-func Plugin(opts ...Option) func(api.Plugin) {
-	return func(plugin api.Plugin) {
-		plugin.SetName("cssc")
-		plugin.AddLoader(
-			api.LoaderOptions{Filter: `\.css$`},
-			func(args api.LoaderArgs) (res api.LoaderResult, err error) {
-				res.Loader = api.LoaderCSS
+func Plugin(opts ...Option) api.Plugin {
+	return api.Plugin{
+		Name: "cssc",
+		Setup: func(build api.PluginBuild) {
+			build.OnLoad(
+				api.OnLoadOptions{Filter: `\.css$`},
+				func(args api.OnLoadArgs) (res api.OnLoadResult, err error) {
+					res.Loader = api.LoaderCSS
 
-				var errors csscReporter
-				options := cssc.Options{
-					Entry:    []string{args.Path},
-					Reporter: &errors,
-				}
-				for _, opt := range opts {
-					options = opt(options)
-				}
+					var errors csscReporter
+					options := cssc.Options{
+						Entry:    []string{args.Path},
+						Reporter: &errors,
+					}
+					for _, opt := range opts {
+						options = opt(options)
+					}
 
-				result := cssc.Compile(options)
+					result := cssc.Compile(options)
 
-				if len(errors) > 0 {
-					res.Errors = errors.toEsbuild()
-					return
-				}
+					if len(errors) > 0 {
+						res.Errors = errors.toEsbuild()
+						return
+					}
 
-				f, ok := result.Files[args.Path]
-				if !ok {
-					err = oops.Errorf("cssc output did not contain %s", args.Path)
-					return
-				}
+					f, ok := result.Files[args.Path]
+					if !ok {
+						err = oops.Errorf("cssc output did not contain %s", args.Path)
+						return
+					}
 
-				res.Contents = &f
-				return res, nil
-			},
-		)
+					res.Contents = &f
+					return res, nil
+				},
+			)
+		},
 	}
 }
