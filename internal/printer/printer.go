@@ -42,7 +42,7 @@ func Print(in ast.Node, opts Options) (output string, err error) {
 			}
 
 			// Re-panic unknown issues.
-			panic(err)
+			panic(rErr)
 		}
 	}()
 
