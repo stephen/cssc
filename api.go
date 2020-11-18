@@ -85,17 +85,17 @@ type compilation struct {
 // addSource will read in a path and assign it a source index. If
 // it's already been loaded, the cached source is returned.
 func (c *compilation) addSource(path string) (int, error) {
-	c.sourcesMu.RLock()
-	if _, ok := c.sources[path]; ok {
-		defer c.sourcesMu.RUnlock()
-		return c.sources[path], nil
-	}
-	c.sourcesMu.RUnlock()
-
 	abs, err := filepath.Abs(path)
 	if err != nil {
 		return 0, oops.Wrapf(err, "failed to make path absolute: %s", path)
 	}
+
+	c.sourcesMu.RLock()
+	if _, ok := c.sources[abs]; ok {
+		defer c.sourcesMu.RUnlock()
+		return c.sources[abs], nil
+	}
+	c.sourcesMu.RUnlock()
 
 	in, err := ioutil.ReadFile(abs)
 	if err != nil {
