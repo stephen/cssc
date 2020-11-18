@@ -100,3 +100,7 @@ func TestURLValues(t *testing.T) {
 	assert.Equal(t, `a{background:url(https://example.com/test.png)}`, Print(t, `a { background: url(https://example.com/test.png); }`))
 	assert.Equal(t, `svg{filter:url(#example)}`, Print(t, `svg { filter: url(#example); }`))
 }
+
+func TestDeclarationHacks(t *testing.T) {
+	assert.Equal(t, `a{*letter-spacing:2rem}`, Print(t, `a { *letter-spacing: 2rem; }`))
+}

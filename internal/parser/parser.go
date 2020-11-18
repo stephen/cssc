@@ -114,9 +114,24 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 	p.lexer.Next()
 
 	for p.lexer.Current != lexer.RCurly {
+		var prefix string
+		if p.lexer.Current == lexer.Delim {
+			// Hack: support old browser declarations like *letter-spacing.
+			if p.lexer.CurrentString == "*" {
+				prefix = p.lexer.CurrentString
+				p.lexer.Next()
+			}
+		}
+
+		property := p.lexer.CurrentString
+		if prefix != "" {
+			// XXX: we can slice into the source instead of doing an allocation here.
+			property = prefix + property
+		}
+
 		decl := &ast.Declaration{
 			Span:     p.lexer.TokenSpan(),
-			Property: p.lexer.CurrentString,
+			Property: property,
 		}
 		p.lexer.Expect(lexer.Ident)
 		p.lexer.Expect(lexer.Colon)
