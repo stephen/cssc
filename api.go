@@ -237,10 +237,14 @@ func Compile(opts Options) *Result {
 		wg.Go(func() error {
 			// XXX: this is the wrong file name
 			source := c.sourcesByIndex[idx]
-			c.result.mu.Lock()
-			defer c.result.mu.Unlock()
+			ast := c.astsByIndex[idx]
+			if source == nil || ast == nil {
+				// Skip attempting to print if there was a problem reading/parsing this file
+				// in the first place.
+				return nil
+			}
 
-			out, err := printer.Print(c.astsByIndex[idx], printer.Options{
+			out, err := printer.Print(ast, printer.Options{
 				OriginalSource: source,
 			})
 			if err != nil {
@@ -248,6 +252,8 @@ func Compile(opts Options) *Result {
 				return nil
 			}
 
+			c.result.mu.Lock()
+			defer c.result.mu.Unlock()
 			c.result.Files[source.Path] = out
 			return nil
 		})
