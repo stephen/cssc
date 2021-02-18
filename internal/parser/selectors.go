@@ -202,7 +202,7 @@ func (p *parser) parseAttributeSelector() *ast.AttributeSelector {
 	}
 
 	switch p.lexer.CurrentString {
-	case "^", "~", "$", "*":
+	case "^", "~", "$", "*", "|":
 		attr.PreOperator = p.lexer.CurrentString
 		p.lexer.Next()
 
@@ -220,6 +220,13 @@ func (p *parser) parseAttributeSelector() *ast.AttributeSelector {
 	}
 
 	attr.End = p.lexer.TokenEnd()
+
+	if p.lexer.Current == lexer.Ident && (p.lexer.CurrentString == "s" || p.lexer.CurrentString == "i") {
+		attr.Modifier = p.lexer.CurrentString
+		attr.End = p.lexer.TokenEnd()
+		p.lexer.Next()
+	}
+
 	p.lexer.Expect(lexer.RBracket)
 	return attr
 }

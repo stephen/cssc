@@ -128,6 +128,10 @@ type AttributeSelector struct {
 
 	// Value is the value to match against.
 	Value Value
+
+	// Modifier can be either i (insensitive) or s (sensitive). In practice,
+	// s is not supported.
+	Modifier string
 }
 
 var _ SelectorPart = TypeSelector{}
