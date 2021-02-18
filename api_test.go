@@ -55,3 +55,19 @@ func TestApi_BrokenImport(t *testing.T) {
 	assert.Len(t, result.Files, 1)
 	assert.Len(t, errors, 1)
 }
+
+func TestApi_Crlf(t *testing.T) {
+	var errors TestReporter
+	result := cssc.Compile(cssc.Options{
+		Entry: []string{
+			"testdata/crlf/monaco.css",
+		},
+		Transforms: transforms.Options{
+			ImportRules: transforms.ImportRulesInline,
+		},
+		Reporter: &errors,
+	})
+
+	assert.Len(t, result.Files, 1)
+	assert.Len(t, errors, 0)
+}

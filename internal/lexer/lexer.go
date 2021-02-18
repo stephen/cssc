@@ -82,6 +82,19 @@ func (l *Lexer) step() {
 		return
 	}
 
+	// "Convert" to newline. https://www.w3.org/TR/css-syntax-3/#newline
+	if cp == '\r' {
+		next, nextSize := utf8.DecodeRuneInString(l.source.Content[l.pos+size:])
+		if next == '\n' {
+			l.source.Lines = append(l.source.Lines, l.pos+size+nextSize)
+		}
+
+		l.ch = next
+		l.lastPos = l.pos
+		l.pos += size + nextSize
+		return
+	}
+
 	if cp == '\n' {
 		l.source.Lines = append(l.source.Lines, l.pos+size)
 	}
