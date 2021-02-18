@@ -238,6 +238,17 @@ func (p *printer) print(in ast.Node) {
 		}
 		p.s.WriteRune(')')
 
+	case *ast.Brackets:
+		p.s.WriteRune('[')
+		for i, val := range node.Values {
+			p.print(val)
+
+			if i+1 < len(node.Values) {
+				p.s.WriteRune(' ')
+			}
+		}
+		p.s.WriteRune(']')
+
 	case *ast.MathParenthesizedExpression:
 		p.s.WriteRune('(')
 		p.print(node.Value)

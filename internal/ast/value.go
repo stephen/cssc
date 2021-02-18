@@ -53,6 +53,14 @@ type HexColor struct {
 	RGBA string
 }
 
+// Brackets is a bracketized value.
+type Brackets struct {
+	Span
+
+	// Values is the inner values, space-separated.
+	Values []Value
+}
+
 // Function is a css function.
 type Function struct {
 	Span
@@ -111,6 +119,7 @@ type Comma struct {
 
 func (String) isValue()                      {}
 func (Dimension) isValue()                   {}
+func (Brackets) isValue()                    {}
 func (Function) isValue()                    {}
 func (MathExpression) isValue()              {}
 func (MathParenthesizedExpression) isValue() {}
@@ -121,6 +130,7 @@ func (Raw) isValue()                         {}
 
 var _ Value = String{}
 var _ Value = Dimension{}
+var _ Value = Brackets{}
 var _ Value = Function{}
 var _ Value = MathExpression{}
 var _ Value = MathParenthesizedExpression{}

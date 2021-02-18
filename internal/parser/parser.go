@@ -317,6 +317,29 @@ func (p *parser) parseValue() ast.Value {
 			Value: p.lexer.CurrentNumeral,
 		}
 
+	case lexer.LBracket:
+		b := &ast.Brackets{
+			Span: p.lexer.TokenSpan(),
+		}
+		p.lexer.Next()
+
+		for {
+			switch p.lexer.Current {
+			case lexer.RBracket:
+				b.End = p.lexer.TokenEnd()
+				p.lexer.Next()
+				return b
+
+			default:
+				v := p.parseValue()
+				if v == nil {
+					p.lexer.Errorf("expected value")
+				}
+
+				b.Values = append(b.Values, v)
+			}
+		}
+
 	case lexer.Percentage:
 		defer p.lexer.Next()
 		return &ast.Dimension{
