@@ -83,7 +83,7 @@ func (l *Lexer) step() {
 	}
 
 	if cp == '\n' {
-		l.source.Lines = append(l.source.Lines, l.pos+1)
+		l.source.Lines = append(l.source.Lines, l.pos+size)
 	}
 
 	l.ch = cp
