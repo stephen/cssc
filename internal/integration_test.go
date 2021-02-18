@@ -16,6 +16,7 @@ func TestIntegration(t *testing.T) {
 		"testdata/comments.css",
 		"testdata/bem.css",
 		"testdata/font-face.css",
+		"testdata/grid.css",
 	} {
 		t.Run(c, func(t *testing.T) {
 

@@ -141,9 +141,15 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 			case lexer.EOF:
 				p.lexer.Errorf("unexpected EOF")
 
+			case lexer.Comma:
+				decl.Values = append(decl.Values, &ast.Comma{Span: p.lexer.TokenSpan()})
+				p.lexer.Next()
+
 			case lexer.Delim:
 				if p.lexer.CurrentString != "!" {
-					p.lexer.Errorf("unexpected token: %s", p.lexer.CurrentString)
+					decl.Values = append(decl.Values, &ast.Raw{Span: p.lexer.TokenSpan(), Value: p.lexer.CurrentString})
+					p.lexer.Next()
+					continue
 				}
 				p.lexer.Next()
 
@@ -153,10 +159,6 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 				decl.End = p.lexer.TokenEnd()
 				p.lexer.Next()
 				decl.Important = true
-
-			case lexer.Comma:
-				decl.Values = append(decl.Values, &ast.Comma{Span: p.lexer.TokenSpan()})
-				p.lexer.Next()
 
 			default:
 				val := p.parseValue()

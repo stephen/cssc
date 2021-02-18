@@ -96,6 +96,13 @@ type MathParenthesizedExpression struct {
 	Value Value
 }
 
+// Raw is an otherwise non-structured but valid value.
+type Raw struct {
+	Span
+
+	Value string
+}
+
 // Comma is a single comma. Some declarations require commas,
 // e.g. font-family fallbacks or transitions.
 type Comma struct {
@@ -110,6 +117,7 @@ func (MathParenthesizedExpression) isValue() {}
 func (Comma) isValue()                       {}
 func (Identifier) isValue()                  {}
 func (HexColor) isValue()                    {}
+func (Raw) isValue()                         {}
 
 var _ Value = String{}
 var _ Value = Dimension{}
@@ -119,3 +127,4 @@ var _ Value = MathParenthesizedExpression{}
 var _ Value = Comma{}
 var _ Value = Identifier{}
 var _ Value = HexColor{}
+var _ Value = Raw{}

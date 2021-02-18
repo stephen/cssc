@@ -363,6 +363,9 @@ func (p *printer) print(in ast.Node) {
 		}
 		p.s.WriteRune(')')
 
+	case *ast.Raw:
+		p.s.WriteString(node.Value)
+
 	default:
 		panic(fmt.Sprintf("unknown ast node: %s", reflect.TypeOf(in).String()))
 	}
