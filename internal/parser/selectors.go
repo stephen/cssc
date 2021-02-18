@@ -168,44 +168,7 @@ func (p *parser) parseSelector() *ast.Selector {
 			s.Parts = append(s.Parts, pc)
 
 		case lexer.LBracket:
-			startLoc := p.lexer.TokenSpan()
-			p.lexer.Next()
-			attr := &ast.AttributeSelector{
-				Span:     startLoc,
-				Property: p.lexer.CurrentString,
-			}
-
-			p.lexer.Expect(lexer.Ident)
-			if p.lexer.Current == lexer.RBracket {
-				attr.End = p.lexer.TokenEnd()
-				s.Parts = append(s.Parts, attr)
-				p.lexer.Next()
-				break
-			}
-
-			if p.lexer.Current == lexer.Delim {
-				switch p.lexer.CurrentString {
-				case "^", "~", "$", "*":
-					attr.PreOperator = p.lexer.CurrentString
-					p.lexer.Next()
-
-					if p.lexer.CurrentString != "=" {
-						p.lexer.Errorf("expected =, got %s: ", p.lexer.CurrentString)
-					}
-					p.lexer.Expect(lexer.Delim)
-				case "=":
-					p.lexer.Expect(lexer.Delim)
-				}
-
-				attr.Value = p.parseValue()
-				if attr.Value == nil {
-					p.lexer.Errorf("value must be specified")
-				}
-				s.Parts = append(s.Parts, attr)
-			}
-
-			attr.End = p.lexer.TokenEnd()
-			p.lexer.Expect(lexer.RBracket)
+			s.Parts = append(s.Parts, p.parseAttributeSelector())
 
 		default:
 			if len(s.Parts) == 0 {
@@ -215,6 +178,50 @@ func (p *parser) parseSelector() *ast.Selector {
 			return s
 		}
 	}
+}
+
+func (p *parser) parseAttributeSelector() *ast.AttributeSelector {
+	prev := p.lexer.RetainWhitespace
+	p.lexer.RetainWhitespace = false
+	defer func() {
+		p.lexer.RetainWhitespace = prev
+	}()
+
+	startLoc := p.lexer.TokenSpan()
+	p.lexer.Next()
+	attr := &ast.AttributeSelector{
+		Span:     startLoc,
+		Property: p.lexer.CurrentString,
+	}
+
+	p.lexer.Expect(lexer.Ident)
+	if p.lexer.Current == lexer.RBracket {
+		attr.End = p.lexer.TokenEnd()
+		p.lexer.Next()
+		return attr
+	}
+
+	switch p.lexer.CurrentString {
+	case "^", "~", "$", "*":
+		attr.PreOperator = p.lexer.CurrentString
+		p.lexer.Next()
+
+		if p.lexer.CurrentString != "=" {
+			p.lexer.Errorf("expected =, got %s: ", p.lexer.CurrentString)
+		}
+		p.lexer.Expect(lexer.Delim)
+	default:
+		p.lexer.Expect(lexer.Delim)
+	}
+
+	attr.Value = p.parseValue()
+	if attr.Value == nil {
+		p.lexer.Errorf("value must be specified")
+	}
+
+	attr.End = p.lexer.TokenEnd()
+	p.lexer.Expect(lexer.RBracket)
+	return attr
 }
 
 func (p *parser) parseANPlusB() *ast.ANPlusB {

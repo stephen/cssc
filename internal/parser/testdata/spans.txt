@@ -204,7 +204,7 @@
 
 *ast.SelectorList:18:1
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
-	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *ast.Selector:18:1
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
@@ -316,7 +316,7 @@
 
 *ast.Selector:18:85
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
-	                                                                                    ~~~~~~~~~
+	                                                                                    ~~~~~~~~
 
 *ast.TypeSelector:18:85
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
@@ -325,10 +325,6 @@
 *ast.AttributeSelector:18:86
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
 	                                                                                     ~~~~~~~
-
-*ast.Whitespace:18:93
-	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
-	                                                                                            ~
 
 *ast.DeclarationBlock:18:94
 	.big#THINGS + div, span::after, a:href, a:visited, not.a:problem + a[link="thing"], a[other] {
