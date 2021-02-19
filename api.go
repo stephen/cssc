@@ -39,7 +39,6 @@ func newCompilation(opts Options) *compilation {
 		sourcesByIndex: make(map[int]*sources.Source),
 		outputsByIndex: make(map[int]struct{}),
 		astsByIndex:    make(map[int]*ast.Stylesheet),
-		lockersByIndex: make(map[int]*sync.Mutex),
 		result:         newResult(),
 		reporter:       logging.DefaultReporter,
 		transforms:     opts.Transforms,
@@ -66,12 +65,14 @@ type compilation struct {
 	sources   map[string]int
 	nextIndex int
 
-	sourcesByIndex map[int]*sources.Source
-	astsByIndex    map[int]*ast.Stylesheet
+	sourcesByIndexMu sync.RWMutex
+	sourcesByIndex   map[int]*sources.Source
+
+	astsByIndexMu sync.RWMutex
+	astsByIndex   map[int]*ast.Stylesheet
 
 	// outputsByIndex is the set of sources to write outputs for.
 	outputsByIndex map[int]struct{}
-	lockersByIndex map[int]*sync.Mutex
 
 	result *Result
 
@@ -110,13 +111,11 @@ func (c *compilation) addSource(path string) (int, error) {
 	c.sourcesMu.Lock()
 	i := c.nextIndex
 	c.sources[abs] = i
-	locker := &sync.Mutex{}
-	c.lockersByIndex[i] = locker
 	c.sourcesMu.Unlock()
 
-	locker.Lock()
-	defer locker.Unlock()
+	c.sourcesByIndexMu.Lock()
 	c.sourcesByIndex[i] = source
+	c.sourcesByIndexMu.Unlock()
 
 	c.nextIndex++
 	return i, nil
@@ -159,16 +158,16 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 		c.outputsByIndex[idx] = struct{}{}
 	}
 
-	// Grab the lock for this source, since multiple callers might try
-	// to parse the same file.
-	locker := c.lockersByIndex[idx]
-	locker.Lock()
-	defer locker.Unlock()
+	c.astsByIndexMu.RLock()
 	if ss, ok := c.astsByIndex[idx]; ok {
+		c.astsByIndexMu.RUnlock()
 		return ss
 	}
+	c.astsByIndexMu.RUnlock()
 
+	c.sourcesByIndexMu.RLock()
 	source := c.sourcesByIndex[idx]
+	c.sourcesByIndexMu.RUnlock()
 	ss, err := parser.Parse(source)
 	if err != nil {
 		c.addError(err)
@@ -213,7 +212,9 @@ func (c *compilation) parseFile(file string, hasOutput bool) *ast.Stylesheet {
 	}
 
 	ss = transformer.Transform(ss, opts)
+	c.astsByIndexMu.Lock()
 	c.astsByIndex[idx] = ss
+	c.astsByIndexMu.Unlock()
 	return ss
 }
 
