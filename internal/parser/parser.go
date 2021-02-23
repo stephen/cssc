@@ -470,11 +470,8 @@ func (p *parser) parseAtRule() {
 	case "custom-media":
 		p.parseCustomMediaAtRule()
 
-	case "font-face":
-		p.parseFontFace()
-
 	default:
-		p.lexer.Errorf("unsupported at rule: %s", p.lexer.CurrentString)
+		p.parseGenericAtRule()
 	}
 }
 
@@ -836,9 +833,8 @@ func (p *parser) parseCustomMediaAtRule() {
 	p.ss.Nodes = append(p.ss.Nodes, r)
 }
 
-// parseFontFace parses an @font-face rule.
-// See: https://www.w3.org/TR/css-fonts-4/#font-face-rule
-func (p *parser) parseFontFace() {
+// parseGenericAtRule parses a generic atrule like @font-face.
+func (p *parser) parseGenericAtRule() {
 	r := &ast.AtRule{
 		Span: p.lexer.TokenSpan(),
 		Name: p.lexer.CurrentString,
