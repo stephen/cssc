@@ -642,3 +642,47 @@
 	    url("./what.ttf") format("truetype");
 	                             ~~~~~~~~~~
 
+*ast.QualifiedRule:39:1
+	.broken {
+	~~~~~~~~~>
+
+*ast.SelectorList:39:1
+	.broken {
+	~~~~~~~~
+
+*ast.Selector:39:1
+	.broken {
+	~~~~~~~~
+
+*ast.ClassSelector:39:1
+	.broken {
+	~~~~~~~
+
+*ast.Whitespace:39:8
+	.broken {
+	       ~
+
+*ast.DeclarationBlock:39:9
+	.broken {
+	        ~>
+
+*ast.Declaration:40:2
+	  border-radius: 2px;;
+	  ~~~~~~~~~~~~~~~~~~
+
+*ast.Dimension:40:17
+	  border-radius: 2px;;
+	                 ~~~
+
+*ast.Raw:40:21
+	  border-radius: 2px;;
+	                     ~
+
+*ast.Declaration:41:2
+	  width: 200px;
+	  ~~~~~~~~~~~~
+
+*ast.Dimension:41:9
+	  width: 200px;
+	         ~~~~~
+

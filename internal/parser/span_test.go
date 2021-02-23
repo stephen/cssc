@@ -62,6 +62,11 @@ func TestSpans(t *testing.T) {
     url("./what.woff") format("woff"),
 		url("./what.ttf") format("truetype");
 }
+
+.broken {
+	border-radius: 2px;;
+	width: 200px;
+}
 `,
 	}
 

@@ -116,7 +116,7 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 	p.lexer.Next()
 
 	for p.lexer.Current != lexer.RCurly {
-		block.Declarations = append(block.Declarations, p.parseDeclaration())
+		block.Declarations = append(block.Declarations, p.parseDeclarationOrFallback())
 		if p.lexer.Current == lexer.Semicolon {
 			p.lexer.Next()
 		}
@@ -124,6 +124,35 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 	block.End = p.lexer.TokenEnd()
 	p.lexer.Next()
 	return block
+}
+
+func (p *parser) parseDeclarationOrFallback() (rv ast.Declarationish) {
+	lexerState := *p.lexer
+	defer func() {
+		if err := recover(); err != nil {
+			// Restore the lexer and try again to read the value.
+			p.lexer = &lexerState
+			rv = p.parseRaw()
+		}
+	}()
+
+	return p.parseDeclaration()
+}
+
+func (p *parser) parseRaw() *ast.Raw {
+	raw := &ast.Raw{
+		Span: p.lexer.TokenSpan(),
+	}
+
+	for p.lexer.Current != lexer.Semicolon {
+		p.lexer.Next()
+	}
+	raw.End = p.lexer.TokenEnd()
+	p.lexer.Next()
+
+	raw.Value = p.source.Content[raw.Start:raw.End]
+
+	return raw
 }
 
 func (p *parser) parseDeclaration() *ast.Declaration {
