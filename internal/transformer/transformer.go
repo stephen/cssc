@@ -145,14 +145,20 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 					return
 				}
 
-				newDecls := make([]*ast.Declaration, 0, len(declBlock.Declarations))
+				newDecls := make([]ast.Declarationish, 0, len(declBlock.Declarations))
 				for _, decl := range declBlock.Declarations {
-					if strings.HasPrefix(decl.Property, "--") && t.variables != nil {
-						t.variables[decl.Property] = decl.Values
-						continue
+					switch d := decl.(type) {
+					case *ast.Declaration:
+
+						if strings.HasPrefix(d.Property, "--") && t.variables != nil {
+							t.variables[d.Property] = d.Values
+							continue
+						}
+						newDecls = append(newDecls, d)
+					default:
+						newDecls = append(newDecls, d)
 					}
 
-					newDecls = append(newDecls, decl)
 				}
 
 				declBlock.Declarations = newDecls
@@ -375,11 +381,16 @@ func (t *transformer) transformBlock(block ast.Block) ast.Block {
 	return block
 }
 
-func (t *transformer) transformDeclarations(decls []*ast.Declaration) []*ast.Declaration {
-	newDecls := make([]*ast.Declaration, 0, len(decls))
-	for _, d := range decls {
-		d.Values = t.transformValues(d.Values)
-		newDecls = append(newDecls, d)
+func (t *transformer) transformDeclarations(decls []ast.Declarationish) []ast.Declarationish {
+	newDecls := make([]ast.Declarationish, 0, len(decls))
+	for _, decl := range decls {
+		switch d := decl.(type) {
+		case *ast.Declaration:
+			d.Values = t.transformValues(d.Values)
+			newDecls = append(newDecls, d)
+		default:
+			newDecls = append(newDecls, d)
+		}
 	}
 
 	return newDecls

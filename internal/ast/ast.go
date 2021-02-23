@@ -53,7 +53,13 @@ type Block interface {
 type DeclarationBlock struct {
 	Span
 
-	Declarations []*Declaration
+	Declarations []Declarationish
+}
+
+// Declarationish is a Declaration or a Raw value.
+type Declarationish interface {
+	Node
+	isDeclaration()
 }
 
 // QualifiedRuleBlock is a block containing a set of rules.
@@ -82,3 +88,9 @@ type Declaration struct {
 	// Important is whether or not the declaration was marked !important.
 	Important bool
 }
+
+func (Declaration) isDeclaration() {}
+func (Raw) isDeclaration()         {}
+
+var _ Declarationish = Declaration{}
+var _ Declarationish = Raw{}
