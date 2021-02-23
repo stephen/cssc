@@ -107,6 +107,7 @@ func Walk(start Node, visit func(n Node)) {
 	case *Dimension:
 	case *Whitespace:
 	case *Identifier:
+	case *Raw:
 
 	default:
 		panic(fmt.Errorf("unknown node type: %s", reflect.TypeOf(s).String()))
