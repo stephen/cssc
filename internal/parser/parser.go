@@ -114,71 +114,7 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 	p.lexer.Next()
 
 	for p.lexer.Current != lexer.RCurly {
-		var prefix string
-		if p.lexer.Current == lexer.Delim {
-			// Hack: support old browser declarations like *letter-spacing.
-			if p.lexer.CurrentString == "*" {
-				prefix = p.lexer.CurrentString
-				p.lexer.Next()
-			}
-		}
-
-		property := p.lexer.CurrentString
-		if prefix != "" {
-			// XXX: we can slice into the source instead of doing an allocation here.
-			property = prefix + property
-		}
-
-		decl := &ast.Declaration{
-			Span:     p.lexer.TokenSpan(),
-			Property: property,
-		}
-		p.lexer.Expect(lexer.Ident)
-		p.lexer.Expect(lexer.Colon)
-	values:
-		for {
-			switch p.lexer.Current {
-			case lexer.EOF:
-				p.lexer.Errorf("unexpected EOF")
-
-			case lexer.Comma:
-				decl.Values = append(decl.Values, &ast.Comma{Span: p.lexer.TokenSpan()})
-				p.lexer.Next()
-
-			case lexer.Delim:
-				if p.lexer.CurrentString != "!" {
-					decl.Values = append(decl.Values, &ast.Raw{Span: p.lexer.TokenSpan(), Value: p.lexer.CurrentString})
-					p.lexer.Next()
-					continue
-				}
-				p.lexer.Next()
-
-				if !isImportantString(p.lexer.CurrentString) {
-					p.lexer.Errorf("expected !important, unexpected token: %s", p.lexer.CurrentString)
-				}
-				decl.End = p.lexer.TokenEnd()
-				p.lexer.Next()
-				decl.Important = true
-
-			default:
-				val := p.parseValue()
-				if val == nil {
-					if len(decl.Values) == 0 {
-						p.lexer.Errorf("declaration must have a value")
-					}
-					if lastValueEnd := decl.Values[len(decl.Values)-1].Location().End; lastValueEnd > decl.End {
-						decl.End = lastValueEnd
-					}
-
-					block.Declarations = append(block.Declarations, decl)
-
-					break values
-				}
-
-				decl.Values = append(decl.Values, val)
-			}
-		}
-
+		block.Declarations = append(block.Declarations, p.parseDeclaration())
 		if p.lexer.Current == lexer.Semicolon {
 			p.lexer.Next()
 		}
@@ -186,6 +122,71 @@ func (p *parser) parseDeclarationBlock() *ast.DeclarationBlock {
 	block.End = p.lexer.TokenEnd()
 	p.lexer.Next()
 	return block
+}
+
+func (p *parser) parseDeclaration() *ast.Declaration {
+	var prefix string
+	if p.lexer.Current == lexer.Delim {
+		// Hack: support old browser declarations like *letter-spacing.
+		if p.lexer.CurrentString == "*" {
+			prefix = p.lexer.CurrentString
+			p.lexer.Next()
+		}
+	}
+
+	property := p.lexer.CurrentString
+	if prefix != "" {
+		// XXX: we can slice into the source instead of doing an allocation here.
+		property = prefix + property
+	}
+
+	decl := &ast.Declaration{
+		Span:     p.lexer.TokenSpan(),
+		Property: property,
+	}
+	p.lexer.Expect(lexer.Ident)
+	p.lexer.Expect(lexer.Colon)
+
+	for {
+		switch p.lexer.Current {
+		case lexer.EOF:
+			p.lexer.Errorf("unexpected EOF")
+
+		case lexer.Comma:
+			decl.Values = append(decl.Values, &ast.Comma{Span: p.lexer.TokenSpan()})
+			p.lexer.Next()
+
+		case lexer.Delim:
+			if p.lexer.CurrentString != "!" {
+				decl.Values = append(decl.Values, &ast.Raw{Span: p.lexer.TokenSpan(), Value: p.lexer.CurrentString})
+				p.lexer.Next()
+				continue
+			}
+			p.lexer.Next()
+
+			if !isImportantString(p.lexer.CurrentString) {
+				p.lexer.Errorf("expected !important, unexpected token: %s", p.lexer.CurrentString)
+			}
+			decl.End = p.lexer.TokenEnd()
+			p.lexer.Next()
+			decl.Important = true
+
+		default:
+			val := p.parseValue()
+			if val == nil {
+				if len(decl.Values) == 0 {
+					p.lexer.Errorf("declaration must have a value")
+				}
+				if lastValueEnd := decl.Values[len(decl.Values)-1].Location().End; lastValueEnd > decl.End {
+					decl.End = lastValueEnd
+				}
+
+				return decl
+			}
+
+			decl.Values = append(decl.Values, val)
+		}
+	}
 }
 
 func (p *parser) parseKeyframeSelectorList() *ast.KeyframeSelectorList {
