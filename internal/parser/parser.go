@@ -32,14 +32,16 @@ func Parse(source *sources.Source) (ss *ast.Stylesheet, err error) {
 
 func newParser(source *sources.Source) *parser {
 	return &parser{
-		lexer: lexer.NewLexer(source),
-		ss:    &ast.Stylesheet{},
+		source: source,
+		lexer:  lexer.NewLexer(source),
+		ss:     &ast.Stylesheet{},
 	}
 }
 
 type parser struct {
-	lexer *lexer.Lexer
-	ss    *ast.Stylesheet
+	source *sources.Source
+	lexer  *lexer.Lexer
+	ss     *ast.Stylesheet
 }
 
 func (p *parser) parse() {
