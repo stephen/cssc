@@ -464,7 +464,7 @@ func (p *parser) parseAtRule() {
 	case "media":
 		p.parseMediaAtRule()
 
-	case "keyframes", "-webkit-keyframes":
+	case "keyframes", "-webkit-keyframes", "-o-keyframes":
 		p.parseKeyframes()
 
 	case "custom-media":
