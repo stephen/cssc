@@ -1,6 +1,9 @@
 package esbuildplugin
 
 import (
+	"context"
+	"runtime/pprof"
+
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/samsarahq/go/oops"
 	"github.com/stephen/cssc"
@@ -86,6 +89,7 @@ func Plugin(opts ...Option) api.Plugin {
 						options = opt(options)
 					}
 
+					pprof.SetGoroutineLabels(pprof.WithLabels(context.TODO(), pprof.Labels("cssc-path", args.Path)))
 					result := cssc.Compile(options)
 
 					if len(errors) > 0 {

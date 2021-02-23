@@ -408,7 +408,13 @@ func (p *parser) parseValue() ast.Value {
 					fn.Arguments = append(fn.Arguments, p.parseMathExpression())
 					continue
 				}
-				fn.Arguments = append(fn.Arguments, p.parseValue())
+				val := p.parseValue()
+				if val == nil {
+					// XXX: there's probably some backtracking to do here?
+					break arguments
+				}
+
+				fn.Arguments = append(fn.Arguments, val)
 			}
 		}
 
