@@ -193,7 +193,7 @@ func (t *transformer) transformNodes(nodes []ast.Node) []ast.Node {
 					t.addWarn(node, "@import transform does not yet support @supports or media queries")
 				}
 
-				rv = append(rv, imported.Nodes...)
+				rv = append(rv, t.transformNodes(imported.Nodes)...)
 
 			case "custom-media":
 				func() {

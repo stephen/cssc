@@ -3,14 +3,18 @@ package transformer_test
 import (
 	"testing"
 
+	"github.com/stephen/cssc/internal/ast"
 	"github.com/stephen/cssc/internal/parser"
+	"github.com/stephen/cssc/internal/printer"
 	"github.com/stephen/cssc/internal/sources"
 	"github.com/stephen/cssc/internal/transformer"
 	"github.com/stephen/cssc/transforms"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCustomMedia(t *testing.T) {
+
 	assert.Equal(t, "@media (max-width:30em){.a{color:green}}@media (max-width:30em) and (script){.c{color:red}}", Transform(t, func(o *transformer.Options) {
 		o.CustomMediaQueries = transforms.CustomMediaQueriesTransform
 	}, `
@@ -54,4 +58,42 @@ func TestCustomMedia_Passthrough(t *testing.T) {
 	@media (--narrow-window) and (script) {
 		.c { color: red; }
 	}`))
+}
+
+func TestCustomMediaViaImport(t *testing.T) {
+	mainSource := &sources.Source{
+		Path: "main.css",
+		Content: `
+	@import "other.css";
+
+	@media (--narrow-window) {
+		.a { color: green; }
+	}
+
+	@media (--narrow-window) and (script) {
+		.c { color: red; }
+	}`,
+	}
+	main, err := parser.Parse(mainSource)
+	other, err := parser.Parse(&sources.Source{
+		Path:    "other.css",
+		Content: `@custom-media --narrow-window (max-width: 30em);`,
+	})
+
+	require.NoError(t, err)
+	o := &transformer.Options{
+		OriginalSource: mainSource,
+		Reporter:       &reporter{},
+		ImportReplacements: map[*ast.AtRule]*ast.Stylesheet{
+			main.Imports[0].AtRule: other,
+		},
+		Options: transforms.Options{
+			CustomMediaQueries: transforms.CustomMediaQueriesTransform,
+		},
+	}
+
+	out, err := printer.Print(transformer.Transform(main, *o), printer.Options{})
+	assert.NoError(t, err)
+
+	assert.Equal(t, "@media (max-width:30em){.a{color:green}}@media (max-width:30em) and (script){.c{color:red}}", out)
 }
